@@ -31,7 +31,7 @@ export default async function ProgramsPage() {
           icon={<Building2 className="h-6 w-6" />}
           title="No programs yet"
           description="Start by adding an institution, then create programs to track."
-          action={{ label: "Add first program", onClick: () => {}, href: "/programs/new" }}
+          action={{ label: "Add first program", href: "/programs/new" }}
         />
       ) : (
         <>
