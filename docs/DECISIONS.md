@@ -89,3 +89,14 @@ This log records justified deviations from specifications and version-sensitive 
 **Rationale:** AGENTS.md specifies "Vitest and Playwright." Vitest is native to the Vite ecosystem, has excellent Next.js integration, and is faster than Jest for TypeScript projects. Playwright handles E2E.
 **Spec deviation:** None — explicitly specified in AGENTS.md.
 **Revisit:** Never.
+
+---
+
+## D-009: MFA enforcement deferred to Phase 2
+
+**Date:** 2026-08-22
+**Category:** Authentication / Security
+**Decision:** Do not enforce TOTP MFA (aal2) on protected data in Phase 1. The visual shell, PWA foundation, theme system and layout primitives will function without authentication or at AAL1 only. MFA enrollment, challenge, verification and restrictive RLS policies will be implemented in Phase 2.
+**Rationale:** Phase 1 is purely visual/UI work — no real application data exists yet. Enforcing MFA would block all development and testing of the shell. The security stop condition in the roadmap ("Do not proceed to private domain data until the RLS/MFA negative-test harness is working") applies to Phase 3, not Phase 1.
+**Spec deviation:** ROADMAP Phase 1 does not explicitly mention MFA, but AGENTS.md states MFA is required for application data. This deferral is limited to Phase 1 only — Phase 2 must complete MFA before Phase 3 begins.
+**Revisit:** Phase 2 is mandatory. No private domain data (Phase 3+) may proceed without working MFA + RLS tests.
