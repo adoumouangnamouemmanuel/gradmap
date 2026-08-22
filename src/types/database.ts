@@ -212,6 +212,107 @@ export type Database = {
           },
         ]
       }
+      contact_interactions: {
+        Row: {
+          contact_id: string
+          created_at: string
+          happened_at: string
+          id: string
+          interaction_type: string
+          notes: string | null
+          summary: string
+          user_id: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          happened_at?: string
+          id?: string
+          interaction_type?: string
+          notes?: string | null
+          summary: string
+          user_id: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          happened_at?: string
+          id?: string
+          interaction_type?: string
+          notes?: string | null
+          summary?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_interactions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_interactions_contact_owner_fkey"
+            columns: ["contact_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          email: string | null
+          id: string
+          institution: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          program_id: string | null
+          role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          institution?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          program_id?: string | null
+          role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          institution?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          program_id?: string | null
+          role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deadlines: {
         Row: {
           application_id: string | null
@@ -303,6 +404,311 @@ export type Database = {
             columns: ["scholarship_id", "user_id"]
             isOneToOne: false
             referencedRelation: "scholarships"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      document_requirements: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          document_type: string
+          due_at: string | null
+          id: string
+          is_required: boolean | null
+          notes: string | null
+          requirement_name: string
+          satisfied_by_version_id: string | null
+          scholarship_application_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          document_type?: string
+          due_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          notes?: string | null
+          requirement_name: string
+          satisfied_by_version_id?: string | null
+          scholarship_application_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          document_type?: string
+          due_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          notes?: string | null
+          requirement_name?: string
+          satisfied_by_version_id?: string | null
+          scholarship_application_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_requirements_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requirements_application_owner_fkey"
+            columns: ["application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "document_requirements_satisfied_by_version_id_fkey"
+            columns: ["satisfied_by_version_id"]
+            isOneToOne: false
+            referencedRelation: "document_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requirements_scholarship_application_id_fkey"
+            columns: ["scholarship_application_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requirements_scholarship_application_owner_fkey"
+            columns: ["scholarship_application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      document_versions: {
+        Row: {
+          created_at: string
+          document_id: string
+          file_name: string
+          file_size: number
+          id: string
+          mime_type: string
+          notes: string | null
+          sha256_hash: string | null
+          storage_path: string
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          file_name: string
+          file_size: number
+          id?: string
+          mime_type: string
+          notes?: string | null
+          sha256_hash?: string | null
+          storage_path: string
+          user_id: string
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          mime_type?: string
+          notes?: string | null
+          sha256_hash?: string | null
+          storage_path?: string
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_versions_document_owner_fkey"
+            columns: ["document_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          current_version_id: string | null
+          document_type: string
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          current_version_id?: string | null
+          document_type?: string
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          current_version_id?: string | null
+          document_type?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      essay_prompts: {
+        Row: {
+          application_id: string | null
+          archived_at: string | null
+          character_limit: number | null
+          created_at: string
+          current_version_id: string | null
+          id: string
+          notes: string | null
+          prompt_text: string | null
+          scholarship_application_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          word_limit: number | null
+        }
+        Insert: {
+          application_id?: string | null
+          archived_at?: string | null
+          character_limit?: number | null
+          created_at?: string
+          current_version_id?: string | null
+          id?: string
+          notes?: string | null
+          prompt_text?: string | null
+          scholarship_application_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          word_limit?: number | null
+        }
+        Update: {
+          application_id?: string | null
+          archived_at?: string | null
+          character_limit?: number | null
+          created_at?: string
+          current_version_id?: string | null
+          id?: string
+          notes?: string | null
+          prompt_text?: string | null
+          scholarship_application_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          word_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "essay_prompts_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "essay_prompts_application_owner_fkey"
+            columns: ["application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "essay_prompts_scholarship_application_id_fkey"
+            columns: ["scholarship_application_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "essay_prompts_scholarship_application_owner_fkey"
+            columns: ["scholarship_application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      essay_versions: {
+        Row: {
+          character_count: number | null
+          content: string
+          created_at: string
+          essay_prompt_id: string
+          id: string
+          notes: string | null
+          user_id: string
+          version_number: number
+          word_count: number | null
+        }
+        Insert: {
+          character_count?: number | null
+          content?: string
+          created_at?: string
+          essay_prompt_id: string
+          id?: string
+          notes?: string | null
+          user_id: string
+          version_number?: number
+          word_count?: number | null
+        }
+        Update: {
+          character_count?: number | null
+          content?: string
+          created_at?: string
+          essay_prompt_id?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+          version_number?: number
+          word_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "essay_versions_essay_prompt_id_fkey"
+            columns: ["essay_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "essay_prompts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "essay_versions_prompt_owner_fkey"
+            columns: ["essay_prompt_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "essay_prompts"
             referencedColumns: ["id", "user_id"]
           },
         ]
@@ -731,6 +1137,133 @@ export type Database = {
             referencedColumns: ["id", "user_id"]
           },
         ]
+      }
+      recommendation_requests: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          due_at: string | null
+          id: string
+          notes: string | null
+          recommender_id: string
+          scholarship_application_id: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          notes?: string | null
+          recommender_id: string
+          scholarship_application_id?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          notes?: string | null
+          recommender_id?: string
+          scholarship_application_id?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_requests_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recommendation_requests_application_owner_fkey"
+            columns: ["application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "recommendation_requests_recommender_id_fkey"
+            columns: ["recommender_id"]
+            isOneToOne: false
+            referencedRelation: "recommenders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recommendation_requests_recommender_owner_fkey"
+            columns: ["recommender_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "recommenders"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "recommendation_requests_scholarship_application_id_fkey"
+            columns: ["scholarship_application_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recommendation_requests_scholarship_application_owner_fkey"
+            columns: ["scholarship_application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      recommenders: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          email: string | null
+          id: string
+          institution: string | null
+          name: string
+          notes: string | null
+          relationship: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          institution?: string | null
+          name: string
+          notes?: string | null
+          relationship?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          institution?: string | null
+          name?: string
+          notes?: string | null
+          relationship?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       scholarship_applications: {
         Row: {
