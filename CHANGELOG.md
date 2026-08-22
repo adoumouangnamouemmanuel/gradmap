@@ -19,6 +19,43 @@ All notable changes to this project will be documented in this file.
 **Date:** 2026-08-22
 **Status:** ✅ Complete
 
+## Phase 4 — Scholarships, funding, expenses and decisions
+
+**Date:** 2026-08-22
+**Status:** In Progress
+
+### Completed
+
+- [x] Fix Supabase ambiguous relationship errors in getPrograms, getApplications, getApplication, getProgram
+- [x] Fix EmptyState Server Component onClick error
+- [x] Add cursor-pointer to Button component globally
+- [x] Fix calendar page to use Link instead of raw `<a>`
+- [x] Create Phase 4 migration: scholarships, program_scholarships, scholarship_applications, expenses
+- [x] Add decision/offer fields to applications table
+- [x] Add FKs from deadlines/tasks to scholarships and scholarship_applications
+- [x] Update database TypeScript types for all new tables and altered fields
+- [x] Create server actions for scholarships, scholarship applications, expenses, funding summary
+- [x] Create shared constants (currencies, countries, funding types, mechanisms, statuses)
+- [x] Create institutions list, new, and detail pages
+- [x] Add Institutions to sidebar navigation
+- [x] Build scholarships list, detail, and new pages with program linking
+- [x] Add scholarship-app linking UI on scholarship detail page
+- [x] Update applications page to show scholarship applications and expenses
+- [x] Add expense creation form on application detail page
+- [x] Update dashboard with funding summary section
+- [x] Enhance program new form with institution pre-selection
+- [x] Standardize currency/funding type/mechanism dropdowns across all forms
+
+### Pending
+
+- [ ] Apply migration (requires Docker)
+- [ ] Generate types from live database
+- [ ] Scholarship edit page
+- [ ] Expense edit/delete functionality
+- [ ] Decision/offer comparison view
+
+---
+
 ## Phase 3 — First usable vertical slice: program to deadline to dashboard
 
 **Date:** 2026-08-22
