@@ -121,11 +121,17 @@ export type Database = {
           created_at: string
           decision_at: string | null
           decision_conditions: string | null
+          decision_type: string | null
+          enrollment_deadline: string | null
           fee_amount: number | null
           fee_currency_code: string | null
           fee_status: string | null
           id: string
           notes: string | null
+          offer_aid_details: string | null
+          offer_amount: number | null
+          offer_currency_code: string | null
+          offer_financial_aid: boolean | null
           portal_url: string | null
           priority: number | null
           program_id: string
@@ -142,11 +148,17 @@ export type Database = {
           created_at?: string
           decision_at?: string | null
           decision_conditions?: string | null
+          decision_type?: string | null
+          enrollment_deadline?: string | null
           fee_amount?: number | null
           fee_currency_code?: string | null
           fee_status?: string | null
           id?: string
           notes?: string | null
+          offer_aid_details?: string | null
+          offer_amount?: number | null
+          offer_currency_code?: string | null
+          offer_financial_aid?: boolean | null
           portal_url?: string | null
           priority?: number | null
           program_id: string
@@ -163,11 +175,17 @@ export type Database = {
           created_at?: string
           decision_at?: string | null
           decision_conditions?: string | null
+          decision_type?: string | null
+          enrollment_deadline?: string | null
           fee_amount?: number | null
           fee_currency_code?: string | null
           fee_status?: string | null
           id?: string
           notes?: string | null
+          offer_aid_details?: string | null
+          offer_amount?: number | null
+          offer_currency_code?: string | null
+          offer_financial_aid?: boolean | null
           portal_url?: string | null
           priority?: number | null
           program_id?: string
@@ -272,6 +290,103 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deadlines_scholarship_application_owner_fkey"
+            columns: ["scholarship_application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "deadlines_scholarship_owner_fkey"
+            columns: ["scholarship_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      expenses: {
+        Row: {
+          amount: number
+          application_id: string | null
+          archived_at: string | null
+          category: string
+          created_at: string
+          currency_code: string
+          description: string
+          due_on: string | null
+          id: string
+          notes: string | null
+          paid_at: string | null
+          scholarship_application_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          application_id?: string | null
+          archived_at?: string | null
+          category?: string
+          created_at?: string
+          currency_code: string
+          description: string
+          due_on?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          scholarship_application_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          application_id?: string | null
+          archived_at?: string | null
+          category?: string
+          created_at?: string
+          currency_code?: string
+          description?: string
+          due_on?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          scholarship_application_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_application_owner_fkey"
+            columns: ["application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "expenses_scholarship_application_id_fkey"
+            columns: ["scholarship_application_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_scholarship_application_owner_fkey"
+            columns: ["scholarship_application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id", "user_id"]
           },
         ]
       }
@@ -471,6 +586,65 @@ export type Database = {
           },
         ]
       }
+      program_scholarships: {
+        Row: {
+          compatibility_status: string
+          created_at: string
+          id: string
+          notes: string | null
+          program_id: string
+          scholarship_id: string
+          user_id: string
+        }
+        Insert: {
+          compatibility_status?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          program_id: string
+          scholarship_id: string
+          user_id: string
+        }
+        Update: {
+          compatibility_status?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          program_id?: string
+          scholarship_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_scholarships_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_scholarships_program_owner_fkey"
+            columns: ["program_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "program_scholarships_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_scholarships_scholarship_owner_fkey"
+            columns: ["scholarship_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
       programs: {
         Row: {
           application_portal_url: string | null
@@ -558,6 +732,148 @@ export type Database = {
           },
         ]
       }
+      scholarship_applications: {
+        Row: {
+          application_id: string | null
+          archived_at: string | null
+          award_amount: number | null
+          award_currency_code: string | null
+          conditions: string | null
+          created_at: string
+          decision_at: string | null
+          id: string
+          nomination_required: boolean | null
+          nomination_status: string | null
+          notes: string | null
+          scholarship_id: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          archived_at?: string | null
+          award_amount?: number | null
+          award_currency_code?: string | null
+          conditions?: string | null
+          created_at?: string
+          decision_at?: string | null
+          id?: string
+          nomination_required?: boolean | null
+          nomination_status?: string | null
+          notes?: string | null
+          scholarship_id: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string | null
+          archived_at?: string | null
+          award_amount?: number | null
+          award_currency_code?: string | null
+          conditions?: string | null
+          created_at?: string
+          decision_at?: string | null
+          id?: string
+          nomination_required?: boolean | null
+          nomination_status?: string | null
+          notes?: string | null
+          scholarship_id?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scholarship_applications_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scholarship_applications_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scholarship_applications_scholarship_owner_fkey"
+            columns: ["scholarship_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      scholarships: {
+        Row: {
+          amount: number | null
+          application_mechanism: string
+          archived_at: string | null
+          coverage_notes: string | null
+          created_at: string
+          currency_code: string | null
+          display_priority: number | null
+          eligibility_notes: string | null
+          eligibility_status: string
+          funding_type: string
+          id: string
+          last_verified_at: string | null
+          name: string
+          official_url: string | null
+          provider: string | null
+          service_obligation_notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          application_mechanism?: string
+          archived_at?: string | null
+          coverage_notes?: string | null
+          created_at?: string
+          currency_code?: string | null
+          display_priority?: number | null
+          eligibility_notes?: string | null
+          eligibility_status?: string
+          funding_type?: string
+          id?: string
+          last_verified_at?: string | null
+          name: string
+          official_url?: string | null
+          provider?: string | null
+          service_obligation_notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          application_mechanism?: string
+          archived_at?: string | null
+          coverage_notes?: string | null
+          created_at?: string
+          currency_code?: string | null
+          display_priority?: number | null
+          eligibility_notes?: string | null
+          eligibility_status?: string
+          funding_type?: string
+          id?: string
+          last_verified_at?: string | null
+          name?: string
+          official_url?: string | null
+          provider?: string | null
+          service_obligation_notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           application_id: string | null
@@ -639,6 +955,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_scholarship_application_owner_fkey"
+            columns: ["scholarship_application_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarship_applications"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "tasks_scholarship_owner_fkey"
+            columns: ["scholarship_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
+            referencedColumns: ["id", "user_id"]
           },
         ]
       }
