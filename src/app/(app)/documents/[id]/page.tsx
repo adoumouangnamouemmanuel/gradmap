@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, FileText, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, FileText, Clock, CheckCircle2, Download } from "lucide-react";
 import { getDocument } from "@/features/documents/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/domain/status-badge";
+import { DocumentUpload } from "@/components/domain/document-upload";
 
 export default async function DocumentDetailPage({
   params,
@@ -64,9 +64,21 @@ export default async function DocumentDetailPage({
                           {v.mime_type} · {(v.file_size / 1024).toFixed(1)} KB
                           {v.notes && ` · ${v.notes}`}
                         </p>
+                        {v.sha256_hash && (
+                          <p className="text-xs text-muted-foreground font-mono truncate max-w-md">
+                            SHA-256: {v.sha256_hash.slice(0, 16)}...
+                          </p>
+                        )}
                       </div>
-                      <div className="text-right text-xs text-muted-foreground">
-                        {new Date(v.created_at).toLocaleDateString()}
+                      <div className="text-right ml-4">
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {new Date(v.created_at).toLocaleDateString()}
+                        </p>
+                        <Button size="sm" variant="ghost" asChild>
+                          <a href={`/api/documents/download?path=${encodeURIComponent(v.storage_path)}&name=${encodeURIComponent(v.file_name)}`}>
+                            <Download className="h-3 w-3" />
+                          </a>
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -74,13 +86,10 @@ export default async function DocumentDetailPage({
               )}
 
               <div className="mt-4 border-t pt-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                  Note
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  File upload will be available in Phase 5 when Storage is configured.
-                  Currently tracking document metadata and version history.
-                </p>
+                <DocumentUpload
+                  documentId={id}
+                  currentVersionNumber={versions[0]?.version_number || 0}
+                />
               </div>
             </CardContent>
           </Card>
