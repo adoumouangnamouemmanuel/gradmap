@@ -190,7 +190,7 @@ Make scholarship targeting-especially high-priority opportunities such as Eiffel
 
 ---
 
-## Phase 5 - Private document vault and application requirements
+## Phase 5 - Private document vault and application requirements 🔄 IN PROGRESS
 
 ### Goal
 
@@ -224,7 +224,7 @@ Do not use production Storage until policy tests pass against two test users and
 
 ---
 
-## Phase 6 - Essays, recommenders and contacts
+## Phase 6 - Essays, recommenders and contacts 🔄 IN PROGRESS
 
 ### Goal
 
