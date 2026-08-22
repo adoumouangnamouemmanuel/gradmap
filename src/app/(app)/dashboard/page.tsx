@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { BookOpen, Calendar, FileText, Plus, TrendingUp, AlertTriangle, Award, DollarSign } from "lucide-react";
+import {
+  BookOpen, Calendar, FileText, Plus, TrendingUp,
+  AlertTriangle, Award, DollarSign, Rocket, ArrowRight,
+} from "lucide-react";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { DeadlineIndicator } from "@/components/domain/deadline-indicator";
 import { Metric } from "@/components/domain/metric";
@@ -28,15 +31,15 @@ export default async function DashboardPage() {
     return (
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="font-serif text-[2rem]/[2.25rem] font-semibold tracking-tight sm:text-[2.5rem]/[2.75rem]">
+          <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem]/[2.75rem]">
             Welcome to GradMap
           </h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="mt-1.5 text-sm text-muted-foreground tracking-tight">
             Your command center for graduate applications.
           </p>
         </div>
 
-        <Card className="mb-6 border-primary/20 bg-primary/5">
+        <Card className="mb-6 shadow-sm border-primary/20 bg-primary/5">
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <TrendingUp className="h-5 w-5" />
@@ -54,10 +57,10 @@ export default async function DashboardPage() {
         </Card>
 
         <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Card><CardContent className="p-4"><Metric label="Programs" value={0} /></CardContent></Card>
-          <Card><CardContent className="p-4"><Metric label="Applications" value={0} /></CardContent></Card>
-          <Card><CardContent className="p-4"><Metric label="Deadlines" value={0} /></CardContent></Card>
-          <Card><CardContent className="p-4"><Metric label="Tasks" value={0} /></CardContent></Card>
+          <Card className="shadow-sm"><CardContent className="p-4"><Metric label="Programs" value={0} /></CardContent></Card>
+          <Card className="shadow-sm"><CardContent className="p-4"><Metric label="Applications" value={0} /></CardContent></Card>
+          <Card className="shadow-sm"><CardContent className="p-4"><Metric label="Deadlines" value={0} /></CardContent></Card>
+          <Card className="shadow-sm"><CardContent className="p-4"><Metric label="Tasks" value={0} /></CardContent></Card>
         </div>
       </div>
     );
@@ -70,14 +73,19 @@ export default async function DashboardPage() {
       )
     : null;
 
+  const hasZeroStats =
+    stats.totalPrograms === 0 &&
+    stats.totalApplications === 0 &&
+    (!fundingSummary || (fundingSummary.scholarships.length === 0 && fundingSummary.expenses.length === 0));
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Editorial greeting */}
       <div className="mb-8">
-        <h1 className="font-serif text-[2rem]/[2.25rem] font-semibold tracking-tight sm:text-[2.5rem]/[2.75rem]">
+        <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem]/[2.75rem]">
           Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"}, Emmanuel
         </h1>
-        <p className="mt-1 text-muted-foreground">
+        <p className="mt-1.5 text-sm text-muted-foreground tracking-tight">
           2027 Intake ·{" "}
           {daysUntilDeadline !== null ? (
             <>
@@ -90,11 +98,16 @@ export default async function DashboardPage() {
             <span className="font-medium text-foreground">No upcoming deadlines</span>
           )}
         </p>
+        {hasZeroStats && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Add your first program to start tracking deadlines and applications.
+          </p>
+        )}
       </div>
 
       {/* Next best action */}
       {nextDeadline && (
-        <Card className="mb-6 border-primary/20 bg-primary/5">
+        <Card className="mb-6 shadow-sm border-primary/20 bg-primary/5">
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <TrendingUp className="h-5 w-5" />
@@ -114,7 +127,7 @@ export default async function DashboardPage() {
 
       {/* Blocking tasks alert */}
       {blockingTasks.length > 0 && (
-        <Card className="mb-6 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+        <Card className="mb-6 shadow-sm border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-400">
               <AlertTriangle className="h-5 w-5" />
@@ -129,33 +142,29 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {/* Pipeline metrics */}
+      {/* Pipeline metrics — staggered entrance + hover lift */}
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card>
-          <CardContent className="p-4">
-            <Metric label="Programs" value={stats.totalPrograms} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <Metric label="Applications" value={stats.totalApplications} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <Metric label="Submitted" value={stats.statusCounts.submitted || 0} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <Metric label="Admits" value={stats.statusCounts.admitted || 0} />
-          </CardContent>
-        </Card>
+        {[
+          { label: "Programs", value: stats.totalPrograms },
+          { label: "Applications", value: stats.totalApplications },
+          { label: "Submitted", value: stats.statusCounts.submitted || 0 },
+          { label: "Admits", value: stats.statusCounts.admitted || 0 },
+        ].map((stat, i) => (
+          <Card
+            key={stat.label}
+            className={`shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md animate-stagger-in`}
+            style={{ animationDelay: `${i * 60}ms` }}
+          >
+            <CardContent className="p-4">
+              <Metric label={stat.label} value={stat.value} />
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Upcoming deadlines */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 font-serif text-lg">
@@ -169,12 +178,19 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-1">
             {deadlines.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No upcoming deadlines.{" "}
-                <Link href="/calendar" className="underline text-primary">
-                  Add one
-                </Link>
-              </p>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <p className="text-sm font-medium">No upcoming deadlines</p>
+                <p className="mt-1 text-xs text-muted-foreground">Add a deadline to stay on track.</p>
+                <Button size="sm" asChild className="mt-3">
+                  <Link href="/calendar">
+                    <Plus className="mr-1 h-3.5 w-3.5" />
+                    Add deadline
+                  </Link>
+                </Button>
+              </div>
             ) : (
               <>
                 {/* Desktop table */}
@@ -209,7 +225,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Application pipeline */}
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-serif text-lg">
               <FileText className="h-4 w-4 text-muted-foreground" />
@@ -218,9 +234,19 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {Object.entries(stats.statusCounts).length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No applications yet
-              </p>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                  <Rocket className="h-5 w-5" />
+                </div>
+                <p className="text-sm font-medium">No applications yet</p>
+                <p className="mt-1 text-xs text-muted-foreground">Create an application to start your pipeline.</p>
+                <Button size="sm" asChild className="mt-3">
+                  <Link href="/applications/new">
+                    <Plus className="mr-1 h-3.5 w-3.5" />
+                    New application
+                  </Link>
+                </Button>
+              </div>
             ) : (
               Object.entries(stats.statusCounts).map(([status, count]) => (
                 <div key={status} className="flex items-center justify-between text-sm">
@@ -238,7 +264,7 @@ export default async function DashboardPage() {
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           {/* Scholarships overview */}
           {fundingSummary.scholarships.length > 0 && (
-            <Card>
+            <Card className="shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 font-serif text-lg">
@@ -284,7 +310,7 @@ export default async function DashboardPage() {
 
           {/* Expenses overview */}
           {fundingSummary.expenses.length > 0 && (
-            <Card>
+            <Card className="shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 font-serif text-lg">

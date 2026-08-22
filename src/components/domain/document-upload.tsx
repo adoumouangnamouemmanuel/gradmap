@@ -80,13 +80,7 @@ export function DocumentUpload({
 
       setProgress("Saving metadata...");
 
-      // Compute SHA-256 hash
-      const arrayBuffer = await file.arrayBuffer();
-      const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-
-      // Save version metadata
+      // Save version metadata (without hash)
       const response = await fetch("/api/documents/versions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -96,7 +90,6 @@ export function DocumentUpload({
           mime_type: file.type,
           file_size: file.size,
           storage_path: storagePath,
-          sha256_hash: hashHex,
         }),
       });
 

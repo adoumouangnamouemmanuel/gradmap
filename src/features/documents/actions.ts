@@ -38,9 +38,17 @@ export async function getDocument(id: string) {
     .from("documents")
     .select("*, document_versions(*)")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching document:", error.message);
+    throw new Error(`Could not load document: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Document not found — it may not exist or you may not have access.");
+  }
+
   return data;
 }
 

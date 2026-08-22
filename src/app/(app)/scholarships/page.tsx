@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Award, DollarSign, Globe, ExternalLink } from "lucide-react";
+import { Plus, Award, DollarSign, Globe, ExternalLink, BookOpen } from "lucide-react";
 import { PageHeader } from "@/components/domain/page-header";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,9 +7,38 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/domain/empty-state";
 import { MobileListItem } from "@/components/domain/mobile-list-item";
 import { getScholarships } from "@/features/scholarships/actions";
+import { createClient } from "@/lib/supabase/server";
+
+async function getScholarshipsWithPrograms() {
+  const scholarships = await getScholarships();
+  if (scholarships.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return scholarships;
+
+  // Fetch program links for all scholarships
+  const { data: links } = await supabase
+    .from("program_scholarships")
+    .select("scholarship_id, programs!program_scholarships_program_owner_fkey(name)")
+    .in("scholarship_id", scholarships.map((s: any) => s.id));
+
+  // Build a map of scholarship_id -> program names
+  const programMap: Record<string, string[]> = {};
+  for (const link of links || []) {
+    if (!programMap[link.scholarship_id]) programMap[link.scholarship_id] = [];
+    const programName = (link as any).programs?.name;
+    if (programName) programMap[link.scholarship_id].push(programName);
+  }
+
+  return scholarships.map((s: any) => ({
+    ...s,
+    linked_programs: programMap[s.id] || [],
+  }));
+}
 
 export default async function ScholarshipsPage() {
-  const scholarships = await getScholarships();
+  const scholarships = await getScholarshipsWithPrograms();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -37,10 +66,11 @@ export default async function ScholarshipsPage() {
         <>
           {/* Desktop table */}
           <div className="mt-6 hidden sm:block">
-            <Card>
+            <Card className="shadow-sm">
               <CardContent className="p-0">
-                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 border-b px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 border-b px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   <span>Scholarship</span>
+                  <span>Programs</span>
                   <span>Type</span>
                   <span>Amount</span>
                   <span>Status</span>
@@ -49,7 +79,7 @@ export default async function ScholarshipsPage() {
                   <Link
                     key={scholarship.id}
                     href={`/scholarships/${scholarship.id}`}
-                    className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b px-6 py-4 last:border-b-0 hover:bg-accent/50 transition-colors"
+                    className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b px-6 py-4 last:border-b-0 hover:bg-accent/50 transition-colors"
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{scholarship.name}</p>
@@ -72,6 +102,20 @@ export default async function ScholarshipsPage() {
                           </a>
                         )}
                       </p>
+                    </div>
+                    <div className="min-w-0 max-w-[160px]">
+                      {scholarship.linked_programs?.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {scholarship.linked_programs.map((name: string, i: number) => (
+                            <span key={i} className="inline-flex items-center gap-0.5 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
+                              <BookOpen className="h-2.5 w-2.5" />
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/50">—</span>
+                      )}
                     </div>
                     <span className="text-sm text-muted-foreground capitalize">
                       {scholarship.funding_type}
@@ -102,7 +146,11 @@ export default async function ScholarshipsPage() {
               <Link key={scholarship.id} href={`/scholarships/${scholarship.id}`}>
                 <MobileListItem
                   title={scholarship.name}
-                  subtitle={`${scholarship.funding_type} · ${scholarship.amount ? `${scholarship.currency_code || ""} ${scholarship.amount.toLocaleString()}` : "Amount TBD"}`}
+                  subtitle={
+                    scholarship.linked_programs?.length > 0
+                      ? `Programs: ${scholarship.linked_programs.join(", ")}`
+                      : `${scholarship.funding_type} · ${scholarship.amount ? `${scholarship.currency_code || ""} ${scholarship.amount.toLocaleString()}` : "Amount TBD"}`
+                  }
                   badge={
                     <StatusBadge
                       status={

@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { ArrowLeft, FileText, Clock, CheckCircle2, Download } from "lucide-react";
+import { ArrowLeft, FileText, Clock, CheckCircle2, Download, AlertCircle } from "lucide-react";
 import { getDocument } from "@/features/documents/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,11 +11,37 @@ export default async function DocumentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   let document;
   try {
     document = await getDocument(id);
-  } catch {
-    notFound();
+  } catch (err: any) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <Link
+          href="/documents"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Documents
+        </Link>
+        <Card className="shadow-sm">
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <h3 className="font-serif text-lg font-semibold">Document not found</h3>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              This document may not exist, or you may not have access to it.
+              Make sure the document has been created and you are signed in.
+            </p>
+            <Button asChild className="mt-4">
+              <Link href="/documents">Back to documents</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const versions = (document.document_versions || [])
@@ -43,7 +68,7 @@ export default async function DocumentDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="font-serif text-lg">Versions</CardTitle>
             </CardHeader>
@@ -64,11 +89,6 @@ export default async function DocumentDetailPage({
                           {v.mime_type} · {(v.file_size / 1024).toFixed(1)} KB
                           {v.notes && ` · ${v.notes}`}
                         </p>
-                        {v.sha256_hash && (
-                          <p className="text-xs text-muted-foreground font-mono truncate max-w-md">
-                            SHA-256: {v.sha256_hash.slice(0, 16)}...
-                          </p>
-                        )}
                       </div>
                       <div className="text-right ml-4">
                         <p className="text-xs text-muted-foreground mb-1">
@@ -96,7 +116,7 @@ export default async function DocumentDetailPage({
         </div>
 
         <div className="space-y-6">
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="font-serif text-lg">Info</CardTitle>
             </CardHeader>
@@ -122,7 +142,7 @@ export default async function DocumentDetailPage({
           </Card>
 
           {document.notes && (
-            <Card>
+            <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle className="font-serif text-lg">Notes</CardTitle>
               </CardHeader>
