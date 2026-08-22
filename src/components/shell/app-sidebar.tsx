@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
   Settings,
   Search,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/institutions", label: "Institutions", icon: Building2 },
   { href: "/programs", label: "Programs", icon: BookOpen },
   { href: "/scholarships", label: "Scholarships", icon: Award },
   { href: "/applications", label: "Applications", icon: FileText },
