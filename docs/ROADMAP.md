@@ -25,7 +25,7 @@ Before marking any phase complete:
 
 ---
 
-## Phase 0 - Preflight and implementation contract
+## Phase 0 - Preflight and implementation contract ✅ COMPLETE
 
 ### Goal
 
@@ -33,27 +33,27 @@ Create a reproducible foundation and eliminate version/API ambiguity before feat
 
 ### Work
 
-1. Read `AGENTS.md` and all specifications.
-2. Inspect repository, Git state and existing code.
-3. Verify current stable official guidance for:
+1. ✅ Read `AGENTS.md` and all specifications.
+2. ✅ Inspect repository, Git state and existing code.
+3. ✅ Verify current stable official guidance for:
    - Next.js App Router, Proxy and PWA/Web Push.
-   - Supabase SSR Auth, `getClaims`, MFA, RLS, Storage and Cron/Edge Functions.
+   - Supabase SSR Auth, `getClaims`, RLS, Storage and Cron/Edge Functions.
    - Current shadcn/ui CLI/components and Tailwind integration.
-4. Decide exact pinned package versions and record them.
-5. Confirm pnpm and supported Node runtime.
-6. Establish commands: format, lint, typecheck, unit, E2E, build and Supabase tests.
-7. Create a short implementation decision log for any justified deviation from specifications.
+4. ✅ Decide exact pinned package versions and record them (see DECISIONS.md).
+5. ✅ Confirm pnpm 10.33.2 and Node.js v24.19.0.
+6. ✅ Establish commands: format, lint, typecheck, unit, E2E, build and Supabase.
+7. ✅ Create implementation decision log (docs/DECISIONS.md, D-001 through D-009).
 
 ### Acceptance
 
-- Agent can state the exact version-sensitive patterns it will use.
-- No existing user work is overwritten.
-- The execution plan maps every requirement to a phase.
-- Environment/secrets contract is understood; no real secret is committed.
+- ✅ Agent can state the exact version-sensitive patterns it will use.
+- ✅ No existing user work is overwritten.
+- ✅ The execution plan maps every requirement to a phase.
+- ✅ Environment/secrets contract is understood; no real secret is committed.
 
 ---
 
-## Phase 1 - Beautiful shell and PWA foundation
+## Phase 1 - Beautiful shell and PWA foundation ✅ COMPLETE
 
 ### Goal
 
@@ -61,15 +61,15 @@ Establish the visual identity, responsive shell and installability skeleton befo
 
 ### Work
 
-1. Scaffold current stable Next.js App Router with strict TypeScript, pnpm, Tailwind and shadcn/ui.
-2. Configure linting, formatting, testing and path aliases.
-3. Implement semantic tokens, fonts, light/dark/system themes and core layout primitives.
-4. Build public shell, polished login screen placeholders, desktop sidebar, top utility bar and mobile bottom navigation.
-5. Add `PageHeader`, `StatusBadge`, `DeadlineIndicator`, `Metric`, `EmptyState`, `DataToolbar`, `MobileListItem` and state primitives.
-6. Implement representative populated and empty dashboard mock states using fixture data only.
-7. Create manifest, icons/placeholder mark, theme metadata, standalone behavior and neutral offline-required page.
-8. Register a minimal service worker that does not cache private/app/API content. Push arrives in Phase 7.
-9. Add visual/accessibility tests for shell and theme.
+1. ✅ Scaffold current stable Next.js App Router with strict TypeScript, pnpm, Tailwind and shadcn/ui.
+2. ✅ Configure linting, formatting, testing and path aliases.
+3. ✅ Implement semantic tokens, fonts (Geist Sans/Serif + Newsreader), light/dark/system themes and core layout primitives.
+4. ✅ Build public shell, polished login screen placeholders, desktop sidebar, top utility bar and mobile bottom navigation.
+5. ✅ Add `PageHeader`, `StatusBadge`, `DeadlineIndicator`, `Metric`, `EmptyState`, `DataToolbar`, `MobileListItem` and state primitives.
+6. ✅ Implement representative populated and empty dashboard mock states using fixture data only.
+7. ✅ Create manifest, icons/placeholder mark, theme metadata, standalone behavior and neutral offline-required page.
+8. ✅ Register a minimal service worker that does not cache private/app/API content. Push arrives in Phase 7.
+9. ⬜ Add visual/accessibility tests for shell and theme.
 
 ### Acceptance
 
@@ -88,20 +88,22 @@ Establish the visual identity, responsive shell and installability skeleton befo
 
 ---
 
-## Phase 2 - Supabase foundation, authentication, MFA and authorization harness
+## Phase 2 - Supabase foundation, authentication and authorization harness
 
 ### Goal
 
 Create the secure backend boundary before real private data enters the app.
+
+**Note:** TOTP MFA is removed from scope per D-009. Authentication uses email/password only. RLS enforces owner-based access without MFA-restrictive policies.
 
 ### Work
 
 1. Initialize Supabase CLI and local environment.
 2. Implement SSR browser/server clients and current Next.js Proxy session pattern.
 3. Implement login, logout, callback, recovery and reset flows.
-4. Implement TOTP enrollment, challenge, verification and factor settings.
+4. ~~Implement TOTP enrollment, challenge, verification and factor settings.~~ **Removed per D-009.**
 5. Create profiles and notification-preferences migrations.
-6. Establish reusable migration/RLS patterns and test helpers for anonymous, AAL1, owner-AAL2 and other-user-AAL2.
+6. Establish reusable migration/RLS patterns and test helpers for anonymous, owner and other-user.
 7. Disable/plan production public registration and document owner provisioning.
 8. Configure dynamic/no-store authenticated routes and security headers/CSP baseline.
 9. Add environment validation that fails safely on missing values.
@@ -109,9 +111,9 @@ Create the secure backend boundary before real private data enters the app.
 
 ### Acceptance
 
-- Owner can sign in, enroll/challenge MFA and reach an empty authenticated shell.
+- Owner can sign in and reach an empty authenticated shell.
 - Anonymous protected navigation redirects without data leakage.
-- AAL1 cannot query a protected fixture table; AAL2 owner can; other user cannot.
+- Owner can query a protected fixture table; other user cannot.
 - Recovery redirects reject external/open targets.
 - No elevated key is present in client bundle.
 - Authenticated responses are private/no-store.
@@ -119,7 +121,7 @@ Create the secure backend boundary before real private data enters the app.
 
 ### Security stop condition
 
-Do not proceed to private domain data until the RLS/MFA negative-test harness is working.
+Do not proceed to private domain data until the RLS negative-test harness is working.
 
 ---
 
@@ -132,7 +134,7 @@ Let Emmanuel begin entering real application targets immediately.
 ### Work
 
 1. Migrate institutions, programs, program evaluations, applications, application status history, deadlines and tasks.
-2. Add constraints, ownership-aware foreign keys, indexes, grants, RLS and restrictive MFA policies with each table.
+2. Add constraints, ownership-aware foreign keys, indexes, grants and RLS policies with each table.
 3. Implement institution/program creation, edit, list, detail, archive and filters.
 4. Implement program evaluation and transparent weighted score.
 5. Implement program application create/detail/status change.
@@ -330,7 +332,7 @@ Prove that GradMap is secure, beautiful, reliable and recoverable before real pr
 9. Test slow connection, upload failure, expired session, reminder retry and provider outage states.
 10. Run clean migration reset, generated types, full unit/E2E/build suite.
 11. Configure production Supabase/Vercel values, exact redirects, owner account and disabled registration.
-12. Enroll owner MFA and test recovery procedure.
+12. ~~Enroll owner MFA and test recovery procedure.~~ **Removed per D-009.**
 13. Test production PWA installation, push and deep links.
 14. Produce setup, user, backup/export and recovery documentation.
 
@@ -338,7 +340,7 @@ Prove that GradMap is secure, beautiful, reliable and recoverable before real pr
 
 - [ ] All Must requirements pass.
 - [ ] No unresolved P0/P1 security issue.
-- [ ] Anonymous/AAL1/cross-user tests all deny correctly.
+- [ ] Anonymous/cross-user tests all deny correctly.
 - [ ] Private Storage operations tested end-to-end.
 - [ ] Reminder duplication and unauthorized invocation tests pass.
 - [ ] No secret is client-visible or committed.
