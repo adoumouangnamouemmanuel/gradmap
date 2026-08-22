@@ -14,6 +14,8 @@ import {
   Settings,
   Search,
   Building2,
+  PenTool,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,6 +31,9 @@ const navItems = [
   { href: "/applications", label: "Applications", icon: FileText },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/documents", label: "Documents", icon: FolderOpen },
+  { href: "/essays", label: "Essays", icon: PenTool },
+  { href: "/recommenders", label: "Recommenders", icon: Users },
+  { href: "/contacts", label: "Contacts", icon: Users },
 ];
 
 const bottomItems = [
