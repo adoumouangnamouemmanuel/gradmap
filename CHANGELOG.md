@@ -14,6 +14,21 @@ All notable changes to this project will be documented in this file.
 **Date:** 2026-08-22
 **Status:** ✅ Complete
 
+## Phase 2 — Supabase foundation, authentication and authorization harness
+
+**Date:** 2026-08-22
+**Status:** ✅ Complete
+
+### Completed
+
+- [x] Initialize Supabase CLI 2.115.0 and config.toml
+- [x] Implement login, logout, callback, recovery, reset auth flows
+- [x] Create profiles and notification-preferences migrations with RLS
+- [x] Establish RLS test helpers for anonymous/owner/other-user
+- [x] Configure dynamic/no-store routes and security headers/CSP
+- [x] Add Zod environment validation
+- [x] Verify typecheck and production build pass
+
 ### Completed
 
 - [x] Scaffold Next.js 16.3.2 with TypeScript, Tailwind v4, shadcn/ui

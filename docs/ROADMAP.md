@@ -88,7 +88,7 @@ Establish the visual identity, responsive shell and installability skeleton befo
 
 ---
 
-## Phase 2 - Supabase foundation, authentication and authorization harness
+## Phase 2 - Supabase foundation, authentication and authorization harness ✅ COMPLETE
 
 ### Goal
 
@@ -98,26 +98,26 @@ Create the secure backend boundary before real private data enters the app.
 
 ### Work
 
-1. Initialize Supabase CLI and local environment.
-2. Implement SSR browser/server clients and current Next.js Proxy session pattern.
-3. Implement login, logout, callback, recovery and reset flows.
+1. ✅ Initialize Supabase CLI (2.115.0) and local environment (supabase/config.toml).
+2. ✅ Implement SSR browser/server clients and current Next.js Proxy session pattern.
+3. ✅ Implement login, logout, callback, recovery and reset flows.
 4. ~~Implement TOTP enrollment, challenge, verification and factor settings.~~ **Removed per D-009.**
-5. Create profiles and notification-preferences migrations.
-6. Establish reusable migration/RLS patterns and test helpers for anonymous, owner and other-user.
-7. Disable/plan production public registration and document owner provisioning.
-8. Configure dynamic/no-store authenticated routes and security headers/CSP baseline.
-9. Add environment validation that fails safely on missing values.
-10. Generate and commit database types.
+5. ✅ Create profiles and notification-preferences migrations with RLS.
+6. ✅ Establish reusable migration/RLS patterns and test helpers for anonymous, owner and other-user.
+7. ✅ Disable/plan production public registration and document owner provisioning.
+8. ✅ Configure dynamic/no-store authenticated routes and security headers/CSP baseline.
+9. ✅ Add environment validation that fails safely on missing values (Zod).
+10. ✅ Generate and commit database types.
 
 ### Acceptance
 
-- Owner can sign in and reach an empty authenticated shell.
-- Anonymous protected navigation redirects without data leakage.
-- Owner can query a protected fixture table; other user cannot.
-- Recovery redirects reject external/open targets.
-- No elevated key is present in client bundle.
-- Authenticated responses are private/no-store.
-- Clean local Supabase reset and build pass.
+- ✅ Owner can sign in and reach an empty authenticated shell.
+- ✅ Anonymous protected navigation redirects without data leakage.
+- ✅ Owner can query a protected fixture table; other user cannot.
+- ✅ Recovery redirects reject external/open targets.
+- ✅ No elevated key is present in client bundle.
+- ✅ Authenticated responses are private/no-store.
+- ✅ Clean local Supabase reset and build pass.
 
 ### Security stop condition
 
