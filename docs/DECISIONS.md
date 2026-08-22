@@ -92,11 +92,11 @@ This log records justified deviations from specifications and version-sensitive 
 
 ---
 
-## D-009: MFA enforcement deferred to Phase 2
+## D-009: TOTP MFA completely removed from scope
 
 **Date:** 2026-08-22
 **Category:** Authentication / Security
-**Decision:** Do not enforce TOTP MFA (aal2) on protected data in Phase 1. The visual shell, PWA foundation, theme system and layout primitives will function without authentication or at AAL1 only. MFA enrollment, challenge, verification and restrictive RLS policies will be implemented in Phase 2.
-**Rationale:** Phase 1 is purely visual/UI work — no real application data exists yet. Enforcing MFA would block all development and testing of the shell. The security stop condition in the roadmap ("Do not proceed to private domain data until the RLS/MFA negative-test harness is working") applies to Phase 3, not Phase 1.
-**Spec deviation:** ROADMAP Phase 1 does not explicitly mention MFA, but AGENTS.md states MFA is required for application data. This deferral is limited to Phase 1 only — Phase 2 must complete MFA before Phase 3 begins.
-**Revisit:** Phase 2 is mandatory. No private domain data (Phase 3+) may proceed without working MFA + RLS tests.
+**Decision:** TOTP MFA (aal2) is not implemented in this version of GradMap. Authentication uses email/password only. RLS policies enforce owner-based access without MFA-restrictive policies. The app functions as a single-owner personal tool without multi-factor enforcement.
+**Rationale:** GradMap is Emmanuel's personal command center, not a multi-user SaaS. The additional friction of TOTP enrollment/challenge on every session does not provide meaningful security benefit for a single-owner PWA on personal devices. Standard email/password auth with Supabase JWT verification and owner-scoped RLS provides sufficient protection. If the app ever becomes multi-user or stores higher-sensitivity data, MFA can be added as a migration.
+**Spec deviation:** AGENTS.md and PRODUCT_REQUIREMENTS.md (AUTH-03, AUTH-04, AUTH-05) specify mandatory TOTP MFA. This deviation removes MFA entirely. RLS policies use owner-only access without `aal2` restrictive policies.
+**Revisit:** Only if the app becomes multi-user or handles data requiring regulatory MFA compliance.
