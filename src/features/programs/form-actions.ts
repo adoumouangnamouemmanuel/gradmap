@@ -1,14 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createActionClient } from "@/lib/supabase/server";
 
 // ============================================================
 // INSTITUTION FORM ACTIONS
 // ============================================================
 
 export async function createInstitutionFromForm(formData: FormData) {
-  const supabase = await createClient();
+  const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
@@ -47,7 +47,7 @@ export async function createInstitutionFromForm(formData: FormData) {
 // ============================================================
 
 export async function createProgramFromForm(formData: FormData) {
-  const supabase = await createClient();
+  const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
@@ -94,7 +94,7 @@ export async function createProgramFromForm(formData: FormData) {
 // ============================================================
 
 export async function createApplicationFromForm(formData: FormData) {
-  const supabase = await createClient();
+  const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
@@ -119,7 +119,6 @@ export async function createApplicationFromForm(formData: FormData) {
 
   if (error) redirect("/applications/new?error=" + encodeURIComponent(error.message));
 
-  // Record initial status in history
   await supabase.from("application_status_history").insert({
     user_id: user.id,
     application_id: data.id,
@@ -144,7 +143,7 @@ export async function createApplicationFromForm(formData: FormData) {
 // ============================================================
 
 export async function createDeadlineFromForm(formData: FormData) {
-  const supabase = await createClient();
+  const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 

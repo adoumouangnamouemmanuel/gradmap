@@ -1,14 +1,16 @@
-import { login, signup, magicLink } from "@/lib/auth/actions";
+import { login, magicLink } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string; message?: string }>;
 }) {
+  const params = await searchParams;
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -23,7 +25,16 @@ export default function LoginPage({
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Error/Message display */}
-          <div id="auth-messages" />
+          {params.error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+              {decodeURIComponent(params.error)}
+            </div>
+          )}
+          {params.message && (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+              {decodeURIComponent(params.message)}
+            </div>
+          )}
 
           {/* Email/Password Login */}
           <form action={login} className="space-y-3">

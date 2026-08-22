@@ -3,24 +3,38 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
+// Helper to get authenticated user
+async function getUser() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return { supabase, user };
+}
+
 // ============================================================
 // INSTITUTIONS
 // ============================================================
 
 export async function getInstitutions() {
-  const supabase = await createClient();
+  const { supabase, user } = await getUser();
+  if (!user) return [];
+
   const { data, error } = await supabase
     .from("institutions")
     .select("*")
     .is("archived_at", null)
     .order("name");
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error("Error fetching institutions:", error.message);
+    return [];
+  }
+  return data || [];
 }
 
 export async function getInstitution(id: string) {
-  const supabase = await createClient();
+  const { supabase, user } = await getUser();
+  if (!user) throw new Error("Not authenticated");
+
   const { data, error } = await supabase
     .from("institutions")
     .select("*")
@@ -29,82 +43,6 @@ export async function getInstitution(id: string) {
 
   if (error) throw error;
   return data;
-}
-
-export async function createInstitution(formData: {
-  name: string;
-  country_code?: string;
-  country_name?: string;
-  city?: string;
-  website_url?: string;
-  notes?: string;
-}) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-
-  const { data, error } = await supabase
-    .from("institutions")
-    .insert({
-      user_id: user.id,
-      name: formData.name,
-      country_code: formData.country_code || null,
-      country_name: formData.country_name || null,
-      city: formData.city || null,
-      website_url: formData.website_url || null,
-      notes: formData.notes || null,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  // Log activity
-  await supabase.from("activity_events").insert({
-    user_id: user.id,
-    entity_type: "institution",
-    entity_id: data.id,
-    action: "created",
-    summary: `Created institution: ${formData.name}`,
-  });
-
-  revalidatePath("/programs");
-  return data;
-}
-
-export async function updateInstitution(
-  id: string,
-  formData: {
-    name?: string;
-    country_code?: string;
-    country_name?: string;
-    city?: string;
-    website_url?: string;
-    notes?: string;
-  },
-) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("institutions")
-    .update(formData)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  revalidatePath("/programs");
-  return data;
-}
-
-export async function archiveInstitution(id: string) {
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("institutions")
-    .update({ archived_at: new Date().toISOString() })
-    .eq("id", id);
-
-  if (error) throw error;
-  revalidatePath("/programs");
 }
 
 // ============================================================
@@ -112,7 +50,9 @@ export async function archiveInstitution(id: string) {
 // ============================================================
 
 export async function getPrograms(institutionId?: string) {
-  const supabase = await createClient();
+  const { supabase, user } = await getUser();
+  if (!user) return [];
+
   let query = supabase
     .from("programs")
     .select("*, institutions!inner(name, country_name, city)")
@@ -124,12 +64,17 @@ export async function getPrograms(institutionId?: string) {
   }
 
   const { data, error } = await query;
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error("Error fetching programs:", error.message);
+    return [];
+  }
+  return data || [];
 }
 
 export async function getProgram(id: string) {
-  const supabase = await createClient();
+  const { supabase, user } = await getUser();
+  if (!user) throw new Error("Not authenticated");
+
   const { data, error } = await supabase
     .from("programs")
     .select("*, institutions!inner(name, country_name, city, website_url)")
@@ -157,8 +102,7 @@ export async function createProgram(formData: {
   requirements_summary?: string;
   research_notes?: string;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
 
   const { data, error } = await supabase
@@ -217,7 +161,7 @@ export async function updateProgram(
     research_notes: string;
   }>,
 ) {
-  const supabase = await createClient();
+  const { supabase } = await getUser();
   const { data, error } = await supabase
     .from("programs")
     .update(formData)
@@ -232,7 +176,7 @@ export async function updateProgram(
 }
 
 export async function archiveProgram(id: string) {
-  const supabase = await createClient();
+  const { supabase } = await getUser();
   const { error } = await supabase
     .from("programs")
     .update({ archived_at: new Date().toISOString() })
@@ -247,19 +191,26 @@ export async function archiveProgram(id: string) {
 // ============================================================
 
 export async function getApplications() {
-  const supabase = await createClient();
+  const { supabase, user } = await getUser();
+  if (!user) return [];
+
   const { data, error } = await supabase
     .from("applications")
     .select("*, programs!inner(name, institutions!inner(name, country_name))")
     .is("archived_at", null)
     .order("priority", { ascending: false });
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error("Error fetching applications:", error.message);
+    return [];
+  }
+  return data || [];
 }
 
 export async function getApplication(id: string) {
-  const supabase = await createClient();
+  const { supabase, user } = await getUser();
+  if (!user) throw new Error("Not authenticated");
+
   const { data, error } = await supabase
     .from("applications")
     .select(`
@@ -284,8 +235,7 @@ export async function createApplication(formData: {
   portal_url?: string;
   notes?: string;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
 
   const initialStatus = formData.status || "researching";
@@ -306,7 +256,6 @@ export async function createApplication(formData: {
 
   if (error) throw error;
 
-  // Record initial status in history
   await supabase.from("application_status_history").insert({
     user_id: user.id,
     application_id: data.id,
@@ -332,11 +281,9 @@ export async function updateApplicationStatus(
   newStatus: string,
   note?: string,
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
 
-  // Get current status
   const { data: current } = await supabase
     .from("applications")
     .select("status")
@@ -352,7 +299,6 @@ export async function updateApplicationStatus(
 
   if (error) throw error;
 
-  // Record in history
   await supabase.from("application_status_history").insert({
     user_id: user.id,
     application_id: id,
@@ -378,25 +324,10 @@ export async function updateApplicationStatus(
 // DEADLINES
 // ============================================================
 
-export async function getDeadlines(applicationId?: string) {
-  const supabase = await createClient();
-  let query = supabase
-    .from("deadlines")
-    .select("*")
-    .is("archived_at", null)
-    .order("due_at");
-
-  if (applicationId) {
-    query = query.eq("application_id", applicationId);
-  }
-
-  const { data, error } = await query;
-  if (error) throw error;
-  return data;
-}
-
 export async function getUpcomingDeadlines(days: number = 30) {
-  const supabase = await createClient();
+  const { supabase, user } = await getUser();
+  if (!user) return [];
+
   const now = new Date();
   const future = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
@@ -409,60 +340,15 @@ export async function getUpcomingDeadlines(days: number = 30) {
     .lte("due_at", future.toISOString())
     .order("due_at");
 
-  if (error) throw error;
-  return data;
-}
-
-export async function createDeadline(formData: {
-  title: string;
-  deadline_type: string;
-  due_at: string;
-  timezone?: string;
-  is_date_only?: boolean;
-  source_url?: string;
-  is_hard_deadline?: boolean;
-  application_id?: string;
-  program_id?: string;
-  notes?: string;
-}) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-
-  const { data, error } = await supabase
-    .from("deadlines")
-    .insert({
-      user_id: user.id,
-      title: formData.title,
-      deadline_type: formData.deadline_type,
-      due_at: formData.due_at,
-      timezone: formData.timezone || "Africa/Accra",
-      is_date_only: formData.is_date_only || false,
-      source_url: formData.source_url || null,
-      is_hard_deadline: formData.is_hard_deadline !== false,
-      application_id: formData.application_id || null,
-      program_id: formData.program_id || null,
-      notes: formData.notes || null,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  await supabase.from("activity_events").insert({
-    user_id: user.id,
-    entity_type: "deadline",
-    entity_id: data.id,
-    action: "created",
-    summary: `Created deadline: ${formData.title}`,
-  });
-
-  revalidatePath("/calendar");
-  return data;
+  if (error) {
+    console.error("Error fetching deadlines:", error.message);
+    return [];
+  }
+  return data || [];
 }
 
 export async function completeDeadline(id: string) {
-  const supabase = await createClient();
+  const { supabase } = await getUser();
   const { data, error } = await supabase
     .from("deadlines")
     .update({ completed_at: new Date().toISOString() })
@@ -480,7 +366,9 @@ export async function completeDeadline(id: string) {
 // ============================================================
 
 export async function getTasks(applicationId?: string) {
-  const supabase = await createClient();
+  const { supabase, user } = await getUser();
+  if (!user) return [];
+
   let query = supabase
     .from("tasks")
     .select("*")
@@ -492,12 +380,17 @@ export async function getTasks(applicationId?: string) {
   }
 
   const { data, error } = await query;
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error("Error fetching tasks:", error.message);
+    return [];
+  }
+  return data || [];
 }
 
 export async function getBlockingTasks() {
-  const supabase = await createClient();
+  const { supabase, user } = await getUser();
+  if (!user) return [];
+
   const { data, error } = await supabase
     .from("tasks")
     .select("*")
@@ -506,56 +399,15 @@ export async function getBlockingTasks() {
     .not("status", "in", "(done,cancelled)")
     .order("due_at", { ascending: true });
 
-  if (error) throw error;
-  return data;
-}
-
-export async function createTask(formData: {
-  title: string;
-  description?: string;
-  priority?: number;
-  due_at?: string;
-  estimated_minutes?: number;
-  blocking?: boolean;
-  application_id?: string;
-  program_id?: string;
-}) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-
-  const { data, error } = await supabase
-    .from("tasks")
-    .insert({
-      user_id: user.id,
-      title: formData.title,
-      description: formData.description || null,
-      priority: formData.priority || 3,
-      due_at: formData.due_at || null,
-      estimated_minutes: formData.estimated_minutes || null,
-      blocking: formData.blocking || false,
-      application_id: formData.application_id || null,
-      program_id: formData.program_id || null,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  await supabase.from("activity_events").insert({
-    user_id: user.id,
-    entity_type: "task",
-    entity_id: data.id,
-    action: "created",
-    summary: `Created task: ${formData.title}`,
-  });
-
-  revalidatePath("/calendar");
-  return data;
+  if (error) {
+    console.error("Error fetching blocking tasks:", error.message);
+    return [];
+  }
+  return data || [];
 }
 
 export async function updateTaskStatus(id: string, status: string) {
-  const supabase = await createClient();
+  const { supabase } = await getUser();
   const { data, error } = await supabase
     .from("tasks")
     .update({
@@ -576,9 +428,17 @@ export async function updateTaskStatus(id: string, status: string) {
 // ============================================================
 
 export async function getDashboardStats() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
+  const { supabase, user } = await getUser();
+  if (!user) {
+    return {
+      totalPrograms: 0,
+      totalApplications: 0,
+      statusCounts: {},
+      upcomingDeadlines: [],
+      pendingTasks: [],
+      blockingTasks: [],
+    };
+  }
 
   const [programsRes, applicationsRes, deadlinesRes, tasksRes] = await Promise.all([
     supabase
@@ -612,15 +472,13 @@ export async function getDashboardStats() {
     statusCounts[app.status] = (statusCounts[app.status] || 0) + 1;
   }
 
-  const blockingTasks = tasksRes.data?.filter((t) => t.blocking) || [];
-
   return {
     totalPrograms: programsRes.count || 0,
     totalApplications: applicationsRes.count || 0,
     statusCounts,
     upcomingDeadlines: deadlinesRes.data || [],
     pendingTasks: tasksRes.data || [],
-    blockingTasks,
+    blockingTasks: tasksRes.data?.filter((t) => t.blocking) || [],
   };
 }
 
@@ -629,59 +487,13 @@ export async function getDashboardStats() {
 // ============================================================
 
 export async function getProgramEvaluation(programId: string) {
-  const supabase = await createClient();
+  const { supabase } = await getUser();
   const { data, error } = await supabase
     .from("program_evaluations")
     .select("*")
     .eq("program_id", programId)
     .single();
 
-  if (error && error.code !== "PGRST116") throw error;
-  return data;
-}
-
-export async function upsertProgramEvaluation(formData: {
-  program_id: string;
-  academic_fit?: number;
-  research_career_fit?: number;
-  funding_strength?: number;
-  admission_feasibility?: number;
-  location_personal_fit?: number;
-  academic_weight?: number;
-  research_weight?: number;
-  funding_weight?: number;
-  feasibility_weight?: number;
-  location_weight?: number;
-  notes?: string;
-}) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-
-  const { data, error } = await supabase
-    .from("program_evaluations")
-    .upsert(
-      {
-        user_id: user.id,
-        program_id: formData.program_id,
-        academic_fit: formData.academic_fit ?? null,
-        research_career_fit: formData.research_career_fit ?? null,
-        funding_strength: formData.funding_strength ?? null,
-        admission_feasibility: formData.admission_feasibility ?? null,
-        location_personal_fit: formData.location_personal_fit ?? null,
-        academic_weight: formData.academic_weight ?? 20,
-        research_weight: formData.research_weight ?? 25,
-        funding_weight: formData.funding_weight ?? 20,
-        feasibility_weight: formData.feasibility_weight ?? 20,
-        location_weight: formData.location_weight ?? 15,
-        notes: formData.notes || null,
-      },
-      { onConflict: "program_id,user_id" },
-    )
-    .select()
-    .single();
-
-  if (error) throw error;
-  revalidatePath(`/programs/${formData.program_id}`);
+  if (error && error.code !== "PGRST116") return null;
   return data;
 }
