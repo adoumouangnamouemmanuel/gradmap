@@ -5,9 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getInstitutions } from "@/features/programs/actions";
+import { DEGREE_TYPES } from "@/lib/constants";
 
-export default async function NewProgramPage() {
+export default async function NewProgramPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ institution?: string }>;
+}) {
   const institutions = await getInstitutions();
+  const { institution: preselectedInstitution } = await searchParams;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
@@ -37,13 +43,16 @@ export default async function NewProgramPage() {
               >
                 <option value="">Select an institution</option>
                 {institutions.map((inst: any) => (
-                  <option key={inst.id} value={inst.id}>
+                  <option
+                    key={inst.id}
+                    value={inst.id}
+                    selected={inst.id === preselectedInstitution}
+                  >
                     {inst.name}
                     {inst.country_name ? `, ${inst.country_name}` : ""}
                   </option>
                 ))}
               </select>
-
             </div>
 
             <div className="space-y-1">
@@ -60,11 +69,9 @@ export default async function NewProgramPage() {
                 </label>
                 <select id="degree_type" name="degree_type" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
                   <option value="">Select</option>
-                  <option value="msc">MSc</option>
-                  <option value="meng">MEng</option>
-                  <option value="ma">MA</option>
-                  <option value="phd">PhD</option>
-                  <option value="other">Other</option>
+                  {DEGREE_TYPES.map((dt) => (
+                    <option key={dt} value={dt.toLowerCase()}>{dt}</option>
+                  ))}
                 </select>
               </div>
 
@@ -85,6 +92,7 @@ export default async function NewProgramPage() {
                   <option value="">Select</option>
                   <option value="fall">Fall</option>
                   <option value="spring">Spring</option>
+                  <option value="winter">Winter</option>
                   <option value="other">Other</option>
                 </select>
               </div>
