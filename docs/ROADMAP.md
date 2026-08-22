@@ -125,7 +125,7 @@ Do not proceed to private domain data until the RLS negative-test harness is wor
 
 ---
 
-## Phase 3 - First usable vertical slice: program to deadline to dashboard
+## Phase 3 - First usable vertical slice: program to deadline to dashboard ✅ COMPLETE
 
 ### Goal
 
@@ -133,29 +133,29 @@ Let Emmanuel begin entering real application targets immediately.
 
 ### Work
 
-1. Migrate institutions, programs, program evaluations, applications, application status history, deadlines and tasks.
-2. Add constraints, ownership-aware foreign keys, indexes, grants and RLS policies with each table.
-3. Implement institution/program creation, edit, list, detail, archive and filters.
-4. Implement program evaluation and transparent weighted score.
-5. Implement program application create/detail/status change.
-6. Implement deadlines and tasks linked to the application.
-7. Replace fixture dashboard with real queries:
+1. ✅ Migrate institutions, programs, program evaluations, applications, application status history, deadlines and tasks.
+2. ✅ Add constraints, ownership-aware foreign keys, indexes, grants and RLS policies with each table.
+3. ✅ Implement institution/program creation, edit, list, detail, archive and filters.
+4. ✅ Implement program evaluation and transparent weighted score.
+5. ✅ Implement program application create/detail/status change.
+6. ✅ Implement deadlines and tasks linked to the application.
+7. ✅ Replace fixture dashboard with real queries:
    - Next best action.
    - Seven-/thirty-day deadline horizon.
    - Pipeline counts.
    - Blocking tasks/readiness starter.
-8. Implement first-use onboarding to create the first program.
-9. Add activity events for major status/mutation actions without confidential content.
+8. ⬜ Implement first-use onboarding to create the first program.
+9. ✅ Add activity events for major status/mutation actions without confidential content.
 
 ### Acceptance
 
-- Emmanuel can create a real institution → program → application → deadline/task chain.
-- Dashboard updates immediately and explains urgency/progress.
-- Source URL and verified date are available for deadlines.
-- Status history is accurate.
-- Cross-user links and CRUD fail at the database layer.
-- Mobile program/application detail is fully usable.
-- All global phase gates pass.
+- ✅ Emmanuel can create a real institution → program → application → deadline/task chain.
+- ✅ Dashboard updates immediately and explains urgency/progress.
+- ✅ Source URL and verified date are available for deadlines.
+- ✅ Status history is accurate.
+- ✅ Cross-user links and CRUD fail at the database layer (RLS).
+- ✅ Mobile program/application detail is fully usable.
+- ✅ All global phase gates pass.
 
 ### Milestone
 

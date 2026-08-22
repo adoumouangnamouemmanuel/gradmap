@@ -19,6 +19,29 @@ All notable changes to this project will be documented in this file.
 **Date:** 2026-08-22
 **Status:** ✅ Complete
 
+## Phase 3 — First usable vertical slice: program to deadline to dashboard
+
+**Date:** 2026-08-22
+**Status:** ✅ Complete
+
+### Completed
+
+- [x] Create institutions, programs, program_evaluations, applications, application_status_history, deadlines, tasks, activity_events migrations
+- [x] Add ownership-aware composite foreign keys and indexes
+- [x] Add RLS policies (owner-only select/insert/update/delete) for all tables
+- [x] Implement institution CRUD (create, list, archive)
+- [x] Implement program CRUD (create, list, detail, archive)
+- [x] Implement program evaluation with weighted score computation
+- [x] Implement application CRUD with status history tracking
+- [x] Implement deadline and task management
+- [x] Build dashboard with real Supabase queries (next best action, deadlines, pipeline counts, blocking tasks)
+- [x] Build programs list and detail pages (desktop table + mobile list)
+- [x] Build applications list and detail pages
+- [x] Build calendar page with upcoming deadlines and tasks
+- [x] Build placeholder pages for documents, scholarships, essays, recommender, contacts, more, settings
+- [x] Implement activity event logging for all mutations
+- [x] Verify typecheck and production build pass
+
 ### Completed
 
 - [x] Initialize Supabase CLI 2.115.0 and config.toml
