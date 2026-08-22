@@ -40,10 +40,8 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: Do not run code between createServerClient and
   // supabase.auth.getClaims(). A simple mistake could make it very
   // hard to debug issues with users being randomly logged out.
-  const { data: claims } = await supabase.auth.getClaims();
-
-  // Check if user is authenticated (claims must have a valid sub/user ID)
-  const isAuthenticated = claims && typeof claims === "object" && "sub" in claims;
+  const { data: { user } } = await supabase.auth.getUser();
+  const isAuthenticated = !!user;
 
   // Redirect unauthenticated users to login
   if (!isAuthenticated && !isPublicRoute(request.nextUrl.pathname)) {
