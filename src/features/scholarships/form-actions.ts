@@ -4,6 +4,91 @@ import { redirect } from "next/navigation";
 import { createActionClient } from "@/lib/supabase/server";
 
 // ============================================================
+// SCHOLARSHIP DEADLINE FORM ACTION
+// ============================================================
+
+export async function createScholarshipDeadlineFromForm(formData: FormData) {
+  const supabase = await createActionClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const title = formData.get("title") as string;
+  const dueAt = formData.get("due_at") as string;
+  const scholarshipId = formData.get("scholarship_id") as string;
+  if (!title || !dueAt || !scholarshipId) redirect(`/scholarships/${scholarshipId}?error=Title+and+due+date+are+required`);
+
+  const { data: deadlineData, error } = await supabase
+    .from("deadlines")
+    .insert({
+      user_id: user.id,
+      title,
+      deadline_type: (formData.get("deadline_type") as string) || "funding",
+      due_at: dueAt,
+      timezone: (formData.get("timezone") as string) || "Africa/Accra",
+      is_date_only: formData.get("is_date_only") === "on",
+      source_url: formData.get("source_url") as string || null,
+      is_hard_deadline: formData.get("is_hard_deadline") !== "off",
+      scholarship_id: scholarshipId,
+      notes: formData.get("notes") as string || null,
+    })
+    .select()
+    .single();
+
+  if (error) redirect(`/scholarships/${scholarshipId}?error=` + encodeURIComponent(error.message));
+
+  await supabase.from("activity_events").insert({
+    user_id: user.id,
+    entity_type: "deadline",
+    entity_id: deadlineData?.id,
+    action: "created",
+    summary: `Created scholarship deadline: ${title}`,
+  });
+
+  redirect(`/scholarships/${scholarshipId}`);
+}
+
+// ============================================================
+// SCHOLARSHIP TASK FORM ACTION
+// ============================================================
+
+export async function createScholarshipTaskFromForm(formData: FormData) {
+  const supabase = await createActionClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const title = formData.get("title") as string;
+  const scholarshipId = formData.get("scholarship_id") as string;
+  if (!title || !scholarshipId) redirect(`/scholarships/${scholarshipId}?error=Title+is+required`);
+
+  const { data: taskData, error } = await supabase
+    .from("tasks")
+    .insert({
+      user_id: user.id,
+      title,
+      description: formData.get("description") as string || null,
+      status: "todo",
+      priority: Number(formData.get("priority")) || 3,
+      due_at: formData.get("due_at") as string || null,
+      scholarship_id: scholarshipId,
+      blocking: formData.get("blocking") === "on",
+    })
+    .select()
+    .single();
+
+  if (error) redirect(`/scholarships/${scholarshipId}?error=` + encodeURIComponent(error.message));
+
+  await supabase.from("activity_events").insert({
+    user_id: user.id,
+    entity_type: "task",
+    entity_id: taskData?.id,
+    action: "created",
+    summary: `Created scholarship task: ${title}`,
+  });
+
+  redirect(`/scholarships/${scholarshipId}`);
+}
+
+// ============================================================
 // SCHOLARSHIP FORM ACTIONS
 // ============================================================
 
