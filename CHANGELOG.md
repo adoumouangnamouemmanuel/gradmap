@@ -9,6 +9,24 @@ All notable changes to this project will be documented in this file.
 **Date:** 2026-08-22
 **Status:** ✅ Complete
 
+## Phase 1 — Beautiful shell and PWA foundation
+
+**Date:** 2026-08-22
+**Status:** ✅ Complete
+
+### Completed
+
+- [x] Scaffold Next.js 16.3.2 with TypeScript, Tailwind v4, shadcn/ui
+- [x] Configure linting, formatting, testing, path aliases
+- [x] Implement semantic tokens, fonts (Geist + Newsreader), light/dark/system themes
+- [x] Build desktop sidebar, top utility bar, mobile bottom navigation
+- [x] Build PageHeader, StatusBadge, DeadlineIndicator, Metric, EmptyState, DataToolbar, MobileListItem
+- [x] Implement populated and empty dashboard mock states with fixture data
+- [x] Create PWA manifest, offline page, theme metadata
+- [x] Register minimal service worker (no private data caching)
+- [x] Install all dependencies (Radix UI, Lucide, Geist font, next-themes)
+- [x] Verify typecheck and production build pass
+
 ### Completed
 
 - [x] Read AGENTS.md and all specifications (PRODUCT_REQUIREMENTS, DATA_MODEL, ARCHITECTURE, ROADMAP, SECURITY, UI_DESIGN_SYSTEM)
