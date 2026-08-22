@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { securityHeaders } from "@/lib/security/headers";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -32,10 +33,10 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: Do not run code between createServerClient and
   // supabase.auth.getClaims(). A simple mistake could make it very
   // hard to debug issues with users being randomly logged out.
-  //
-  // IMPORTANT: Always use getClaims() for identity verification.
-  // getSession() is NOT safe for authorization decisions.
   await supabase.auth.getClaims();
+
+  // Apply security headers
+  securityHeaders(supabaseResponse);
 
   return supabaseResponse;
 }
