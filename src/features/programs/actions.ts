@@ -55,7 +55,7 @@ export async function getPrograms(institutionId?: string) {
 
   let query = supabase
     .from("programs")
-    .select("*, institutions!inner(name, country_name, city)")
+    .select("*, institutions!programs_institution_id_fkey(name, country_name, city)")
     .is("archived_at", null)
     .order("display_priority", { ascending: false });
 
@@ -77,7 +77,7 @@ export async function getProgram(id: string) {
 
   const { data, error } = await supabase
     .from("programs")
-    .select("*, institutions!inner(name, country_name, city, website_url)")
+    .select("*, institutions!programs_institution_id_fkey(name, country_name, city, website_url)")
     .eq("id", id)
     .single();
 
@@ -196,7 +196,7 @@ export async function getApplications() {
 
   const { data, error } = await supabase
     .from("applications")
-    .select("*, programs!inner(name, institutions!inner(name, country_name))")
+    .select("*, programs!applications_program_id_fkey(name, institutions!programs_institution_id_fkey(name, country_name))")
     .is("archived_at", null)
     .order("priority", { ascending: false });
 
@@ -215,9 +215,9 @@ export async function getApplication(id: string) {
     .from("applications")
     .select(`
       *,
-      programs!inner(
+      programs!applications_program_id_fkey(
         name, degree_type, field, institution_id,
-        institutions!inner(name, country_name, city)
+        institutions!programs_institution_id_fkey(name, country_name, city)
       )
     `)
     .eq("id", id)
