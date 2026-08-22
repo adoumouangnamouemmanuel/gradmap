@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { fonts } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s | GradMap",
   },
   description:
-    "Emmanuel Adoum's secure command center for graduate-program and scholarship applications.",
+    "Your path to the next chapter, clearly organized. A secure command center for graduate-program and scholarship applications.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -33,8 +35,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-white font-sans antialiased dark:bg-gray-950">
-        {children}
+      <body
+        className={`${fonts.sans} ${fonts.serif} ${fonts.mono} min-h-screen bg-background font-sans antialiased`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
