@@ -23,9 +23,7 @@ create table public.profiles (
   updated_at timestamptz not null default now()
 );
 
--- Unique constraint for ownership-aware composite FKs
-alter table public.profiles
-  add constraint profiles_id_user_id_key unique (id, id);
+-- PK already provides uniqueness; no extra constraint needed
 
 -- Index for common lookups
 create index profiles_id_idx on public.profiles (id);
