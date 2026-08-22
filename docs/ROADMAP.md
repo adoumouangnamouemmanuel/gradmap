@@ -163,7 +163,7 @@ Let Emmanuel begin entering real application targets immediately.
 
 ---
 
-## Phase 4 - Scholarships, funding, expenses and decisions
+## Phase 4 - Scholarships, funding, expenses and decisions 🔄 IN PROGRESS
 
 ### Goal
 
@@ -171,22 +171,22 @@ Make scholarship targeting-especially high-priority opportunities such as Eiffel
 
 ### Work
 
-1. Migrate scholarships, program-scholarship links, scholarship applications and expenses.
-2. Implement eligibility, mechanism, coverage, amount/currency, obligations and verification fields.
-3. Link scholarships to compatible programs.
-4. Implement separate scholarship application pipeline and program-application association.
-5. Add scholarship deadlines/tasks through canonical planning flows.
-6. Implement expense tracking with exact currencies and fee states.
-7. Build funding comparison and dashboard outlook without guessed FX conversion.
-8. Enhance decision/offer fields and response-deadline display.
+1. ✅ Migrate scholarships, program-scholarship links, scholarship applications and expenses.
+2. ✅ Implement eligibility, mechanism, coverage, amount/currency, obligations and verification fields.
+3. ✅ Link scholarships to compatible programs.
+4. ✅ Implement separate scholarship application pipeline and program-application association.
+5. ⬜ Add scholarship deadlines/tasks through canonical planning flows.
+6. ✅ Implement expense tracking with exact currencies and fee states.
+7. ✅ Build funding comparison and dashboard outlook without guessed FX conversion.
+8. ✅ Enhance decision/offer fields and response-deadline display.
 
 ### Acceptance
 
-- Eiffel can be entered as data, linked to programs and tracked without hardcoded special-case code.
-- Automatic, nomination and separate-application mechanisms render correctly.
-- Amount/currency constraints reject invalid combinations.
-- Funding dashboard traces to source records.
-- User isolation tests cover every new table/relation.
+- ✅ Eiffel can be entered as data, linked to programs and tracked without hardcoded special-case code.
+- ✅ Automatic, nomination and separate-application mechanisms render correctly.
+- ✅ Amount/currency constraints reject invalid combinations.
+- ✅ Funding dashboard traces to source records.
+- ⬜ User isolation tests cover every new table/relation.
 
 ---
 
