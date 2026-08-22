@@ -197,6 +197,27 @@ export default async function ApplicationDetailPage({
             </Card>
           )}
 
+          {/* Quick links to related entities */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-serif text-lg">Related</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" asChild>
+                <Link href={`/essays/new?application=${id}`}>Add essay prompt</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <Link href={`/recommenders/new?application=${id}`}>Add recommender request</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <Link href={`/documents/new?application=${id}`}>Add document requirement</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <Link href={`/calendar?application=${id}`}>Add deadline</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Expenses */}
           <Card>
             <CardHeader>
