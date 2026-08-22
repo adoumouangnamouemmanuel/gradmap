@@ -10,7 +10,6 @@ import {
   FileText,
   Calendar,
   FolderOpen,
-  MoreHorizontal,
   Settings,
   Search,
   Building2,
@@ -37,7 +36,6 @@ const navItems = [
 ];
 
 const bottomItems = [
-  { href: "/more", label: "More", icon: MoreHorizontal },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
