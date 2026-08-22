@@ -1,11 +1,10 @@
+import Link from "next/link";
 import { CalendarDays, Plus, CheckCircle2, Clock } from "lucide-react";
 import { PageHeader } from "@/components/domain/page-header";
 import { DeadlineIndicator } from "@/components/domain/deadline-indicator";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/domain/empty-state";
-import { MobileListItem } from "@/components/domain/mobile-list-item";
 import { Separator } from "@/components/ui/separator";
 import { getUpcomingDeadlines, getTasks } from "@/features/programs/actions";
 
@@ -22,10 +21,10 @@ export default async function CalendarPage() {
         description="Upcoming deadlines and tasks."
         action={
           <Button asChild>
-            <a href="/calendar/new">
+            <Link href="/calendar/new">
               <Plus className="mr-1 h-4 w-4" />
               Add deadline
-            </a>
+            </Link>
           </Button>
         }
       />
