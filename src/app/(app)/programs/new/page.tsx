@@ -39,15 +39,12 @@ export default async function NewProgramPage({
                 id="institution_id"
                 name="institution_id"
                 required
+                defaultValue={preselectedInstitution || ""}
                 className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="">Select an institution</option>
                 {institutions.map((inst: any) => (
-                  <option
-                    key={inst.id}
-                    value={inst.id}
-                    selected={inst.id === preselectedInstitution}
-                  >
+                  <option key={inst.id} value={inst.id}>
                     {inst.name}
                     {inst.country_name ? `, ${inst.country_name}` : ""}
                   </option>
