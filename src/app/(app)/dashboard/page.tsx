@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, Calendar, FileText, Plus, TrendingUp, AlertTriangle } from "lucide-react";
+import { BookOpen, Calendar, FileText, Plus, TrendingUp, AlertTriangle, Award, DollarSign } from "lucide-react";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { DeadlineIndicator } from "@/components/domain/deadline-indicator";
 import { Metric } from "@/components/domain/metric";
@@ -8,17 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getDashboardStats, getUpcomingDeadlines, getBlockingTasks } from "@/features/programs/actions";
+import { getFundingSummary } from "@/features/scholarships/actions";
 
 export default async function DashboardPage() {
   let stats;
   let deadlines;
   let blockingTasks;
+  let fundingSummary;
 
   try {
-    [stats, deadlines, blockingTasks] = await Promise.all([
+    [stats, deadlines, blockingTasks, fundingSummary] = await Promise.all([
       getDashboardStats(),
       getUpcomingDeadlines(30),
       getBlockingTasks(),
+      getFundingSummary(),
     ]);
   } catch {
     // Not authenticated or no data - show empty state
@@ -229,6 +232,108 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Funding summary */}
+      {fundingSummary && (fundingSummary.scholarships.length > 0 || fundingSummary.expenses.length > 0) && (
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          {/* Scholarships overview */}
+          {fundingSummary.scholarships.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 font-serif text-lg">
+                    <Award className="h-4 w-4 text-muted-foreground" />
+                    Scholarships
+                  </CardTitle>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href="/scholarships">View all</Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {fundingSummary.scholarships.slice(0, 5).map((s: any) => (
+                  <Link
+                    key={s.id}
+                    href={`/scholarships/${s.id}`}
+                    className="flex items-center justify-between py-2 hover:bg-accent/50 rounded px-2 -mx-2 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{s.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{s.funding_type}</p>
+                    </div>
+                    <div className="text-right">
+                      {s.amount && (
+                        <p className="text-sm font-medium">
+                          {s.currency_code} {s.amount.toLocaleString()}
+                        </p>
+                      )}
+                      <StatusBadge
+                        status={
+                          s.eligibility_status === "eligible" ? "done" :
+                          s.eligibility_status === "likely" ? "preparing" :
+                          "exploring"
+                        }
+                        label={s.eligibility_status.replace("_", " ")}
+                      />
+                    </div>
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Expenses overview */}
+          {fundingSummary.expenses.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 font-serif text-lg">
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    Expenses
+                  </CardTitle>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href="/applications">View all</Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {fundingSummary.expenses.slice(0, 5).map((e: any) => (
+                  <div key={e.id} className="flex items-center justify-between py-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{e.description}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{e.category.replace("_", " ")}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">
+                        {e.currency_code} {Number(e.amount).toLocaleString()}
+                      </p>
+                      <StatusBadge
+                        status={
+                          e.status === "paid" ? "done" :
+                          e.status === "due" ? "submitted" :
+                          "draft"
+                        }
+                        label={e.status}
+                      />
+                    </div>
+                  </div>
+                ))}
+                {fundingSummary.totalExpenses > 0 && (
+                  <>
+                    <Separator />
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-sm font-medium">Total paid</span>
+                      <span className="text-sm font-medium text-primary">
+                        {fundingSummary.totalExpenses.toLocaleString()}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
     </div>
   );
 }
