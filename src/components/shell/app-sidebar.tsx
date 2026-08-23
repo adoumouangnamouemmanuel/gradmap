@@ -18,6 +18,7 @@ import {
   User,
   ChevronLeft,
   LogOut,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -105,14 +106,17 @@ function NavItemLink({
   item,
   isActive,
   collapsed,
+  onClick,
 }: {
   item: NavItemData;
   isActive: boolean;
   collapsed: boolean;
+  onClick?: () => void;
 }) {
   const link = (
     <Link
       href={item.href}
+      onClick={onClick}
       className={cn(
         "group relative flex items-center gap-3 rounded-md py-2 text-sm font-medium transition-all duration-200 ease-out",
         collapsed ? "justify-center px-0 h-10 w-10 mx-auto" : "px-3",
@@ -147,17 +151,21 @@ function NavItemLink({
 interface AppSidebarProps {
   collapsed?: boolean;
   onToggle?: () => void;
+  onNavSelect?: () => void;
+  className?: string;
 }
 
-export function AppSidebar({ collapsed = false, onToggle }: AppSidebarProps) {
+export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className }: AppSidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col border-r border-sidebar-border bg-sidebar/95 backdrop-blur-xl supports-[backdrop-filter]:bg-sidebar/60 text-sidebar-foreground",
+        "flex flex-col h-full border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
+        "lg:bg-sidebar/95 lg:backdrop-blur-xl lg:supports-[backdrop-filter]:bg-sidebar/60",
         "transition-[width] duration-300 ease-[cubic-bezier(0.2,1,0.2,1)] shadow-[-1px_0_10px_rgba(0,0,0,0.02)_inset]",
         collapsed ? "w-[72px]" : "w-[260px]",
+        className
       )}
     >
       {/* ── Logo row + collapse toggle ── */}
@@ -175,22 +183,33 @@ export function AppSidebar({ collapsed = false, onToggle }: AppSidebarProps) {
           GradMap
         </span>
 
-        {/* Collapse toggle - circular, on the border edge */}
-        <div className="absolute -right-[14px] top-1/2 -translate-y-1/2 z-20">
+        {/* Mobile close toggle */}
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 lg:hidden">
+          <button
+            onClick={onToggle}
+            aria-label="Close sidebar"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground active:scale-95 transition-all cursor-pointer"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Collapse toggle - circular, on the border edge (desktop only) */}
+        <div className="absolute -right-[14px] top-1/2 -translate-y-1/2 z-20 hidden lg:block">
           <button
             onClick={onToggle}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className={cn(
-              "flex h-6 w-6 items-center justify-center rounded-full",
-              "border border-sidebar-border bg-background shadow-sm",
+              "flex h-7 w-7 items-center justify-center rounded-full",
+              "border border-border/80 bg-background shadow-md",
               "transition-all duration-200",
-              "hover:bg-accent hover:shadow-md hover:scale-105 active:scale-95",
+              "hover:bg-accent hover:shadow-lg hover:scale-105 active:scale-95",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             )}
           >
             <ChevronLeft
               className={cn(
-                "h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
+                "h-4 w-4 text-foreground transition-transform duration-200",
                 collapsed && "rotate-180",
               )}
             />
@@ -230,6 +249,7 @@ export function AppSidebar({ collapsed = false, onToggle }: AppSidebarProps) {
                     item={item}
                     isActive={pathname.startsWith(item.href)}
                     collapsed={collapsed}
+                    onClick={onNavSelect}
                   />
                 ))}
               </React.Fragment>
@@ -250,6 +270,7 @@ export function AppSidebar({ collapsed = false, onToggle }: AppSidebarProps) {
               item={item}
               isActive={pathname.startsWith(item.href)}
               collapsed={collapsed}
+              onClick={onNavSelect}
             />
           ))}
         </nav>

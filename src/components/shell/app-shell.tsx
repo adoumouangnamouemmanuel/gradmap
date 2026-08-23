@@ -23,6 +23,7 @@ export function AppShell({ children }: AppShellProps) {
         <AppSidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="hidden lg:flex"
         />
 
         {/* Mobile overlay */}
@@ -38,12 +39,16 @@ export function AppShell({ children }: AppShellProps) {
         {/* Mobile sidebar drawer */}
         <div
           className={
-            `fixed inset-y-0 left-0 z-50 w-[260px] transition-transform duration-200 ease-out lg:hidden ${
+            `fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-out lg:hidden ${
               mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
             }`
           }
         >
-          <AppSidebar onToggle={() => setMobileMenuOpen(false)} />
+          <AppSidebar 
+            onToggle={() => setMobileMenuOpen(false)} 
+            onNavSelect={() => setMobileMenuOpen(false)}
+            className="w-[260px] max-w-[80vw]" 
+          />
         </div>
 
         {/* Search dialog */}
