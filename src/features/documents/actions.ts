@@ -36,7 +36,7 @@ export async function getDocument(id: string) {
 
   const { data, error } = await supabase
     .from("documents")
-    .select("*, document_versions(*)")
+    .select("*, document_versions!document_versions_document_id_fkey(*)")
     .eq("id", id)
     .maybeSingle();
 
@@ -46,7 +46,7 @@ export async function getDocument(id: string) {
   }
 
   if (!data) {
-    throw new Error("Document not found — it may not exist or you may not have access.");
+    throw new Error("Document not found - it may not exist or you may not have access.");
   }
 
   return data;

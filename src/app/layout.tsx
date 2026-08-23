@@ -38,12 +38,7 @@ export default function RootLayout({
       <body
         className={`${fonts.sans} ${fonts.serif} ${fonts.mono} min-h-screen bg-background font-sans antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider>
           {children}
         </ThemeProvider>
       </body>

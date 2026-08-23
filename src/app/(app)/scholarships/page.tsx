@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Plus, Award, DollarSign, Globe, ExternalLink, BookOpen } from "lucide-react";
+import { Plus, Award, DollarSign, Globe, BookOpen } from "lucide-react";
 import { PageHeader } from "@/components/domain/page-header";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/domain/empty-state";
 import { MobileListItem } from "@/components/domain/mobile-list-item";
+import { ExternalLinkStop } from "@/components/domain/external-link-stop";
 import { getScholarships } from "@/features/scholarships/actions";
 import { createClient } from "@/lib/supabase/server";
 
@@ -91,15 +92,10 @@ export default async function ScholarshipsPage() {
                           </>
                         )}
                         {scholarship.official_url && (
-                          <a
+                          <ExternalLinkStop
                             href={scholarship.official_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="text-primary hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
+                          />
                         )}
                       </p>
                     </div>
@@ -114,7 +110,7 @@ export default async function ScholarshipsPage() {
                           ))}
                         </div>
                       ) : (
-                        <span className="text-xs text-muted-foreground/50">—</span>
+                        <span className="text-xs text-muted-foreground/50">-</span>
                       )}
                     </div>
                     <span className="text-sm text-muted-foreground capitalize">
@@ -123,7 +119,7 @@ export default async function ScholarshipsPage() {
                     <span className="text-sm font-medium">
                       {scholarship.amount
                         ? `${scholarship.currency_code || ""} ${scholarship.amount.toLocaleString()}`
-                        : "—"}
+                        : "-"}
                     </span>
                     <StatusBadge
                       status={

@@ -121,7 +121,7 @@ export default async function RecommenderDetailPage({
                     <option value="">General request (no specific application)</option>
                     {applications.map((app: any) => (
                       <option key={app.id} value={app.id}>
-                        {app.programs?.name} — {app.status}
+                        {app.programs?.name} - {app.status}
                       </option>
                     ))}
                   </select>

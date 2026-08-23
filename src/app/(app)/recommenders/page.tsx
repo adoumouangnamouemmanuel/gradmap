@@ -3,6 +3,7 @@ import { Plus, Users, Mail } from "lucide-react";
 import { PageHeader } from "@/components/domain/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { StopPropagationAnchor } from "@/components/domain/stop-prop-anchor";
 import { EmptyState } from "@/components/domain/empty-state";
 import { MobileListItem } from "@/components/domain/mobile-list-item";
 import { getRecommenders } from "@/features/essays/actions";
@@ -55,14 +56,14 @@ export default async function RecommendersPage() {
                       )}
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {rec.institution || "—"}
+                      {rec.institution || "-"}
                     </span>
                     <span className="text-sm text-muted-foreground">
                       {rec.email ? (
-                        <a href={`mailto:${rec.email}`} className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                        <StopPropagationAnchor href={`mailto:${rec.email}`} className="text-primary hover:underline">
                           <Mail className="h-4 w-4" />
-                        </a>
-                      ) : "—"}
+                        </StopPropagationAnchor>
+                      ) : "-"}
                     </span>
                   </Link>
                 ))}

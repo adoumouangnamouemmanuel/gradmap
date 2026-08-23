@@ -36,7 +36,7 @@ export async function getEssayPrompt(id: string) {
 
   const { data, error } = await supabase
     .from("essay_prompts")
-    .select("*, essay_versions(*)")
+    .select("*, essay_versions!essay_versions_essay_prompt_id_fkey(*)")
     .eq("id", id)
     .single();
 
@@ -178,7 +178,7 @@ export async function getRecommender(id: string) {
 
   const { data, error } = await supabase
     .from("recommenders")
-    .select("*, recommendation_requests(*)")
+    .select("*, recommendation_requests!recommendation_requests_recommender_id_fkey(*)")
     .eq("id", id)
     .single();
 
@@ -255,6 +255,13 @@ export async function createRecommendationRequest(formData: {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
 
+  // Ensure datetime-local values get seconds for PostgreSQL timestamptz
+  let isoDueAt: string | null = null;
+  if (formData.due_at) {
+    const formatted = formData.due_at.length === 16 ? formData.due_at + ":00" : formData.due_at;
+    isoDueAt = new Date(formatted).toISOString();
+  }
+
   const { data, error } = await supabase
     .from("recommendation_requests")
     .insert({
@@ -262,7 +269,7 @@ export async function createRecommendationRequest(formData: {
       recommender_id: formData.recommender_id,
       application_id: formData.application_id || null,
       scholarship_application_id: formData.scholarship_application_id || null,
-      due_at: formData.due_at || null,
+      due_at: isoDueAt,
       notes: formData.notes || null,
     })
     .select()
@@ -326,7 +333,7 @@ export async function getContact(id: string) {
 
   const { data, error } = await supabase
     .from("contacts")
-    .select("*, contact_interactions(*)")
+    .select("*, contact_interactions!contact_interactions_contact_id_fkey(*)")
     .eq("id", id)
     .single();
 

@@ -17,13 +17,17 @@ export async function createScholarshipDeadlineFromForm(formData: FormData) {
   const scholarshipId = formData.get("scholarship_id") as string;
   if (!title || !dueAt || !scholarshipId) redirect(`/scholarships/${scholarshipId}?error=Title+and+due+date+are+required`);
 
+  // Ensure the datetime-local value has seconds for PostgreSQL timestamptz
+  const formattedDueAt = dueAt.length === 16 ? dueAt + ":00" : dueAt;
+  const isoDueAt = new Date(formattedDueAt).toISOString();
+
   const { data: deadlineData, error } = await supabase
     .from("deadlines")
     .insert({
       user_id: user.id,
       title,
       deadline_type: (formData.get("deadline_type") as string) || "funding",
-      due_at: dueAt,
+      due_at: isoDueAt,
       timezone: (formData.get("timezone") as string) || "Africa/Accra",
       is_date_only: formData.get("is_date_only") === "on",
       source_url: formData.get("source_url") as string || null,
@@ -60,6 +64,10 @@ export async function createScholarshipTaskFromForm(formData: FormData) {
   const scholarshipId = formData.get("scholarship_id") as string;
   if (!title || !scholarshipId) redirect(`/scholarships/${scholarshipId}?error=Title+is+required`);
 
+  const rawDueAt = formData.get("due_at") as string || null;
+  const formattedTaskDueAt = rawDueAt && rawDueAt.length === 16 ? rawDueAt + ":00" : rawDueAt;
+  const isoTaskDueAt = formattedTaskDueAt ? new Date(formattedTaskDueAt).toISOString() : null;
+
   const { data: taskData, error } = await supabase
     .from("tasks")
     .insert({
@@ -68,7 +76,7 @@ export async function createScholarshipTaskFromForm(formData: FormData) {
       description: formData.get("description") as string || null,
       status: "todo",
       priority: Number(formData.get("priority")) || 3,
-      due_at: formData.get("due_at") as string || null,
+      due_at: isoTaskDueAt,
       scholarship_id: scholarshipId,
       blocking: formData.get("blocking") === "on",
     })
@@ -92,13 +100,13 @@ export async function createScholarshipTaskFromForm(formData: FormData) {
 // SCHOLARSHIP FORM ACTIONS
 // ============================================================
 
-export async function createScholarshipWithPrograms(formData: FormData) {
+export async function createScholarshipWithPrograms(formData: FormData): Promise<{ id: string } | { error: string }> {
   const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return { error: "Not authenticated" };
 
   const name = formData.get("name") as string;
-  if (!name) redirect("/scholarships/new?error=Name+is+required");
+  if (!name) return { error: "Name is required" };
 
   // Create the scholarship
   const { data: scholarship, error } = await supabase
@@ -113,7 +121,7 @@ export async function createScholarshipWithPrograms(formData: FormData) {
       currency_code: formData.get("currency_code") as string || null,
       coverage_notes: formData.get("coverage_notes") as string || null,
       application_mechanism: (formData.get("application_mechanism") as string) || "unknown",
-      eligibility_status: (formData.get("eligibility_status") as string) || "unknown",
+      eligibility_status: formData.get("eligibility_status") as string || "unknown",
       eligibility_notes: formData.get("eligibility_notes") as string || null,
       service_obligation_notes: formData.get("service_obligation_notes") as string || null,
       display_priority: Number(formData.get("display_priority")) || 3,
@@ -121,7 +129,7 @@ export async function createScholarshipWithPrograms(formData: FormData) {
     .select()
     .single();
 
-  if (error) redirect("/scholarships/new?error=" + encodeURIComponent(error.message));
+  if (error) return { error: error.message };
 
   // Link to selected programs
   const programIds = formData.getAll("program_ids") as string[];
@@ -150,7 +158,7 @@ export async function createScholarshipWithPrograms(formData: FormData) {
     summary: `Created scholarship: ${name}${programIds.length > 0 ? ` linked to ${programIds.length} program(s)` : ""}`,
   });
 
-  redirect(`/scholarships/${scholarship.id}`);
+  return { id: scholarship.id };
 }
 
 // ============================================================

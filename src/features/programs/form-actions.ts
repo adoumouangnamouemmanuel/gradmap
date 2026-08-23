@@ -1,19 +1,19 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createActionClient } from "@/lib/supabase/server";
 
 // ============================================================
 // INSTITUTION FORM ACTIONS
 // ============================================================
 
-export async function createInstitutionFromForm(formData: FormData) {
+export async function createInstitutionFromForm(formData: FormData): Promise<{ id: string } | { error: string }> {
   const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return { error: "Not authenticated" };
 
   const name = formData.get("name") as string;
-  if (!name) redirect("/programs/new?error=Name+is+required");
+  if (!name) return { error: "Name is required" };
 
   const { data, error } = await supabase
     .from("institutions")
@@ -29,7 +29,7 @@ export async function createInstitutionFromForm(formData: FormData) {
     .select()
     .single();
 
-  if (error) redirect("/programs/new?error=" + encodeURIComponent(error.message));
+  if (error) return { error: error.message };
 
   await supabase.from("activity_events").insert({
     user_id: user.id,
@@ -39,21 +39,21 @@ export async function createInstitutionFromForm(formData: FormData) {
     summary: `Created institution: ${name}`,
   });
 
-  redirect("/programs/new");
+  return { id: data.id };
 }
 
 // ============================================================
 // PROGRAM FORM ACTIONS
 // ============================================================
 
-export async function createProgramFromForm(formData: FormData) {
+export async function createProgramFromForm(formData: FormData): Promise<{ id: string } | { error: string }> {
   const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return { error: "Not authenticated" };
 
   const institutionId = formData.get("institution_id") as string;
   const name = formData.get("name") as string;
-  if (!institutionId || !name) redirect("/programs/new?error=Institution+and+name+are+required");
+  if (!institutionId || !name) return { error: "Institution and name are required" };
 
   const { data, error } = await supabase
     .from("programs")
@@ -76,7 +76,7 @@ export async function createProgramFromForm(formData: FormData) {
     .select()
     .single();
 
-  if (error) redirect("/programs/new?error=" + encodeURIComponent(error.message));
+  if (error) return { error: error.message };
 
   await supabase.from("activity_events").insert({
     user_id: user.id,
@@ -86,20 +86,20 @@ export async function createProgramFromForm(formData: FormData) {
     summary: `Created program: ${name}`,
   });
 
-  redirect(`/programs/${data.id}`);
+  return { id: data.id };
 }
 
 // ============================================================
 // APPLICATION FORM ACTIONS
 // ============================================================
 
-export async function createApplicationFromForm(formData: FormData) {
+export async function createApplicationFromForm(formData: FormData): Promise<{ id: string } | { error: string }> {
   const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return { error: "Not authenticated" };
 
   const programId = formData.get("program_id") as string;
-  if (!programId) redirect("/applications/new?error=Program+is+required");
+  if (!programId) return { error: "Program is required" };
 
   const initialStatus = (formData.get("status") as string) || "researching";
 
@@ -117,7 +117,7 @@ export async function createApplicationFromForm(formData: FormData) {
     .select()
     .single();
 
-  if (error) redirect("/applications/new?error=" + encodeURIComponent(error.message));
+  if (error) return { error: error.message };
 
   await supabase.from("application_status_history").insert({
     user_id: user.id,
@@ -135,21 +135,29 @@ export async function createApplicationFromForm(formData: FormData) {
     summary: `Created application`,
   });
 
-  redirect(`/applications/${data.id}`);
+  return { id: data.id };
 }
 
 // ============================================================
 // DEADLINE FORM ACTIONS
 // ============================================================
 
-export async function createDeadlineFromForm(formData: FormData) {
+export async function createDeadlineFromForm(formData: FormData): Promise<{ id: string } | { error: string }> {
   const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return { error: "Not authenticated" };
 
   const title = formData.get("title") as string;
   const dueAt = formData.get("due_at") as string;
-  if (!title || !dueAt) redirect("/calendar?error=Title+and+due+date+are+required");
+  if (!title || !dueAt) return { error: "Title and due date are required" };
+
+  // Ensure the datetime-local value has seconds for PostgreSQL timestamptz
+  const formattedDueAt = dueAt.length === 16 ? dueAt + ":00" : dueAt;
+  // Convert to full ISO string for timestamptz column
+  const isoDueAt = new Date(formattedDueAt).toISOString();
+
+  const applicationId = formData.get("application_id") as string || null;
+  const programId = formData.get("program_id") as string || null;
 
   const { data, error } = await supabase
     .from("deadlines")
@@ -157,19 +165,19 @@ export async function createDeadlineFromForm(formData: FormData) {
       user_id: user.id,
       title,
       deadline_type: (formData.get("deadline_type") as string) || "custom",
-      due_at: dueAt,
+      due_at: isoDueAt,
       timezone: (formData.get("timezone") as string) || "Africa/Accra",
       is_date_only: formData.get("is_date_only") === "on",
       source_url: formData.get("source_url") as string || null,
       is_hard_deadline: formData.get("is_hard_deadline") !== "off",
-      application_id: formData.get("application_id") as string || null,
-      program_id: formData.get("program_id") as string || null,
+      application_id: applicationId || null,
+      program_id: programId || null,
       notes: formData.get("notes") as string || null,
     })
     .select()
     .single();
 
-  if (error) redirect("/calendar?error=" + encodeURIComponent(error.message));
+  if (error) return { error: error.message };
 
   await supabase.from("activity_events").insert({
     user_id: user.id,
@@ -179,5 +187,8 @@ export async function createDeadlineFromForm(formData: FormData) {
     summary: `Created deadline: ${title}`,
   });
 
-  redirect("/calendar");
+  revalidatePath("/calendar");
+  revalidatePath("/dashboard");
+
+  return { id: data.id };
 }
