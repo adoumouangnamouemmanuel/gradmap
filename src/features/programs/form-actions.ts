@@ -86,6 +86,8 @@ export async function createProgramFromForm(formData: FormData): Promise<{ id: s
     summary: `Created program: ${name}`,
   });
 
+  revalidatePath("/programs");
+
   return { id: data.id };
 }
 
