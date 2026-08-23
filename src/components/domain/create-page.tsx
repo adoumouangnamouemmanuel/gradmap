@@ -211,6 +211,12 @@ export function CreatePage({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {errors._form && (
+              <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
+                {errors._form}
+              </div>
+            )}
+            
             {fields.map((item, i) => {
               if (isFieldGroup(item)) {
                 return (

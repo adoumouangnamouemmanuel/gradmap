@@ -16,7 +16,7 @@ export function FadeIn({ children, delay = 0, className }: { children: ReactNode
   );
 }
 
-export function StaggerContainer({ children, className }: { children: ReactNode; className?: string }) {
+export function StaggerContainer({ children, className, delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   return (
     <motion.div
       initial="hidden"
@@ -24,6 +24,7 @@ export function StaggerContainer({ children, className }: { children: ReactNode;
       variants={{
         visible: {
           transition: {
+            delayChildren: delay,
             staggerChildren: 0.1,
           },
         },

@@ -10,17 +10,27 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, action, children }: PageHeaderProps) {
   return (
-    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-      <div className="space-y-1">
-        <h1 className="font-serif text-2xl font-semibold tracking-tight sm:text-3xl lg:text-[2rem]/[2.25rem]">
-          {title}
-        </h1>
-        {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+    <div className="flex flex-col gap-4 mb-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="font-serif text-2xl font-semibold tracking-tight sm:text-3xl lg:text-[2rem]/[2.25rem]">
+            {title}
+          </h1>
+          {description && (
+            <p className="text-sm text-muted-foreground">{description}</p>
+          )}
+        </div>
+        {action && (
+          <div className="shrink-0 mt-1">
+            {action}
+          </div>
         )}
       </div>
-      <div className="flex items-center gap-2">{action}</div>
-      {children}
+      {children && (
+        <div className="w-full">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
