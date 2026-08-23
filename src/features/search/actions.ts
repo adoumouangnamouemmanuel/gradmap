@@ -256,5 +256,12 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
     });
   }
 
-  return results;
+  // Deduplicate by type+id
+  const seen = new Set<string>();
+  return results.filter(r => {
+    const key = `${r.type}-${r.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
