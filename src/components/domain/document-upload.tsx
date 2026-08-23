@@ -4,8 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Upload, FileCheck, AlertCircle, Loader2, File, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
-import { createDocumentVersionFromUpload } from "@/features/documents/actions";
+import { uploadDocumentVersion } from "@/features/documents/actions";
 
 interface DocumentUploadProps {
   documentId: string;
@@ -62,28 +61,25 @@ export function DocumentUpload({ documentId, currentVersionNumber, onUploadCompl
     setError(null);
 
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      // Convert file to base64, send everything to the server action
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
 
-      const versionNumber = currentVersionNumber + 1;
-      const ext = selectedFile.name.split(".").pop() || "bin";
-      const storagePath = `${user.id}/${documentId}/v${versionNumber}.${ext}`;
+      // Convert to base64 in chunks to avoid stack overflow
+      let binary = "";
+      const chunkSize = 8192;
+      for (let i = 0; i < uint8Array.length; i += chunkSize) {
+        const chunk = uint8Array.subarray(i, i + chunkSize);
+        binary += String.fromCharCode(...chunk);
+      }
+      const base64 = btoa(binary);
 
-      // Upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from("application-files")
-        .upload(storagePath, selectedFile, { cacheControl: "3600", upsert: false });
-
-      if (uploadError) throw uploadError;
-
-      // Save metadata via Server Action (fixes RLS)
-      await createDocumentVersionFromUpload({
+      await uploadDocumentVersion({
         document_id: documentId,
         file_name: selectedFile.name,
         mime_type: selectedFile.type,
         file_size: selectedFile.size,
-        storage_path: storagePath,
+        file_base64: base64,
       });
 
       setSuccess(true);
@@ -124,7 +120,6 @@ export function DocumentUpload({ documentId, currentVersionNumber, onUploadCompl
         </div>
       )}
 
-      {/* Upload button */}
       {selectedFile && !isUploading && !success && (
         <Button onClick={handleUpload} className="w-full rounded-[12px]">
           <Upload className="mr-2 h-4 w-4" />

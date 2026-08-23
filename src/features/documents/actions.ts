@@ -245,26 +245,25 @@ export async function createDocumentRequirement(formData: {
   return data;
 }
 
-export async function createDocumentVersionFromUpload(formData: {
+export async function uploadDocumentVersion(formData: {
   document_id: string;
   file_name: string;
   mime_type: string;
   file_size: number;
-  storage_path: string;
-  sha256_hash?: string;
+  file_base64: string;
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
 
   // Verify document belongs to user
-  const { data: doc } = await supabase
+  const { data: doc, error: docError } = await supabase
     .from("documents")
     .select("id")
     .eq("id", formData.document_id)
     .eq("user_id", user.id)
     .single();
 
-  if (!doc) throw new Error("Document not found");
+  if (docError || !doc) throw new Error("Document not found or access denied");
 
   // Get next version number
   const { data: existing } = await supabase
@@ -276,7 +275,27 @@ export async function createDocumentVersionFromUpload(formData: {
 
   const nextVersion = (existing?.[0]?.version_number || 0) + 1;
 
-  const { data: version, error } = await supabase
+  // Build storage path
+  const ext = formData.file_name.split(".").pop() || "bin";
+  const storagePath = `${user.id}/${formData.document_id}/v${nextVersion}.${ext}`;
+
+  // Decode base64 and upload to storage — same authenticated context
+  const fileBuffer = Buffer.from(formData.file_base64, "base64");
+  const { error: uploadError } = await supabase.storage
+    .from("application-files")
+    .upload(storagePath, fileBuffer, {
+      contentType: formData.mime_type,
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (uploadError) {
+    console.error("Storage upload error:", uploadError);
+    throw new Error(`File upload failed: ${uploadError.message}`);
+  }
+
+  // Insert version metadata — same user, same auth context
+  const { data: version, error: versionError } = await supabase
     .from("document_versions")
     .insert({
       user_id: user.id,
@@ -285,19 +304,25 @@ export async function createDocumentVersionFromUpload(formData: {
       file_name: formData.file_name,
       mime_type: formData.mime_type,
       file_size: formData.file_size,
-      storage_path: formData.storage_path,
-      sha256_hash: formData.sha256_hash || null,
+      storage_path: storagePath,
     })
     .select()
     .single();
 
-  if (error) throw error;
+  if (versionError) {
+    console.error("Version insert error:", versionError.message, "user_id:", user.id, "doc_id:", formData.document_id);
+    throw new Error(`Failed to save version: ${versionError.message}`);
+  }
 
   // Update current_version_id on parent document
-  await supabase
+  const { error: updateError } = await supabase
     .from("documents")
     .update({ current_version_id: version.id })
     .eq("id", formData.document_id);
+
+  if (updateError) {
+    console.error("Document update error:", updateError.message);
+  }
 
   revalidatePath("/documents");
   revalidatePath(`/documents/${formData.document_id}`);
