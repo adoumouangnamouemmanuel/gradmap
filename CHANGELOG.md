@@ -4,22 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## Phase 0 — Preflight and implementation contract
+## Phase 0 - Preflight and implementation contract
 
 **Date:** 2026-08-22
 **Status:** ✅ Complete
 
-## Phase 1 — Beautiful shell and PWA foundation
+## Phase 1 - Beautiful shell and PWA foundation
 
 **Date:** 2026-08-22
 **Status:** ✅ Complete
 
-## Phase 2 — Supabase foundation, authentication and authorization harness
+## Phase 2 - Supabase foundation, authentication and authorization harness
 
 **Date:** 2026-08-22
 **Status:** ✅ Complete
 
-## Phase 5+6 — Documents, essays, recommenders, contacts
+## Phase 5+6 - Documents, essays, recommenders, contacts
 
 **Date:** 2026-08-22
 **Status:** In Progress
@@ -45,7 +45,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## Phase 4 — Scholarships, funding, expenses and decisions
+## Phase 4 - Scholarships, funding, expenses and decisions
 
 **Date:** 2026-08-22
 **Status:** ✅ Complete
@@ -82,7 +82,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## Phase 3 — First usable vertical slice: program to deadline to dashboard
+## Phase 3 - First usable vertical slice: program to deadline to dashboard
 
 **Date:** 2026-08-22
 **Status:** ✅ Complete
@@ -148,7 +148,7 @@ All notable changes to this project will be documented in this file.
 
 ### Pending
 
-(none — all Phase 0 research tasks complete)
+(none - all Phase 0 research tasks complete)
 
 ---
 
@@ -180,9 +180,9 @@ All notable changes to this project will be documented in this file.
 
 ### Verified API Patterns
 
-1. **Next.js `proxy.ts`** — replaces `middleware.ts` for Supabase session refresh (current convention as of v16)
-2. **`supabase.auth.getClaims()`** — preferred over `getSession()` for server-side identity verification; validates JWT signature against JWKS
-3. **`@supabase/ssr` `createBrowserClient` / `createServerClient`** — standard SSR client creation using cookie handlers
-4. **PWA manifest** — `app/manifest.ts` with `MetadataRoute.Manifest` type
-5. **Web Push** — `web-push` npm package with VAPID keys, service worker registered via `navigator.serviceWorker.register()`
-6. **Supabase API key rename** — docs now reference `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (was `anon key`)
+1. **Next.js `proxy.ts`** - replaces `middleware.ts` for Supabase session refresh (current convention as of v16)
+2. **`supabase.auth.getClaims()`** - preferred over `getSession()` for server-side identity verification; validates JWT signature against JWKS
+3. **`@supabase/ssr` `createBrowserClient` / `createServerClient`** - standard SSR client creation using cookie handlers
+4. **PWA manifest** - `app/manifest.ts` with `MetadataRoute.Manifest` type
+5. **Web Push** - `web-push` npm package with VAPID keys, service worker registered via `navigator.serviceWorker.register()`
+6. **Supabase API key rename** - docs now reference `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (was `anon key`)

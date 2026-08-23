@@ -33,7 +33,7 @@ export default function DashboardPage() {
           <div className="flex-1">
             <p className="text-sm font-medium">Next best action</p>
             <p className="text-sm text-muted-foreground">
-              ETH Zurich application is due in 2 days — complete your statement of purpose.
+              ETH Zurich application is due in 2 days - complete your statement of purpose.
             </p>
           </div>
           <Button size="sm">View</Button>

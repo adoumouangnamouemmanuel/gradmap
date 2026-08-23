@@ -209,7 +209,7 @@ export default async function ProgramDetailPage({
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Intake</p>
-                <p className="text-sm font-medium mt-1">{program.intake_term || "—"} {program.intake_year}</p>
+                <p className="text-sm font-medium mt-1">{program.intake_term || "-"} {program.intake_year}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Duration</p>
@@ -283,7 +283,7 @@ export default async function ProgramDetailPage({
                 ].map((item) => (
                   <div key={item.label} className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">{item.label}</span>
-                    <span className="font-medium">{item.value != null ? \`\${item.value}/5\` : "—"}</span>
+                    <span className="font-medium">{item.value != null ? \`\${item.value}/5\` : "-"}</span>
                   </div>
                 ))}
               </div>
@@ -388,7 +388,7 @@ export default async function ApplicationsPage() {
                       label={app.status}
                     />
                     <span className="text-sm font-medium">{app.priority}/5</span>
-                    <span className="text-xs text-muted-foreground">{app.application_round || "—"}</span>
+                    <span className="text-xs text-muted-foreground">{app.application_round || "-"}</span>
                   </Link>
                 ))}
               </CardContent>
@@ -515,7 +515,7 @@ export default async function ApplicationDetailPage({
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Round</p>
-                <p className="text-sm font-medium mt-1">{application.application_round || "—"}</p>
+                <p className="text-sm font-medium mt-1">{application.application_round || "-"}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Fee Status</p>

@@ -21,7 +21,7 @@ This log records justified deviations from specifications and version-sensitive 
 **Category:** Authentication
 **Decision:** Always use `supabase.auth.getClaims()` on the server to verify identity. Never trust `getSession()` for authorization decisions.
 **Rationale:** `getClaims()` validates the JWT signature against the project's published public keys (via WebCrypto + cached JWKS for asymmetric keys, the default for new Supabase projects). `getSession()` reads from local storage without re-validation. The Supabase docs explicitly state: "It's safe to trust getClaims() because it validates the JWT signature."
-**Spec deviation:** ARCHITECTURE.md says "check verified claims" — this pins the exact method.
+**Spec deviation:** ARCHITECTURE.md says "check verified claims" - this pins the exact method.
 **Revisit:** If Supabase changes the default signing key algorithm.
 
 ---
@@ -43,7 +43,7 @@ This log records justified deviations from specifications and version-sensitive 
 **Category:** Environment variables
 **Decision:** Use `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (current docs convention) instead of the legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 **Rationale:** The current Supabase SSR documentation references "publishable key" as the standard name. The env.example already uses this naming. The underlying value is the same publishable/anon key.
-**Spec deviation:** None — env.example already matches.
+**Spec deviation:** None - env.example already matches.
 **Revisit:** If Supabase reverts naming.
 
 ---
@@ -55,7 +55,7 @@ This log records justified deviations from specifications and version-sensitive 
 **Decision:** Use Zod 4.4.3 (latest stable) instead of Zod v3.
 **Rationale:** Zod v4 is the current latest stable release. The API is largely backward-compatible for basic validation patterns. If v4 introduces breaking changes for our use cases, pin to 3.x instead.
 **Spec deviation:** AGENTS.md specifies "Zod at trust boundaries" without pinning a version.
-**Revisit:** After first migration/test cycle — if v4 causes issues with shadcn/ui or other integrations, fall back to `zod@^3.23`.
+**Revisit:** After first migration/test cycle - if v4 causes issues with shadcn/ui or other integrations, fall back to `zod@^3.23`.
 
 ---
 
@@ -65,7 +65,7 @@ This log records justified deviations from specifications and version-sensitive 
 **Category:** Project structure
 **Decision:** Use `src/` directory for application code, matching the ARCHITECTURE.md suggested structure.
 **Rationale:** The ARCHITECTURE.md explicitly shows `src/app/`, `src/components/`, etc. This separates application source from config files at root level.
-**Spec deviation:** None — aligned with ARCHITECTURE.md.
+**Spec deviation:** None - aligned with ARCHITECTURE.md.
 **Revisit:** Never.
 
 ---
@@ -76,7 +76,7 @@ This log records justified deviations from specifications and version-sensitive 
 **Category:** Database migrations
 **Decision:** Group related tables into single migration files (e.g., institutions + programs + program_evaluations in one migration) rather than one table per migration file.
 **Rationale:** DATA_MODEL.md specifies migration order by domain group. Grouping keeps related schema changes atomic and reduces migration file count. Each migration leaves the database secure at its end (RLS enabled, grants applied).
-**Spec deviation:** None — aligned with DATA_MODEL.md §17 migration order.
+**Spec deviation:** None - aligned with DATA_MODEL.md §17 migration order.
 **Revisit:** If migration complexity exceeds comfortable review size.
 
 ---
@@ -87,7 +87,7 @@ This log records justified deviations from specifications and version-sensitive 
 **Category:** Testing
 **Decision:** Use Vitest 4.1.11 as the unit/integration test runner.
 **Rationale:** AGENTS.md specifies "Vitest and Playwright." Vitest is native to the Vite ecosystem, has excellent Next.js integration, and is faster than Jest for TypeScript projects. Playwright handles E2E.
-**Spec deviation:** None — explicitly specified in AGENTS.md.
+**Spec deviation:** None - explicitly specified in AGENTS.md.
 **Revisit:** Never.
 
 ---
