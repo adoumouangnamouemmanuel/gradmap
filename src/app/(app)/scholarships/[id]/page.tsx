@@ -16,6 +16,7 @@ import { getUpcomingDeadlines, getTasks } from "@/features/programs/actions";
 import { DeadlineIndicator } from "@/components/domain/deadline-indicator";
 import { SCHOLARSHIP_STATUSES } from "@/lib/constants";
 import { Separator } from "@/components/ui/separator";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion-wrapper";
 
 export default async function ScholarshipDetailPage({
   params,
@@ -79,38 +80,41 @@ export default async function ScholarshipDetailPage({
       </Link>
 
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="font-serif text-2xl font-semibold tracking-tight sm:text-3xl">
-              {scholarship.name}
-            </h1>
-            {scholarship.provider && (
-              <p className="mt-1 flex items-center gap-2 text-muted-foreground">
-                <Globe className="h-4 w-4" />
-                {scholarship.provider}
-              </p>
-            )}
+      <FadeIn delay={0.1}>
+        <div className="mb-8">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="font-serif text-2xl font-semibold tracking-tight sm:text-3xl">
+                {scholarship.name}
+              </h1>
+              {scholarship.provider && (
+                <p className="mt-1 flex items-center gap-2 text-muted-foreground">
+                  <Globe className="h-4 w-4" />
+                  {scholarship.provider}
+                </p>
+              )}
+            </div>
+            <StatusBadge
+              status={
+                scholarship.eligibility_status === "eligible" ? "done" :
+                scholarship.eligibility_status === "likely" ? "preparing" :
+                scholarship.eligibility_status === "ineligible" ? "blocked" :
+                "exploring"
+              }
+              label={scholarship.eligibility_status.replace("_", " ")}
+            />
           </div>
-          <StatusBadge
-            status={
-              scholarship.eligibility_status === "eligible" ? "done" :
-              scholarship.eligibility_status === "likely" ? "preparing" :
-              scholarship.eligibility_status === "ineligible" ? "blocked" :
-              "exploring"
-            }
-            label={scholarship.eligibility_status.replace("_", " ")}
-          />
         </div>
-      </div>
+      </FadeIn>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <StaggerContainer delay={0.2} className="grid gap-6 lg:grid-cols-3">
         {/* Main info */}
         <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif text-lg">Scholarship Details</CardTitle>
-            </CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="font-serif text-lg">Scholarship Details</CardTitle>
+              </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Funding Type</p>
@@ -134,46 +138,54 @@ export default async function ScholarshipDetailPage({
               </div>
             </CardContent>
           </Card>
+          </StaggerItem>
 
           {scholarship.coverage_notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-serif text-lg">Coverage</CardTitle>
-              </CardHeader>
+            <StaggerItem>
+              <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Coverage</CardTitle>
+                </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{scholarship.coverage_notes}</p>
               </CardContent>
             </Card>
+            </StaggerItem>
           )}
 
           {scholarship.eligibility_notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-serif text-lg">Eligibility</CardTitle>
-              </CardHeader>
+            <StaggerItem>
+              <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Eligibility</CardTitle>
+                </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{scholarship.eligibility_notes}</p>
               </CardContent>
             </Card>
+            </StaggerItem>
           )}
 
           {scholarship.service_obligation_notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-serif text-lg">Service Obligations</CardTitle>
-              </CardHeader>
+            <StaggerItem>
+              <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Service Obligations</CardTitle>
+                </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{scholarship.service_obligation_notes}</p>
               </CardContent>
             </Card>
+            </StaggerItem>
           )}
 
           {/* Linked Programs */}
           {linkedPrograms.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-serif text-lg">Linked Programs</CardTitle>
-              </CardHeader>
+            <StaggerItem>
+              <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Linked Programs</CardTitle>
+                </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {linkedPrograms.map((ps: any) => (
@@ -198,15 +210,17 @@ export default async function ScholarshipDetailPage({
                 </div>
               </CardContent>
             </Card>
+            </StaggerItem>
           )}
 
           {/* Scholarship Applications */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="font-serif text-lg">Scholarship Applications</CardTitle>
-              </div>
-            </CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-serif text-lg">Scholarship Applications</CardTitle>
+                </div>
+              </CardHeader>
             <CardContent>
               {scholarshipApps.length > 0 ? (
                 <div className="space-y-2">
@@ -299,12 +313,14 @@ export default async function ScholarshipDetailPage({
               </div>
             </CardContent>
           </Card>
+          </StaggerItem>
 
           {/* Deadlines */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif text-lg">Deadlines</CardTitle>
-            </CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="font-serif text-lg">Deadlines</CardTitle>
+              </CardHeader>
             <CardContent>
               {deadlines.length > 0 ? (
                 <div className="space-y-2 mb-4">
@@ -344,12 +360,14 @@ export default async function ScholarshipDetailPage({
               </div>
             </CardContent>
           </Card>
+          </StaggerItem>
 
           {/* Tasks */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif text-lg">Tasks</CardTitle>
-            </CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="font-serif text-lg">Tasks</CardTitle>
+              </CardHeader>
             <CardContent>
               {tasks.length > 0 ? (
                 <div className="space-y-2 mb-4">
@@ -395,14 +413,16 @@ export default async function ScholarshipDetailPage({
               </div>
             </CardContent>
           </Card>
+          </StaggerItem>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif text-lg">Quick Info</CardTitle>
-            </CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="font-serif text-lg">Quick Info</CardTitle>
+              </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2 text-sm">
                 <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
@@ -425,11 +445,13 @@ export default async function ScholarshipDetailPage({
               )}
             </CardContent>
           </Card>
+          </StaggerItem>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif text-lg">Actions</CardTitle>
-            </CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="font-serif text-lg">Actions</CardTitle>
+              </CardHeader>
             <CardContent className="space-y-2">
               {scholarship.official_url && (
                 <Button asChild className="w-full" variant="outline">
@@ -451,8 +473,9 @@ export default async function ScholarshipDetailPage({
               </form>
             </CardContent>
           </Card>
+          </StaggerItem>
         </div>
-      </div>
+      </StaggerContainer>
     </div>
   );
 }
