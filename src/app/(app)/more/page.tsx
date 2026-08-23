@@ -1,34 +1,33 @@
 import Link from "next/link";
 import {
   BookOpen, Award, FileText, Users, Settings, Building2,
-  GraduationCap, PenTool, Wallet, ChevronRight,
+  GraduationCap, PenTool, Wallet,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { GroupedList, MobileListItem } from "@/components/domain/mobile-list-item";
 
 const sections = [
   {
     title: "Applications",
     items: [
-      { href: "/programs", label: "Programs", icon: GraduationCap, description: "Browse and manage programs" },
-      { href: "/applications", label: "Applications", icon: FileText, description: "Track application status" },
-      { href: "/scholarships", label: "Scholarships", icon: Award, description: "Funding opportunities" },
-      { href: "/institutions", label: "Institutions", icon: Building2, description: "Universities and colleges" },
+      { href: "/programs", label: "Programs", icon: GraduationCap, subtitle: "Browse and manage programs" },
+      { href: "/applications", label: "Applications", icon: FileText, subtitle: "Track application status" },
+      { href: "/scholarships", label: "Scholarships", icon: Award, subtitle: "Funding opportunities" },
     ],
   },
   {
     title: "Writing & People",
     items: [
-      { href: "/essays", label: "Essays", icon: PenTool, description: "Essay prompts and versions" },
-      { href: "/recommenders", label: "Recommenders", icon: Users, description: "Recommendation letter writers" },
-      { href: "/contacts", label: "Contacts", icon: Users, description: "People you've connected with" },
-      { href: "/documents", label: "Documents", icon: BookOpen, description: "Uploads and file vault" },
+      { href: "/essays", label: "Essays", icon: PenTool, subtitle: "Essay prompts and versions" },
+      { href: "/recommenders", label: "Recommenders", icon: Users, subtitle: "Recommendation letter writers" },
+      { href: "/contacts", label: "Contacts", icon: Users, subtitle: "People you've connected with" },
+      { href: "/documents", label: "Documents", icon: BookOpen, subtitle: "Uploads and file vault" },
     ],
   },
   {
     title: "Account",
     items: [
-      { href: "/settings/profile", label: "Profile", icon: Wallet, description: "Account details and financials" },
-      { href: "/settings", label: "Settings", icon: Settings, description: "App preferences" },
+      { href: "/settings/profile", label: "Profile", icon: Wallet, subtitle: "Account and financials" },
+      { href: "/settings", label: "Settings", icon: Settings, subtitle: "App preferences" },
     ],
   },
 ];
@@ -36,49 +35,32 @@ const sections = [
 export default function MorePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6 animate-apple-fade">
-        <h1 className="font-serif text-[28px] sm:text-3xl font-semibold tracking-tight leading-tight">More</h1>
-        <p className="mt-1.5 text-[14px] text-muted-foreground">All sections at a glance.</p>
+      <div className="mb-5 animate-content-enter">
+        <h1 className="text-[34px] font-bold tracking-tight leading-[1.1]">More</h1>
+        <p className="mt-1 text-[14px] text-muted-foreground">All sections at a glance.</p>
       </div>
 
-      <div className="space-y-8">
-        {sections.map((section, sectionIdx) => (
-          <div 
-            key={section.title} 
-            className={cn(
-              "animate-apple-slide-up",
-              sectionIdx === 0 && "stagger-1",
-              sectionIdx === 1 && "stagger-3",
-              sectionIdx === 2 && "stagger-5",
-            )}
-          >
-            <h2 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2 px-1">
+      <div className="space-y-8 max-w-lg">
+        {sections.map((section, sIdx) => (
+          <div key={section.title} className="animate-content-enter" style={{ animationDelay: `${sIdx * 80}ms` }}>
+            <p className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-wider mb-2 px-4">
               {section.title}
-            </h2>
-            <div className="rounded-2xl border border-border/40 bg-card overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-              {section.items.map((item, itemIdx) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3",
-                    "transition-colors duration-150",
-                    "hover:bg-accent/50 active:bg-accent/70",
-                    "press-subtle",
-                    itemIdx < section.items.length - 1 && "separator-apple ml-[52px]"
-                  )}
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground">
-                    <item.icon className="h-4 w-4" strokeWidth={1.8} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[15px] font-medium">{item.label}</p>
-                    <p className="text-[13px] text-muted-foreground truncate">{item.description}</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+            </p>
+            <GroupedList>
+              {section.items.map((item) => (
+                <Link key={item.href} href={item.href}>
+                  <MobileListItem
+                    title={item.label}
+                    subtitle={item.subtitle}
+                    indicator={
+                      <div className="flex h-[30px] w-[30px] items-center justify-center rounded-[8px] bg-primary/[0.08] text-primary/60">
+                        <item.icon className="h-[16px] w-[16px]" strokeWidth={1.8} />
+                      </div>
+                    }
+                  />
                 </Link>
               ))}
-            </div>
+            </GroupedList>
           </div>
         ))}
       </div>

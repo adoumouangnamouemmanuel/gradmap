@@ -19,11 +19,7 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
   React.useEffect(() => {
     const main = document.querySelector("main");
     if (!main) return;
-    
-    const handleScroll = () => {
-      setScrolled(main.scrollTop > 8);
-    };
-    
+    const handleScroll = () => setScrolled(main.scrollTop > 4);
     main.addEventListener("scroll", handleScroll, { passive: true });
     return () => main.removeEventListener("scroll", handleScroll);
   }, []);
@@ -34,44 +30,44 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
         "sticky top-0 z-30 flex h-[52px] items-center gap-3 px-3",
         "transition-all duration-300 ease-out",
         scrolled
-          ? "border-b border-border/40 bg-background/80 glass-blur shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-          : "border-b border-transparent bg-background/60 glass-blur",
-        "lg:h-[56px] lg:gap-4 lg:border-b lg:border-border/40 lg:bg-background/80 lg:px-6"
+          ? "border-b border-border/40 bg-background/85 glass-blur shadow-elevation-1"
+          : "border-b border-transparent bg-background/60",
+        "lg:h-[56px] lg:gap-4 lg:border-b lg:border-border/40 lg:bg-background/85 lg:glass-blur lg:px-6"
       )}
     >
       {/* Mobile menu toggle */}
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden h-9 w-9 rounded-full hover:bg-accent press-apple"
+        className="lg:hidden h-10 w-10 rounded-full press-apple"
         onClick={onMenuToggle}
         aria-label="Toggle menu"
       >
-        <Menu className="h-[22px] w-[22px]" strokeWidth={1.8} />
+        <Menu className="h-[20px] w-[20px]" strokeWidth={1.8} />
       </Button>
 
       {/* Mobile logo */}
-      <Link href="/dashboard" className="lg:hidden">
-        <div className="flex items-center gap-2 press-apple">
-          <div className="flex h-[26px] w-[26px] items-center justify-center rounded-lg overflow-hidden shadow-sm">
-            <Image src="/logo.jpg" alt="GradMap Logo" width={26} height={26} className="object-cover" />
+      <Link href="/dashboard" className="lg:hidden press-apple">
+        <div className="flex items-center gap-2">
+          <div className="flex h-[26px] w-[26px] items-center justify-center rounded-[7px] overflow-hidden shadow-elevation-1">
+            <Image src="/logo.jpg" alt="GradMap" width={26} height={26} className="object-cover" />
           </div>
-          <span className="font-serif text-[15px] font-semibold tracking-tight">GradMap</span>
+          <span className="font-serif text-[16px] font-semibold tracking-tight">GradMap</span>
         </div>
       </Link>
 
-      {/* Search - desktop */}
+      {/* Desktop search bar */}
       <div className="hidden lg:flex flex-1 max-w-[480px]">
         <Button
           variant="outline"
           size="sm"
           onClick={onSearchOpen}
-          className="w-full justify-start gap-3 rounded-full text-muted-foreground hover:bg-accent/50 hover:text-foreground h-10 px-4 border-border/50 shadow-sm transition-all"
+          className="w-full justify-start gap-3 rounded-full text-muted-foreground hover:bg-accent/50 hover:text-foreground h-10 px-4 border-border/50 shadow-elevation-1 transition-all"
         >
-          <Search className="h-4 w-4 shrink-0 text-muted-foreground/70" />
-          <span className="flex-1 text-left font-normal">Search programs, scholarships...</span>
-          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded bg-muted/50 px-1.5 font-mono text-[10px] font-medium text-muted-foreground/70">
-            <span className="text-xs">⌘</span>K
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground/60" />
+          <span className="flex-1 text-left font-normal text-[14px]">Search programs, scholarships...</span>
+          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-md bg-muted/50 px-1.5 font-mono text-[10px] font-medium text-muted-foreground/60">
+            <span className="text-[11px]">⌘</span>K
           </kbd>
         </Button>
       </div>
@@ -82,7 +78,7 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden h-9 w-9 rounded-full hover:bg-accent press-apple"
+        className="lg:hidden h-10 w-10 rounded-full press-apple"
         aria-label="Search"
         onClick={onSearchOpen}
       >
@@ -96,10 +92,10 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
         variant="ghost"
         size="icon"
         aria-label="Notifications"
-        className="relative h-9 w-9 rounded-full hover:bg-accent press-apple"
+        className="relative h-10 w-10 rounded-full press-apple"
       >
         <Bell className="h-[20px] w-[20px]" strokeWidth={1.8} />
-        <span className="absolute right-2 top-2 h-[7px] w-[7px] rounded-full bg-primary shadow-[0_0_0_2px_var(--color-background)]" />
+        <span className="absolute right-[9px] top-[9px] h-[7px] w-[7px] rounded-full bg-primary ring-2 ring-background" />
       </Button>
 
       {/* Theme toggle */}

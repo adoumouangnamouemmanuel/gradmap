@@ -16,29 +16,31 @@ export function AppShell({ children }: AppShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
-  const [drawerAnimating, setDrawerAnimating] = React.useState<"enter" | "exit" | null>(null);
+  const [drawerState, setDrawerState] = React.useState<"closed" | "opening" | "open" | "closing">("closed");
 
   const openMenu = React.useCallback(() => {
     setMobileMenuOpen(true);
-    setDrawerAnimating("enter");
-    // Clean up animation class after it completes
-    setTimeout(() => setDrawerAnimating(null), 400);
+    setDrawerState("opening");
+    // Trigger haptic
+    if (navigator.vibrate) navigator.vibrate(5);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setDrawerState("open");
+      });
+    });
   }, []);
 
   const closeMenu = React.useCallback(() => {
-    setDrawerAnimating("exit");
+    setDrawerState("closing");
     setTimeout(() => {
       setMobileMenuOpen(false);
-      setDrawerAnimating(null);
-    }, 280);
+      setDrawerState("closed");
+    }, 350);
   }, []);
 
   const toggleMenu = React.useCallback(() => {
-    if (mobileMenuOpen) {
-      closeMenu();
-    } else {
-      openMenu();
-    }
+    if (mobileMenuOpen) closeMenu();
+    else openMenu();
   }, [mobileMenuOpen, openMenu, closeMenu]);
 
   return (
@@ -51,28 +53,28 @@ export function AppShell({ children }: AppShellProps) {
           className="hidden lg:flex"
         />
 
-        {/* Mobile overlay */}
+        {/* Mobile drawer overlay */}
         <div
           className={cn(
-            "fixed inset-0 z-40 bg-black/40 lg:hidden",
-            mobileMenuOpen ? "pointer-events-auto" : "pointer-events-none",
-            drawerAnimating === "enter" && "overlay-enter",
-            drawerAnimating === "exit" && "overlay-exit",
-            !drawerAnimating && (mobileMenuOpen ? "opacity-100" : "opacity-0")
+            "fixed inset-0 z-40 lg:hidden",
+            "bg-black/40 glass-blur",
+            drawerState === "closed" && "opacity-0 pointer-events-none",
+            drawerState === "opening" && "animate-overlay-in pointer-events-auto",
+            drawerState === "open" && "opacity-100 pointer-events-auto",
+            drawerState === "closing" && "animate-overlay-out pointer-events-none",
           )}
           onClick={closeMenu}
-          aria-hidden="true"
         />
 
-        {/* Mobile sidebar drawer */}
+        {/* Mobile drawer */}
         {mobileMenuOpen && (
           <div
             className={cn(
               "fixed inset-y-0 left-0 z-50 lg:hidden",
-              "shadow-2xl",
-              drawerAnimating === "enter" && "drawer-enter",
-              drawerAnimating === "exit" && "drawer-exit",
-              !drawerAnimating && "translate-x-0"
+              "shadow-elevation-3",
+              drawerState === "opening" && "animate-drawer-open",
+              drawerState === "open" && "translate-x-0",
+              drawerState === "closing" && "animate-drawer-close",
             )}
           >
             <AppSidebar
@@ -86,20 +88,19 @@ export function AppShell({ children }: AppShellProps) {
         {/* Search dialog */}
         <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
 
-        {/* Main content area */}
+        {/* Main content */}
         <div className="flex flex-1 flex-col overflow-hidden">
           <TopBar
             onMenuToggle={toggleMenu}
             onSearchOpen={() => setSearchOpen(true)}
           />
 
-          <main className="flex-1 overflow-y-auto pb-20 lg:pb-0 scroll-ios overscroll-contain">
-            <div className="animate-apple-fade">
+          <main className="flex-1 overflow-y-auto pb-[84px] lg:pb-0 scroll-ios overscroll-contain">
+            <div className="animate-content-enter">
               {children}
             </div>
           </main>
 
-          {/* Mobile bottom nav */}
           <MobileNav />
         </div>
       </div>

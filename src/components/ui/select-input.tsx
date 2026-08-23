@@ -8,30 +8,20 @@ const Select = React.forwardRef<HTMLSelectElement, React.ComponentProps<"select"
         <select
           ref={ref}
           className={cn(
-            "flex h-10 w-full appearance-none rounded-xl border border-border/50 bg-muted/30 px-3.5 py-2.5 pr-9 text-[15px]",
-            "shadow-[0_1px_2px_rgba(0,0,0,0.02)_inset]",
-            "transition-all duration-150 ease-out",
-            "placeholder:text-muted-foreground/50",
-            "hover:bg-muted/50 hover:border-border",
-            "focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-primary/10 focus-visible:bg-background",
-            "disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-[44px] w-full appearance-none rounded-[12px] border border-border/50 bg-transparent px-4 py-3 pr-10",
+            "text-[16px] leading-normal",
+            "transition-all duration-200",
+            "hover:border-border",
+            "focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-primary/10",
+            "disabled:cursor-not-allowed disabled:opacity-40",
             className,
           )}
           {...props}
         >
           {children}
         </select>
-        {/* Custom chevron */}
-        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50">
-          <svg
-            className="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+        <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/40">
+          <svg className="h-[14px] w-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 9l6 6 6-6" />
           </svg>
         </div>

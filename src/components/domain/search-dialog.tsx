@@ -23,65 +23,36 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Focus input when dialog opens
   React.useEffect(() => {
     if (open) {
-      setQuery("");
-      setResults([]);
-      setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
+      setQuery(""); setResults([]); setSelectedIndex(0);
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open]);
 
-  // Cmd+K listener
   React.useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        onOpenChange(!open);
-      }
-      if (e.key === "Escape" && open) {
-        onOpenChange(false);
-      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); onOpenChange(!open); }
+      if (e.key === "Escape" && open) onOpenChange(false);
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onOpenChange]);
 
-  // Debounced search
   React.useEffect(() => {
-    if (!query || query.trim().length < 2) {
-      setResults([]);
-      return;
-    }
-
+    if (!query || query.trim().length < 2) { setResults([]); return; }
     const timer = setTimeout(async () => {
       setLoading(true);
-      try {
-        const data = await globalSearch(query);
-        setResults(data);
-        setSelectedIndex(0);
-      } catch {
-        setResults([]);
-      }
+      try { setResults(await globalSearch(query)); setSelectedIndex(0); } catch { setResults([]); }
       setLoading(false);
     }, 300);
-
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Keyboard navigation
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedIndex((i) => Math.min(i + 1, results.length - 1));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedIndex((i) => Math.max(i - 1, 0));
-    } else if (e.key === "Enter" && results[selectedIndex]) {
-      e.preventDefault();
-      navigateTo(results[selectedIndex]);
-    }
+    if (e.key === "ArrowDown") { e.preventDefault(); setSelectedIndex((i) => Math.min(i + 1, results.length - 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setSelectedIndex((i) => Math.max(i - 1, 0)); }
+    else if (e.key === "Enter" && results[selectedIndex]) { e.preventDefault(); navigateTo(results[selectedIndex]); }
   }
 
   function navigateTo(result: SearchResult) {
@@ -93,76 +64,56 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[20vh] sm:pt-[15vh]">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm overlay-enter"
-        onClick={() => onOpenChange(false)}
-      />
-
-      {/* Dialog */}
-      <div className="relative z-50 w-full max-w-lg rounded-2xl border border-border/50 bg-card shadow-[0_20px_60px_rgba(0,0,0,0.15)] animate-apple-scale overflow-hidden">
+      <div className="fixed inset-0 bg-black/40 glass-blur animate-overlay-in" onClick={() => onOpenChange(false)} />
+      <div className="relative z-50 w-full max-w-lg rounded-[20px] border border-border/30 bg-card shadow-elevation-3 animate-scale-in overflow-hidden">
         {/* Search input */}
-        <div className="flex items-center gap-3 border-b border-border/40 px-4">
-          {loading ? (
-            <Loader2 className="h-4 w-4 shrink-0 text-muted-foreground animate-spin" />
-          ) : (
-            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-          )}
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Search programs, scholarships, institutions..."
-            className="flex h-12 w-full bg-transparent text-[15px] placeholder:text-muted-foreground focus:outline-none"
+        <div className="flex items-center gap-3 border-b border-border/30 px-4 h-[52px]">
+          {loading ? <Loader2 className="h-[18px] w-[18px] shrink-0 text-muted-foreground animate-spin" /> : <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground/50" />}
+          <input ref={inputRef} value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown}
+            placeholder="Search everything..."
+            className="flex-1 bg-transparent text-[16px] placeholder:text-muted-foreground/40 focus:outline-none"
           />
-          <button
-            onClick={() => onOpenChange(false)}
-            className="rounded-full p-1.5 hover:bg-accent press-apple"
-          >
-            <X className="h-4 w-4 text-muted-foreground" />
+          <button onClick={() => onOpenChange(false)} className="rounded-full p-2 hover:bg-accent press-apple">
+            <X className="h-[16px] w-[16px] text-muted-foreground/50" />
           </button>
         </div>
 
         {/* Results */}
-        <div className="max-h-80 overflow-y-auto p-2 scroll-ios">
+        <div className="max-h-[320px] overflow-y-auto p-2 scroll-ios">
           {query.trim().length >= 2 && !loading && results.length === 0 && (
-            <p className="py-8 text-center text-[14px] text-muted-foreground">
-              No results for &ldquo;{query}&rdquo;
-            </p>
+            <p className="py-8 text-center text-[14px] text-muted-foreground">No results for &ldquo;{query}&rdquo;</p>
           )}
-
           {results.map((result, index) => (
             <button
               key={`${result.type}-${result.id}`}
               onClick={() => navigateTo(result)}
               onMouseEnter={() => setSelectedIndex(index)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-100",
-                "press-subtle",
+                "flex w-full items-center gap-3 rounded-[14px] px-3 py-2.5 text-left",
+                "transition-colors duration-100 press-subtle",
                 index === selectedIndex ? "bg-accent" : "hover:bg-accent/50",
               )}
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-lg rounded-xl bg-muted/60 text-muted-foreground">
+              <span className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[10px] bg-primary/[0.08] text-primary/60">
                 {typeIcons[result.type]}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-medium truncate">{result.title}</p>
-                <p className="text-[12px] text-muted-foreground truncate">{result.subtitle}</p>
+                <p className="text-[15px] font-medium truncate">{result.title}</p>
+                <p className="text-[13px] text-muted-foreground truncate">{result.subtitle}</p>
               </div>
-              <span className="shrink-0 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground capitalize">
+              <span className="shrink-0 rounded-full bg-muted px-2 py-[2px] text-[10px] font-medium text-muted-foreground capitalize">
                 {result.type}
               </span>
             </button>
           ))}
         </div>
 
-        {/* Footer hint */}
-        <div className="border-t border-border/40 px-4 py-2.5">
-          <p className="text-[11px] text-muted-foreground/60">
+        {/* Footer */}
+        <div className="border-t border-border/30 px-4 py-2.5">
+          <p className="text-[11px] text-muted-foreground/40">
             <kbd className="rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px]">↑↓</kbd> navigate ·{" "}
-            <kbd className="rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px]">Enter</kbd> select ·{" "}
-            <kbd className="rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px]">Esc</kbd> close
+            <kbd className="rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px]">↵</kbd> select ·{" "}
+            <kbd className="rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px]">esc</kbd> close
           </p>
         </div>
       </div>

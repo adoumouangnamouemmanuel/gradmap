@@ -11,8 +11,7 @@ interface DeadlineIndicatorProps {
 function getDaysUntil(dueAt: Date | string): number {
   const now = new Date();
   const due = new Date(dueAt);
-  const diff = due.getTime() - now.getTime();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  return Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function getUrgency(days: number): "overdue" | "urgent" | "soon" | "normal" {
@@ -23,30 +22,10 @@ function getUrgency(days: number): "overdue" | "urgent" | "soon" | "normal" {
 }
 
 const urgencyConfig = {
-  overdue: { 
-    icon: AlertTriangle, 
-    bg: "bg-red-50 dark:bg-red-900/30", 
-    text: "text-red-600 dark:text-red-400",
-    label: "Overdue" 
-  },
-  urgent: { 
-    icon: Clock, 
-    bg: "bg-amber-50 dark:bg-amber-900/30", 
-    text: "text-amber-600 dark:text-amber-400",
-    label: "Urgent" 
-  },
-  soon: { 
-    icon: Clock, 
-    bg: "bg-blue-50 dark:bg-blue-900/30", 
-    text: "text-blue-600 dark:text-blue-400",
-    label: "Soon" 
-  },
-  normal: { 
-    icon: Clock, 
-    bg: "bg-gray-50 dark:bg-gray-800/30", 
-    text: "text-muted-foreground",
-    label: "" 
-  },
+  overdue: { icon: AlertTriangle, text: "text-red-500", bg: "bg-red-50 dark:bg-red-900/25" },
+  urgent: { icon: Clock, text: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-900/25" },
+  soon: { icon: Clock, text: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/25" },
+  normal: { icon: Clock, text: "text-muted-foreground", bg: "bg-muted" },
 };
 
 export function DeadlineIndicator({ dueAt, completed, className }: DeadlineIndicatorProps) {
@@ -54,9 +33,8 @@ export function DeadlineIndicator({ dueAt, completed, className }: DeadlineIndic
     return (
       <span className={cn(
         "inline-flex items-center gap-1 text-[11px] font-medium",
-        "text-emerald-600 dark:text-emerald-400",
-        "bg-emerald-50 dark:bg-emerald-900/30",
-        "rounded-full px-2 py-0.5",
+        "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/25 dark:text-emerald-400",
+        "rounded-full px-2 py-[2px]",
         className
       )}>
         <CheckCircle className="h-3 w-3" />
@@ -69,27 +47,17 @@ export function DeadlineIndicator({ dueAt, completed, className }: DeadlineIndic
   const urgency = getUrgency(days);
   const config = urgencyConfig[urgency];
   const Icon = config.icon;
-
-  const label =
-    days < 0
-      ? `${Math.abs(days)}d overdue`
-      : days === 0
-        ? "Today"
-        : days === 1
-          ? "Tomorrow"
-          : `${days}d`;
+  const label = days < 0 ? `${Math.abs(days)}d late` : days === 0 ? "Today" : days === 1 ? "Tmrw" : `${days}d`;
 
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1 text-[11px] font-medium",
-        config.text,
-        config.bg,
-        "rounded-full px-2 py-0.5",
+        config.text, config.bg,
+        "rounded-full px-2 py-[2px]",
         className
       )}
       role="status"
-      aria-label={`${label} remaining`}
     >
       <Icon className="h-3 w-3" />
       {label}

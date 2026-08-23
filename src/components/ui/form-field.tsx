@@ -24,23 +24,21 @@ export function FormField({
     <div className={cn("space-y-1.5", className)}>
       <label
         htmlFor={htmlFor}
-        className="flex items-center gap-1.5 text-[13px] font-medium text-foreground/80"
+        className="flex items-center gap-1 text-[13px] font-medium text-foreground/70"
       >
         {label}
         {required && <span className="text-destructive text-[11px]">*</span>}
         {!required && (
-          <span className="text-muted-foreground/40 text-[11px] font-normal">optional</span>
+          <span className="text-muted-foreground/30 text-[11px] font-normal">optional</span>
         )}
       </label>
       {children}
       {error && (
-        <p className="text-[12px] text-destructive animate-apple-fade">{error}</p>
+        <p className="text-[12px] text-destructive animate-content-enter">{error}</p>
       )}
     </div>
   );
 }
-
-// ── Client-side validation hook for forms with required fields ──
 
 interface FieldError {
   [fieldId: string]: string | undefined;

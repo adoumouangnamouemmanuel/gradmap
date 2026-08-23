@@ -3,80 +3,83 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-background: oklch(0.99 0 0);
-  --color-foreground: oklch(0.14 0 0);
+  /* ─── Core palette ────────────────────────────────────── */
+  --color-background: oklch(0.985 0.001 90);
+  --color-foreground: oklch(0.15 0.005 260);
   --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.14 0 0);
-  --color-primary: oklch(0.2 0 0);
-  --color-primary-foreground: oklch(0.98 0 0);
-  --color-secondary: oklch(0.96 0 0);
-  --color-secondary-foreground: oklch(0.2 0 0);
-  --color-muted: oklch(0.96 0 0);
-  --color-muted-foreground: oklch(0.45 0 0);
-  --color-accent: oklch(0.96 0 0);
-  --color-accent-foreground: oklch(0.14 0 0);
-  --color-destructive: oklch(0.5 0.15 20);
-  --color-destructive-foreground: oklch(0.98 0 0);
-  --color-border: oklch(0.92 0 0);
-  --color-input: oklch(0.92 0 0);
-  --color-ring: oklch(0.8 0 0);
+  --color-card-foreground: oklch(0.15 0.005 260);
+  --color-primary: oklch(0.55 0.18 250);
+  --color-primary-foreground: oklch(0.99 0 0);
+  --color-secondary: oklch(0.96 0.003 90);
+  --color-secondary-foreground: oklch(0.22 0.005 260);
+  --color-muted: oklch(0.965 0.002 90);
+  --color-muted-foreground: oklch(0.42 0.01 260);
+  --color-accent: oklch(0.96 0.004 90);
+  --color-accent-foreground: oklch(0.15 0.005 260);
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-border: oklch(0.91 0.003 90);
+  --color-input: oklch(0.91 0.003 90);
+  --color-ring: oklch(0.55 0.18 250);
 
-  --color-success: oklch(0.6 0.15 140);
+  --color-success: oklch(0.62 0.17 155);
   --color-success-foreground: oklch(1 0 0);
-  --color-warning: oklch(0.7 0.15 60);
-  --color-warning-foreground: oklch(0.14 0 0);
-  --color-info: oklch(0.6 0.1 240);
+  --color-warning: oklch(0.75 0.16 65);
+  --color-warning-foreground: oklch(0.2 0.02 60);
+  --color-info: oklch(0.6 0.12 245);
   --color-info-foreground: oklch(1 0 0);
 
-  --color-sidebar: oklch(0.98 0 0);
-  --color-sidebar-foreground: oklch(0.14 0 0);
-  --color-sidebar-accent: oklch(0.94 0 0);
-  --color-sidebar-accent-foreground: oklch(0.14 0 0);
-  --color-sidebar-border: oklch(0.92 0 0);
-  --color-sidebar-ring: oklch(0.8 0 0);
+  --color-sidebar: oklch(0.98 0.001 90);
+  --color-sidebar-foreground: oklch(0.15 0.005 260);
+  --color-sidebar-accent: oklch(0.945 0.003 90);
+  --color-sidebar-accent-foreground: oklch(0.15 0.005 260);
+  --color-sidebar-border: oklch(0.91 0.003 90);
+  --color-sidebar-ring: oklch(0.55 0.18 250);
 
-  --radius-sm: 0.3rem;
-  --radius-md: 0.5rem;
+  /* ─── Radii ───────────────────────────────────────────── */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  /* ─── Fonts ───────────────────────────────────────────── */
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .dark {
-  --color-background: oklch(0.12 0 0);
-  --color-foreground: oklch(0.98 0 0);
-  --color-card: oklch(0.14 0 0);
-  --color-card-foreground: oklch(0.98 0 0);
-  --color-primary: oklch(0.98 0 0);
-  --color-primary-foreground: oklch(0.12 0 0);
-  --color-secondary: oklch(0.18 0 0);
-  --color-secondary-foreground: oklch(0.98 0 0);
-  --color-muted: oklch(0.18 0 0);
-  --color-muted-foreground: oklch(0.65 0 0);
-  --color-accent: oklch(0.18 0 0);
-  --color-accent-foreground: oklch(0.98 0 0);
-  --color-destructive: oklch(0.5 0.15 20);
-  --color-destructive-foreground: oklch(0.98 0 0);
-  --color-border: oklch(0.2 0 0);
-  --color-input: oklch(0.2 0 0);
-  --color-ring: oklch(0.3 0 0);
+  --color-background: oklch(0.13 0.005 260);
+  --color-foreground: oklch(0.97 0 0);
+  --color-card: oklch(0.17 0.005 260);
+  --color-card-foreground: oklch(0.97 0 0);
+  --color-primary: oklch(0.65 0.18 250);
+  --color-primary-foreground: oklch(0.13 0.005 260);
+  --color-secondary: oklch(0.2 0.005 260);
+  --color-secondary-foreground: oklch(0.97 0 0);
+  --color-muted: oklch(0.2 0.005 260);
+  --color-muted-foreground: oklch(0.62 0.01 260);
+  --color-accent: oklch(0.2 0.005 260);
+  --color-accent-foreground: oklch(0.97 0 0);
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-destructive-foreground: oklch(0.97 0 0);
+  --color-border: oklch(0.24 0.005 260);
+  --color-input: oklch(0.24 0.005 260);
+  --color-ring: oklch(0.65 0.18 250);
 
-  --color-success: oklch(0.6 0.15 140);
-  --color-success-foreground: oklch(1 0 0);
-  --color-warning: oklch(0.7 0.15 60);
-  --color-warning-foreground: oklch(0.14 0 0);
-  --color-info: oklch(0.6 0.1 240);
-  --color-info-foreground: oklch(1 0 0);
+  --color-success: oklch(0.62 0.17 155);
+  --color-success-foreground: oklch(0.13 0 0);
+  --color-warning: oklch(0.75 0.16 65);
+  --color-warning-foreground: oklch(0.13 0 0);
+  --color-info: oklch(0.6 0.12 245);
+  --color-info-foreground: oklch(0.13 0 0);
 
-  --color-sidebar: oklch(0.12 0 0);
-  --color-sidebar-foreground: oklch(0.98 0 0);
-  --color-sidebar-accent: oklch(0.18 0 0);
-  --color-sidebar-accent-foreground: oklch(0.98 0 0);
-  --color-sidebar-border: oklch(0.2 0 0);
-  --color-sidebar-ring: oklch(0.3 0 0);
+  --color-sidebar: oklch(0.13 0.005 260);
+  --color-sidebar-foreground: oklch(0.97 0 0);
+  --color-sidebar-accent: oklch(0.2 0.005 260);
+  --color-sidebar-accent-foreground: oklch(0.97 0 0);
+  --color-sidebar-border: oklch(0.24 0.005 260);
+  --color-sidebar-ring: oklch(0.65 0.18 250);
 }
 
 @layer base {
@@ -84,107 +87,121 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     overscroll-behavior: none;
+    font-feature-settings: "ss01", "ss02", "cv01";
   }
-  /* Prevent iOS bounce on body */
   html {
     overscroll-behavior: none;
   }
+  /* Better focus visible for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
 }
 
-/* ─── Apple-like scrollbars ─────────────────────────────── */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-}
-.scrollbar-thin:hover {
-  scrollbar-color: oklch(0.5 0 0 / 0.25) transparent;
-}
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 2px;
-}
-.scrollbar-thin:hover::-webkit-scrollbar-thumb {
-  background-color: oklch(0.5 0 0 / 0.25);
-}
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+/* ═══════════════════════════════════════════════════════════
+   ELEVATION SYSTEM — consistent shadow scale
+   ═══════════════════════════════════════════════════════════ */
+@layer utilities {
+  .shadow-elevation-1 {
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.04),
+      0 0 0 0.5px rgba(0,0,0,0.02);
+  }
+  .shadow-elevation-2 {
+    box-shadow:
+      0 2px 8px rgba(0,0,0,0.06),
+      0 0 0 0.5px rgba(0,0,0,0.03);
+  }
+  .shadow-elevation-3 {
+    box-shadow:
+      0 4px 16px rgba(0,0,0,0.08),
+      0 0 0 0.5px rgba(0,0,0,0.04);
+  }
+  .dark .shadow-elevation-1 {
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.2),
+      0 0 0 0.5px rgba(255,255,255,0.03);
+  }
+  .dark .shadow-elevation-2 {
+    box-shadow:
+      0 2px 8px rgba(0,0,0,0.3),
+      0 0 0 0.5px rgba(255,255,255,0.04);
+  }
+  .dark .shadow-elevation-3 {
+    box-shadow:
+      0 4px 16px rgba(0,0,0,0.4),
+      0 0 0 0.5px rgba(255,255,255,0.05);
+  }
 }
 
-/* ─── Apple Spring Animations ────────────────────────────── */
-/* Spring curve: fast start, gentle overshoot, settle */
-@keyframes apple-spring-in {
-  0% {
+/* ═══════════════════════════════════════════════════════════
+   APPLE SPRING CURVES
+   iOS uses cubic-bezier(0.32, 0.72, 0, 1) for most transitions
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ios-duration: 0.35s;
+  --ios-duration-fast: 0.2s;
+  --ios-duration-slow: 0.5s;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Page entrance — slide from right (iOS push) */
+@keyframes page-enter {
+  from {
     opacity: 0;
-    transform: scale(0.95) translateY(8px);
+    transform: translateX(20px);
   }
-  60% {
-    opacity: 1;
-    transform: scale(1.01) translateY(-1px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes apple-slide-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes apple-slide-in-right {
-  0% {
-    opacity: 0;
-    transform: translateX(12px);
-  }
-  100% {
+  to {
     opacity: 1;
     transform: translateX(0);
   }
 }
 
-@keyframes apple-fade-in {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes apple-scale-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  100% {
+/* Page exit — slide to right */
+@keyframes page-exit {
+  from {
     opacity: 1;
-    transform: scale(1);
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
   }
 }
 
-@keyframes apple-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+/* Content fade-in with slight scale */
+@keyframes content-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-@keyframes stagger-in {
+/* Card press spring */
+@keyframes card-press {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+/* List item stagger */
+@keyframes list-item-enter {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -195,42 +212,110 @@
   }
 }
 
-.animate-stagger-in {
-  animation: stagger-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+/* Tab icon bounce */
+@keyframes icon-bounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.85); }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
-/* Apple-style utility classes */
-.animate-apple-spring {
-  animation: apple-spring-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+/* Drawer slide */
+@keyframes drawer-open {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
 }
 
-.animate-apple-slide-up {
-  animation: apple-slide-up 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+@keyframes drawer-close {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
 }
 
-.animate-apple-slide-in-right {
-  animation: apple-slide-in-right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+/* Overlay */
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.animate-apple-fade {
-  animation: apple-fade-in 0.3s ease-out both;
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-.animate-apple-scale {
-  animation: apple-scale-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+/* Pull-to-refresh spin */
+@keyframes ptr-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* Stagger delay utilities for mobile lists */
-.stagger-1 { animation-delay: 0.03s; }
-.stagger-2 { animation-delay: 0.06s; }
-.stagger-3 { animation-delay: 0.09s; }
-.stagger-4 { animation-delay: 0.12s; }
-.stagger-5 { animation-delay: 0.15s; }
-.stagger-6 { animation-delay: 0.18s; }
-.stagger-7 { animation-delay: 0.21s; }
-.stagger-8 { animation-delay: 0.24s; }
+/* Scale bounce for modal/sheet */
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
-/* ─── Frosted Glass (Apple blur) ────────────────────────── */
+/* Stagger delays — 40ms apart per item (iOS standard) */
+.stagger-1 { animation-delay: 0.04s; }
+.stagger-2 { animation-delay: 0.08s; }
+.stagger-3 { animation-delay: 0.12s; }
+.stagger-4 { animation-delay: 0.16s; }
+.stagger-5 { animation-delay: 0.20s; }
+.stagger-6 { animation-delay: 0.24s; }
+.stagger-7 { animation-delay: 0.28s; }
+.stagger-8 { animation-delay: 0.32s; }
+.stagger-9 { animation-delay: 0.36s; }
+.stagger-10 { animation-delay: 0.40s; }
+
+.animate-page-enter {
+  animation: page-enter var(--ios-duration) var(--spring) both;
+}
+
+.animate-content-enter {
+  animation: content-enter var(--ios-duration) var(--spring) both;
+}
+
+.animate-list-item {
+  animation: list-item-enter var(--ios-duration) var(--spring) both;
+}
+
+.animate-icon-bounce {
+  animation: icon-bounce 0.4s var(--spring-bouncy) both;
+}
+
+.animate-drawer-open {
+  animation: drawer-open var(--ios-duration) var(--spring) both;
+}
+
+.animate-drawer-close {
+  animation: drawer-close var(--ios-duration-fast) var(--spring) both;
+}
+
+.animate-overlay-in {
+  animation: overlay-in var(--ios-duration-fast) ease-out both;
+}
+
+.animate-overlay-out {
+  animation: overlay-in var(--ios-duration-fast) ease-in reverse both;
+}
+
+.animate-scale-in {
+  animation: scale-in var(--ios-duration) var(--spring) both;
+}
+
+.animate-spin-slow {
+  animation: ptr-spin 0.8s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FROSTED GLASS
+   ═══════════════════════════════════════════════════════════ */
 .glass-blur {
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
@@ -241,167 +326,98 @@
   backdrop-filter: blur(40px) saturate(200%);
 }
 
-/* ─── Apple Press States ────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   PRESS STATES — iOS tactile feedback
+   ═══════════════════════════════════════════════════════════ */
 .press-apple {
-  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  transition: transform var(--ios-duration-fast) var(--spring),
+              opacity var(--ios-duration-fast) ease;
 }
-
 .press-apple:active {
   transform: scale(0.97);
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
-/* For list items - more subtle press */
 .press-subtle {
-  transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background-color 0.2s ease,
+              transform var(--ios-duration-fast) var(--spring);
 }
-
 .press-subtle:active {
   transform: scale(0.98);
 }
 
-/* ─── Apple Card Styles ─────────────────────────────────── */
-.card-apple {
-  border-radius: 16px;
+/* ═══════════════════════════════════════════════════════════
+   iOS GROUPED LIST (Settings-style)
+   ═══════════════════════════════════════════════════════════ */
+.grouped-list {
+  border-radius: 14px;
   background: var(--color-card);
-  border: 0.5px solid var(--color-border);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.02);
-  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+  overflow: hidden;
 }
 
-@media (hover: hover) {
-  .card-apple:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.04);
-  }
+.grouped-list-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  min-height: 44px;
+  transition: background-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.card-apple:active {
-  transform: scale(0.985);
+.grouped-list-item:active {
+  background-color: var(--color-accent);
 }
 
-/* ─── Apple Separator ───────────────────────────────────── */
-.separator-apple {
-  height: 0.5px;
-  background: var(--color-border);
-  margin-left: 0;
+/* Inset separator between grouped list items */
+.grouped-list-item + .grouped-list-item {
+  margin-left: 52px;
+  border-top: 0.5px solid var(--color-border);
 }
 
-/* ─── Safe Areas ────────────────────────────────────────── */
-.safe-top {
-  padding-top: env(safe-area-inset-top);
-}
+/* ═══════════════════════════════════════════════════════════
+   SAFE AREAS
+   ═══════════════════════════════════════════════════════════ */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-both { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
 
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+/* ═══════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════ */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
 }
+.scrollbar-thin:hover { scrollbar-color: oklch(0.5 0 0 / 0.2) transparent; }
+.scrollbar-thin::-webkit-scrollbar { width: 4px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background-color: transparent; border-radius: 2px; }
+.scrollbar-thin:hover::-webkit-scrollbar-thumb { background-color: oklch(0.5 0 0 / 0.2); }
 
-.safe-both {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-}
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
 
-/* ─── Mobile Optimizations ──────────────────────────────── */
-@media (max-width: 1023px) {
-  /* Tighter spacing on mobile */
-  .mobile-compact {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-  
-  /* Apple-style overscroll */
-  .overscroll-contain {
-    overscroll-behavior: contain;
-  }
-}
-
-/* ─── iOS-style momentum scrolling ──────────────────────── */
 .scroll-ios {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 
-/* ─── Tab bar pill animation ────────────────────────────── */
-@keyframes pill-bounce {
-  0% { transform: scaleX(0.8); }
-  50% { transform: scaleX(1.05); }
-  100% { transform: scaleX(1); }
-}
-
-.tab-pill-active {
-  animation: pill-bounce 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-/* ─── Drawer spring animation ───────────────────────────── */
-@keyframes drawer-enter {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0.5;
-  }
-  70% {
-    transform: translateX(2%);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes drawer-exit {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-}
-
-.drawer-enter {
-  animation: drawer-enter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-.drawer-exit {
-  animation: drawer-exit 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-/* ─── Overlay fade ──────────────────────────────────────── */
-@keyframes overlay-in {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes overlay-out {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-.overlay-enter {
-  animation: overlay-in 0.25s ease-out both;
-}
-
-.overlay-exit {
-  animation: overlay-out 0.2s ease-in both;
-}
-
-/* ─── Pull-to-refresh indicator placeholder ─────────────── */
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 1s linear infinite;
-}
-
-/* ─── Haptic feedback simulation ────────────────────────── */
-@media (hover: none) {
-  .haptic-press:active {
-    transform: scale(0.96);
-    transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
+/* ═══════════════════════════════════════════════════════════
+   SKELETON LOADING
+   ═══════════════════════════════════════════════════════════ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 25%,
+    oklch(0.93 0 0 / 0.5) 50%,
+    var(--color-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
 }
