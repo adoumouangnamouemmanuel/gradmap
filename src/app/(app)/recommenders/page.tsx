@@ -35,22 +35,25 @@ export default async function RecommendersPage() {
             <FadeIn delay={0.1}>
               <Card>
                 <CardContent className="p-0">
+                  <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border/30 bg-muted/15 px-6 py-2.5 text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                    <span>Name</span>
+                    <span>Institution</span>
+                    <span>Contact</span>
+                  </div>
                   {recommenders.map((rec: any) => (
                     <Link key={rec.id} href={`/recommenders/${rec.id}`}
-                      className="flex items-center justify-between gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors"
-                    >
-                      <div className="min-w-0">
+                      className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors">                      <div className="min-w-0">
                         <p className="text-[15px] font-medium truncate">{rec.name}</p>
                         {rec.title && <p className="text-[13px] text-muted-foreground">{rec.title}</p>}
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-[13px] text-muted-foreground">{rec.institution || "—"}</span>
-                        {rec.email && (
+                      <span className="text-[13px] text-muted-foreground">{rec.institution || "—"}</span>
+                      <span>
+                        {rec.email ? (
                           <StopPropagationAnchor href={`mailto:${rec.email}`} className="text-primary/60 hover:text-primary">
                             <Mail className="h-[16px] w-[16px]" />
                           </StopPropagationAnchor>
-                        )}
-                      </div>
+                        ) : "—"}
+                      </span>
                     </Link>
                   ))}
                 </CardContent>

@@ -58,21 +58,25 @@ export default async function ScholarshipsPage({ searchParams }: { searchParams:
             <FadeIn delay={0.15}>
               <Card>
                 <CardContent className="p-0">
+                  <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 border-b border-border/30 bg-muted/15 px-6 py-2.5 text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                    <span>Scholarship</span>
+                    <span>Type</span>
+                    <span>Amount</span>
+                    <span>Status</span>
+                  </div>
                   {scholarships.map((s: any) => (
                     <Link key={s.id} href={`/scholarships/${s.id}`}
-                      className="flex items-center justify-between gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors"
-                    >
-                      <div className="min-w-0">
+                      className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors">                      <div className="min-w-0">
                         <p className="text-[15px] font-medium truncate">{s.name}</p>
-                        <p className="text-[13px] text-muted-foreground flex items-center gap-1">
-                          {s.provider && <><Globe className="h-3 w-3 shrink-0" /> {s.provider}</>}
-                          {s.amount ? ` · ${s.currency_code || ""} ${s.amount.toLocaleString()}` : ""}
+                        <p className="text-[13px] text-muted-foreground">
+                          {s.provider || "—"}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-[13px] text-muted-foreground capitalize">{s.funding_type}</span>
-                        <StatusBadge status={s.eligibility_status === "eligible" ? "done" : s.eligibility_status === "likely" ? "preparing" : "exploring"} label={s.eligibility_status?.replace("_", " ")} />
-                      </div>
+                      <span className="text-[13px] text-muted-foreground capitalize">{s.funding_type}</span>
+                      <span className="text-[13px] font-medium tabular-nums">
+                        {s.amount ? `${s.currency_code || ""} ${s.amount.toLocaleString()}` : "—"}
+                      </span>
+                      <StatusBadge status={s.eligibility_status === "eligible" ? "done" : s.eligibility_status === "likely" ? "preparing" : "exploring"} label={s.eligibility_status?.replace("_", " ")} />
                     </Link>
                   ))}
                 </CardContent>

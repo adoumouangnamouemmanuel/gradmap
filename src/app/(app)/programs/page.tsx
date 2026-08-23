@@ -44,21 +44,22 @@ export default async function ProgramsPage({ searchParams }: { searchParams: Pro
             <FadeIn delay={0.15}>
               <Card>
                 <CardContent className="p-0">
+                  <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border/30 bg-muted/15 px-6 py-2.5 text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                    <span>Program</span>
+                    <span>Status</span>
+                    <span>Deadline</span>
+                  </div>
                   {programs.map((program: any) => (
                     <Link key={program.id} href={`/programs/${program.id}`}
-                      className="flex items-center justify-between gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors"
-                    >
-                      <div className="min-w-0">
+                      className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors">                      <div className="min-w-0">
                         <p className="text-[15px] font-medium truncate">{program.name}</p>
                         <p className="text-[13px] text-muted-foreground flex items-center gap-1">
                           <Building2 className="h-3 w-3 shrink-0" /> {program.institutions?.name}
                           {program.institutions?.country_name && <><span>·</span><Globe className="h-3 w-3 shrink-0" /> {program.institutions.country_name}</>}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <StatusBadge status={program.status === "exploring" ? "exploring" : program.status === "applying" ? "preparing" : "submitted"} />
-                        <span className="text-[13px] text-muted-foreground">{program.intake_year}</span>
-                      </div>
+                      <StatusBadge status={program.status === "exploring" ? "exploring" : program.status === "applying" ? "preparing" : "submitted"} />
+                      <span className="text-[13px] text-muted-foreground">{program.intake_year}</span>
                     </Link>
                   ))}
                 </CardContent>

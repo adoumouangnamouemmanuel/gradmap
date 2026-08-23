@@ -39,24 +39,22 @@ export default async function DocumentsPage() {
             <FadeIn delay={0.1}>
               <Card>
                 <CardContent className="p-0">
+                  <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border/30 bg-muted/15 px-6 py-2.5 text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                    <span>Document</span>
+                    <span>Type</span>
+                    <span>Version</span>
+                  </div>
                   {documents.map((doc: any) => (
                     <Link key={doc.id} href={`/documents/${doc.id}`}
-                      className="flex items-center justify-between gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors"
-                    >
-                      <div className="min-w-0 flex items-center gap-3">
-                        <div className="flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-primary/[0.08] text-primary/60 shrink-0">
-                          <FileText className="h-[18px] w-[18px]" />
-                        </div>
+                      className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors">                      <div className="min-w-0">
                         <p className="text-[15px] font-medium truncate">{doc.name}</p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[13px] text-muted-foreground capitalize">{doc.document_type.replace(/_/g, " ")}</span>
-                        {doc.current_version_id ? (
-                          <span className="text-emerald-500 text-[14px]">✓</span>
-                        ) : (
-                          <span className="text-muted-foreground/30 text-[14px]">—</span>
-                        )}
-                      </div>
+                      <span className="text-[13px] text-muted-foreground capitalize">{doc.document_type.replace(/_/g, " ")}</span>
+                      {doc.current_version_id ? (
+                        <span className="text-emerald-500 text-[14px] font-medium">✓</span>
+                      ) : (
+                        <span className="text-muted-foreground/30 text-[14px]">—</span>
+                      )}
                     </Link>
                   ))}
                 </CardContent>

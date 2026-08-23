@@ -42,11 +42,14 @@ export default async function InstitutionsPage({ searchParams }: { searchParams:
             <FadeIn delay={0.15}>
               <Card>
                 <CardContent className="p-0">
+                  <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border/30 bg-muted/15 px-6 py-2.5 text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+                    <span>Institution</span>
+                    <span>Country</span>
+                    <span>City</span>
+                  </div>
                   {institutions.map((inst: any) => (
                     <Link key={inst.id} href={`/institutions/${inst.id}`}
-                      className="flex items-center justify-between gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors"
-                    >
-                      <div className="min-w-0">
+                      className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-border/20 px-6 py-4 last:border-b-0 hover:bg-accent/40 transition-colors">                      <div className="min-w-0">
                         <p className="text-[15px] font-medium truncate">{inst.name}</p>
                         {inst.website_url && (
                           <StopPropagationAnchor href={inst.website_url} target="_blank" rel="noopener noreferrer" className="text-[13px] text-primary/70 hover:underline">
@@ -54,11 +57,8 @@ export default async function InstitutionsPage({ searchParams }: { searchParams:
                           </StopPropagationAnchor>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-[13px] text-muted-foreground shrink-0">
-                        <span>{inst.country_name || "—"}</span>
-                        <span>·</span>
-                        <span>{inst.city || "—"}</span>
-                      </div>
+                      <span className="text-[13px] text-muted-foreground">{inst.country_name || "—"}</span>
+                      <span className="text-[13px] text-muted-foreground">{inst.city || "—"}</span>
                     </Link>
                   ))}
                 </CardContent>
