@@ -415,3 +415,73 @@ export async function createContactInteraction(formData: {
   revalidatePath(`/contacts/${formData.contact_id}`);
   return data;
 }
+
+// ============================================================
+// UPDATE / ARCHIVE
+// ============================================================
+
+export async function updateRecommender(id: string, formData: {
+  name?: string;
+  email?: string;
+  title?: string;
+  institution?: string;
+  relationship?: string;
+  notes?: string;
+}) {
+  const { supabase } = await getUser();
+  const { data, error } = await supabase
+    .from("recommenders")
+    .update(formData)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath("/recommenders");
+  revalidatePath(`/recommenders/${id}`);
+  return data;
+}
+
+export async function archiveRecommender(id: string) {
+  const { supabase } = await getUser();
+  const { error } = await supabase
+    .from("recommenders")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+
+  if (error) throw error;
+  revalidatePath("/recommenders");
+}
+
+export async function updateContact(id: string, formData: {
+  name?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+  institution?: string;
+  notes?: string;
+}) {
+  const { supabase } = await getUser();
+  const { data, error } = await supabase
+    .from("contacts")
+    .update(formData)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath("/contacts");
+  revalidatePath(`/contacts/${id}`);
+  return data;
+}
+
+export async function archiveContact(id: string) {
+  const { supabase } = await getUser();
+  const { error } = await supabase
+    .from("contacts")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+
+  if (error) throw error;
+  revalidatePath("/contacts");
+}

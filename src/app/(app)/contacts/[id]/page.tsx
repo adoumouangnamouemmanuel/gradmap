@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Mail, Phone, Plus, Clock } from "lucide-react";
-import { getContact, createContactInteraction } from "@/features/essays/actions";
+import { ArrowLeft, Mail, Phone, Plus, Clock, Trash2 } from "lucide-react";
+import { getContact, createContactInteraction, archiveContact } from "@/features/essays/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,6 +131,18 @@ export default async function ContactDetailPage({
         </div>
 
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-serif text-lg">Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form action={async () => { "use server"; await archiveContact(id); }}>
+                <Button type="submit" variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" /> Archive contact
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
           {contact.notes && (
             <Card>
               <CardHeader>

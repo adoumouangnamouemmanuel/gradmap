@@ -19,7 +19,7 @@ export function InstitutionFilter({ countries }: { countries: string[] }) {
           router.push(`/institutions`);
         }
       }}
-      className="w-full sm:w-[180px]"
+      className="w-full sm:w-[220px] text-[14px]"
     >
       <option value="">All Countries</option>
       {countries.map(c => (

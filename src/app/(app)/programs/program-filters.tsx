@@ -34,7 +34,7 @@ export function ProgramFilters({ institutions, degreeTypes, statuses }: Props) {
         <Select
           value={currentInstitution}
           onChange={(e) => updateParam("institution", e.target.value)}
-          className="w-[160px] shrink-0 sm:w-[170px] h-9 text-sm"
+          className="w-[180px] shrink-0 sm:w-[200px] text-[14px]"
         >
           <option value="">All Institutions</option>
           {institutions.map(inst => (
@@ -47,7 +47,7 @@ export function ProgramFilters({ institutions, degreeTypes, statuses }: Props) {
         <Select
           value={currentDegree}
           onChange={(e) => updateParam("degree", e.target.value)}
-          className="w-[130px] shrink-0 sm:w-[140px] h-9 text-sm"
+          className="w-[150px] shrink-0 sm:w-[160px] text-[14px]"
         >
           <option value="">All Degrees</option>
           {degreeTypes.map(dt => (
@@ -60,7 +60,7 @@ export function ProgramFilters({ institutions, degreeTypes, statuses }: Props) {
         <Select
           value={currentStatus}
           onChange={(e) => updateParam("status", e.target.value)}
-          className="w-[130px] shrink-0 sm:w-[140px] h-9 text-sm"
+          className="w-[150px] shrink-0 sm:w-[160px] text-[14px]"
         >
           <option value="">All Statuses</option>
           {statuses.map(s => (

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, FileText, Clock, CheckCircle2, Download, AlertCircle } from "lucide-react";
-import { getDocument } from "@/features/documents/actions";
+import { ArrowLeft, FileText, Clock, CheckCircle2, Download, AlertCircle, Trash2 } from "lucide-react";
+import { getDocument, archiveDocument } from "@/features/documents/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DocumentUpload } from "@/components/domain/document-upload";
@@ -81,6 +81,16 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
                 {document.current_version_id && <MobileListItem title="Current" subtitle={`v${versions[0]?.version_number}`} indicator={<CheckCircle2 className="h-[16px] w-[16px] text-emerald-500" />} showChevron={false} />}
                 <MobileListItem title="Created" subtitle={new Date(document.created_at).toLocaleDateString()} indicator={<Clock className="h-[16px] w-[16px] text-muted-foreground/40" />} showChevron={false} />
               </GroupedList>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle className="text-[16px]">Actions</CardTitle></CardHeader>
+            <CardContent>
+              <form action={async () => { "use server"; await archiveDocument(id); }}>
+                <Button type="submit" variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete document
+                </Button>
+              </form>
             </CardContent>
           </Card>
           {document.notes && (

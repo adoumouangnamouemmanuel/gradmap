@@ -245,6 +245,65 @@ export async function createDocumentRequirement(formData: {
   return data;
 }
 
+export async function createDocumentVersionFromUpload(formData: {
+  document_id: string;
+  file_name: string;
+  mime_type: string;
+  file_size: number;
+  storage_path: string;
+  sha256_hash?: string;
+}) {
+  const { supabase, user } = await getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  // Verify document belongs to user
+  const { data: doc } = await supabase
+    .from("documents")
+    .select("id")
+    .eq("id", formData.document_id)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!doc) throw new Error("Document not found");
+
+  // Get next version number
+  const { data: existing } = await supabase
+    .from("document_versions")
+    .select("version_number")
+    .eq("document_id", formData.document_id)
+    .order("version_number", { ascending: false })
+    .limit(1);
+
+  const nextVersion = (existing?.[0]?.version_number || 0) + 1;
+
+  const { data: version, error } = await supabase
+    .from("document_versions")
+    .insert({
+      user_id: user.id,
+      document_id: formData.document_id,
+      version_number: nextVersion,
+      file_name: formData.file_name,
+      mime_type: formData.mime_type,
+      file_size: formData.file_size,
+      storage_path: formData.storage_path,
+      sha256_hash: formData.sha256_hash || null,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  // Update current_version_id on parent document
+  await supabase
+    .from("documents")
+    .update({ current_version_id: version.id })
+    .eq("id", formData.document_id);
+
+  revalidatePath("/documents");
+  revalidatePath(`/documents/${formData.document_id}`);
+  return version;
+}
+
 export async function satisfyDocumentRequirement(id: string, versionId: string) {
   const { supabase } = await getUser();
   const { error } = await supabase

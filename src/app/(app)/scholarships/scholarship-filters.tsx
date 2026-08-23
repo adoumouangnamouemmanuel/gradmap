@@ -32,7 +32,7 @@ export function ScholarshipFilters({ fundingTypes, statuses }: Props) {
         <Select
           value={currentFunding}
           onChange={(e) => updateParam("fundingType", e.target.value)}
-          className="w-[160px] shrink-0 sm:w-[180px] h-9 text-sm"
+          className="w-[190px] shrink-0 sm:w-[210px] text-[14px]"
         >
           <option value="">All Funding Types</option>
           {fundingTypes.map(ft => (
@@ -47,7 +47,7 @@ export function ScholarshipFilters({ fundingTypes, statuses }: Props) {
         <Select
           value={currentStatus}
           onChange={(e) => updateParam("status", e.target.value)}
-          className="w-[140px] shrink-0 sm:w-[150px] h-9 text-sm"
+          className="w-[160px] shrink-0 sm:w-[180px] text-[14px]"
         >
           <option value="">All Statuses</option>
           {statuses.map(s => (

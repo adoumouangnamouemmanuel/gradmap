@@ -11,9 +11,7 @@ interface MobileListItemProps {
   onClick?: () => void;
   href?: string;
   className?: string;
-  /** Shows chevron right arrow (default true when href provided) */
   showChevron?: boolean;
-  /** Position in list for stagger animation delay */
   index?: number;
 }
 
@@ -35,8 +33,10 @@ export function MobileListItem({
   return (
     <div
       className={cn(
-        "grouped-list-item animate-list-item",
-        (onClick || isLink) && "cursor-pointer press-subtle",
+        "flex items-center gap-3 px-4 py-3 min-h-[44px]",
+        "transition-colors duration-150",
+        "border-b border-border/30 last:border-b-0",
+        (onClick || isLink) && "cursor-pointer press-subtle active:bg-accent",
         className,
       )}
       style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}
@@ -46,24 +46,31 @@ export function MobileListItem({
     >
       {/* Leading indicator/avatar */}
       {indicator && (
-        <div className="shrink-0">{indicator}</div>
+        <div className="shrink-0 self-center">{indicator}</div>
       )}
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-[16px] font-normal truncate">{title}</p>
-          {badge}
-        </div>
+        {subtitle ? (
+          <div className="flex items-center gap-2">
+            <p className="text-[16px] font-normal truncate">{title}</p>
+            {badge}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <p className="text-[16px] font-normal">{title}</p>
+            {badge}
+          </div>
+        )}
         {subtitle && (
           <p className="text-[13px] text-muted-foreground truncate mt-[1px] leading-tight">{subtitle}</p>
         )}
       </div>
 
       {/* Trailing action or chevron */}
-      {action && <div className="shrink-0">{action}</div>}
+      {action && <div className="shrink-0 self-center">{action}</div>}
       {showChevronRight && !action && (
-        <ChevronRight className="h-[14px] w-[14px] shrink-0 text-muted-foreground/30" />
+        <ChevronRight className="h-[14px] w-[14px] shrink-0 text-muted-foreground/30 self-center" />
       )}
     </div>
   );
@@ -72,7 +79,10 @@ export function MobileListItem({
 /** iOS grouped list container */
 export function GroupedList({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("grouped-list", className)}>
+    <div className={cn(
+      "rounded-[14px] bg-card border border-border/30 overflow-hidden",
+      className,
+    )}>
       {children}
     </div>
   );

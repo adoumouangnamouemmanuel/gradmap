@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Mail, Plus } from "lucide-react";
-import { getRecommender, createRecommendationRequest, updateRecommendationRequestStatus } from "@/features/essays/actions";
+import { ArrowLeft, Mail, Plus, Trash2 } from "lucide-react";
+import { getRecommender, createRecommendationRequest, updateRecommendationRequestStatus, archiveRecommender } from "@/features/essays/actions";
 import { getApplications } from "@/features/programs/actions";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -155,6 +155,13 @@ export default async function RecommenderDetailPage({
                   <p className="text-sm mt-1 whitespace-pre-wrap">{recommender.notes}</p>
                 </div>
               )}
+              <div className="pt-3 border-t">
+                <form action={async () => { "use server"; await archiveRecommender(id); }}>
+                  <Button type="submit" variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" /> Archive recommender
+                  </Button>
+                </form>
+              </div>
             </CardContent>
           </Card>
         </div>
