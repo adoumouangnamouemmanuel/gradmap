@@ -83,7 +83,7 @@ export default async function DocumentDetailPage({
                     <div key={v.id} className="flex items-center justify-between py-3 border-b last:border-b-0">
                       <div className="min-w-0">
                         <p className="text-sm font-medium">
-                          v{v.version_number} — {v.file_name}
+                          v{v.version_number} - {v.file_name}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {v.mime_type} · {(v.file_size / 1024).toFixed(1)} KB
@@ -95,9 +95,9 @@ export default async function DocumentDetailPage({
                           {new Date(v.created_at).toLocaleDateString()}
                         </p>
                         <Button size="sm" variant="ghost" asChild>
-                          <a href={`/api/documents/download?path=${encodeURIComponent(v.storage_path)}&name=${encodeURIComponent(v.file_name)}`}>
+                          <Link href={`/api/documents/download?path=${encodeURIComponent(v.storage_path)}&name=${encodeURIComponent(v.file_name)}`}>
                             <Download className="h-3 w-3" />
-                          </a>
+                          </Link>
                         </Button>
                       </div>
                     </div>

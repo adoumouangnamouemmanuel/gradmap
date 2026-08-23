@@ -55,7 +55,7 @@ export default async function DocumentsPage() {
                       {doc.document_type.replace(/_/g, " ")}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {doc.current_version_id ? "✓" : "—"}
+                      {doc.current_version_id ? "✓" : "-"}
                     </span>
                   </Link>
                 ))}

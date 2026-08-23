@@ -12,6 +12,7 @@ export default function NewInstitutionPage() {
       backLabel="Institutions"
       submitLabel="Create institution"
       action={(formData) => createInstitutionFromForm(formData)}
+      successHref="/programs/new"
       requiredFields={{ name: "Institution name is required" }}
       fields={[
         {

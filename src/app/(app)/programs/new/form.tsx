@@ -16,6 +16,7 @@ export default function NewProgramForm({ institutions }: Props) {
       backLabel="Programs"
       submitLabel="Create program"
       action={(formData) => createProgramFromForm(formData)}
+      successHref="/programs/{id}"
       requiredFields={{
         institution_id: "Please select an institution",
         name: "Program name is required",

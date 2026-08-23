@@ -55,7 +55,7 @@ export default async function ContactsPage() {
                       )}
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {contact.role || "—"}
+                      {contact.role || "-"}
                     </span>
                     <span className="text-sm text-muted-foreground flex items-center gap-1">
                       {contact.email && <Mail className="h-3 w-3" />}

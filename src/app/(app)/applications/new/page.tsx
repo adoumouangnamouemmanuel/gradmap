@@ -20,8 +20,9 @@ export default function NewApplicationPage() {
       submitLabel="Create application"
       action={async (formData) => {
         const { createApplicationFromForm } = await import("@/features/programs/form-actions");
-        await createApplicationFromForm(formData);
+        return createApplicationFromForm(formData);
       }}
+      successHref="/applications/{id}"
       requiredFields={{
         program_id: "Please select a program",
       }}
@@ -34,7 +35,7 @@ export default function NewApplicationPage() {
             { value: "", label: "Select a program" },
             ...programs.map((program: any) => ({
               value: program.id,
-              label: `${program.name} — ${program.institutions?.name || "Unknown institution"}`,
+              label: `${program.name} - ${program.institutions?.name || "Unknown institution"}`,
             })),
           ],
           hint: programs.length === 0

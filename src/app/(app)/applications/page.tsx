@@ -78,7 +78,7 @@ export default async function ApplicationsPage() {
                       label={app.status}
                     />
                     <span className="text-sm font-medium">{app.priority}/5</span>
-                    <span className="text-xs text-muted-foreground">{app.application_round || "—"}</span>
+                    <span className="text-xs text-muted-foreground">{app.application_round || "-"}</span>
                   </Link>
                 ))}
               </CardContent>
@@ -150,7 +150,7 @@ export default async function ApplicationsPage() {
                     <span className="text-sm font-medium">
                       {sa.award_amount
                         ? `${sa.award_currency_code || ""} ${sa.award_amount.toLocaleString()}`
-                        : "—"}
+                        : "-"}
                     </span>
                   </Link>
                 ))}

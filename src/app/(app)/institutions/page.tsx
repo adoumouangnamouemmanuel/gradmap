@@ -3,6 +3,7 @@ import { Plus, Building2, Globe, MapPin } from "lucide-react";
 import { PageHeader } from "@/components/domain/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { StopPropagationAnchor } from "@/components/domain/stop-prop-anchor";
 import { EmptyState } from "@/components/domain/empty-state";
 import { MobileListItem } from "@/components/domain/mobile-list-item";
 import { getInstitutions } from "@/features/programs/actions";
@@ -52,23 +53,22 @@ export default async function InstitutionsPage() {
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{inst.name}</p>
                       {inst.website_url && (
-                        <a
+                        <StopPropagationAnchor
                           href={inst.website_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-primary hover:underline flex items-center gap-1"
-                          onClick={(e) => e.stopPropagation()}
                         >
                           <Globe className="h-3 w-3" />
                           Website
-                        </a>
+                        </StopPropagationAnchor>
                       )}
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {inst.country_name || "—"}
+                      {inst.country_name || "-"}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {inst.city || "—"}
+                      {inst.city || "-"}
                     </span>
                   </Link>
                 ))}

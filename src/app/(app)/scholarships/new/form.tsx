@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,9 +25,10 @@ interface Props {
 
 export default function NewScholarshipForm({ programs }: Props) {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const [isPending, startTransition] = React.useTransition();
+  const [isPending, setIsPending] = React.useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
@@ -36,9 +38,14 @@ export default function NewScholarshipForm({ programs }: Props) {
       return;
     }
     setErrors({});
-    startTransition(() => {
-      createScholarshipWithPrograms(formData);
-    });
+    setIsPending(true);
+    const result = await createScholarshipWithPrograms(formData);
+    if ("error" in result) {
+      setErrors({ name: result.error });
+      setIsPending(false);
+      return;
+    }
+    router.push(`/scholarships/${result.id}`);
   };
 
   return (

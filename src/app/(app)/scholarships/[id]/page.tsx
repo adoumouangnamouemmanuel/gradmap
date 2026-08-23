@@ -258,7 +258,7 @@ export default async function ScholarshipDetailPage({
                       <option value="">No linked application</option>
                       {applications.map((app: any) => (
                         <option key={app.id} value={app.id}>
-                          {app.programs?.name} — {app.status}
+                          {app.programs?.name} - {app.status}
                         </option>
                       ))}
                     </select>
@@ -433,10 +433,10 @@ export default async function ScholarshipDetailPage({
             <CardContent className="space-y-2">
               {scholarship.official_url && (
                 <Button asChild className="w-full" variant="outline">
-                  <a href={scholarship.official_url} target="_blank" rel="noopener noreferrer">
+                  <Link href={scholarship.official_url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="mr-2 h-4 w-4" />
                     View official page
-                  </a>
+                  </Link>
                 </Button>
               )}
               <Button asChild className="w-full" variant="outline">

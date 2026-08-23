@@ -72,7 +72,7 @@ export default function NewEssayPromptPage() {
             { value: "", label: "No linked application" },
             ...applications.map((app: any) => ({
               value: app.id,
-              label: `${app.programs?.name} — ${app.status}`,
+              label: `${app.programs?.name} - ${app.status}`,
             })),
           ],
         },

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,9 +37,11 @@ interface CreatePageProps {
   backHref: string;
   backLabel: string;
   submitLabel: string;
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => Promise<{ id?: string; error?: string }> | void | Promise<void>;
   fields: (FieldConfig | FieldGroup)[];
   requiredFields?: Record<string, string>;
+  /** Path to navigate to on success. Use {id} as placeholder for the created entity's ID. */
+  successHref?: string;
 }
 
 function isFieldGroup(f: FieldConfig | FieldGroup): f is FieldGroup {
@@ -139,12 +142,14 @@ export function CreatePage({
   action,
   fields,
   requiredFields = {},
+  successHref,
 }: CreatePageProps) {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const [isPending, startTransition] = React.useTransition();
+  const [isPending, setIsPending] = React.useState(false);
+  const router = useRouter();
 
   const handleSubmit = React.useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const formData = new FormData(e.currentTarget);
       const newErrors: Record<string, string> = {};
@@ -164,9 +169,28 @@ export function CreatePage({
         return;
       }
 
-      startTransition(() => {
-        action(formData);
-      });
+      setIsPending(true);
+      try {
+        const result = await action(formData);
+        // If the action returns a result with error or id, handle it
+        if (result && typeof result === "object") {
+          if ("error" in result && result.error) {
+            setErrors({ _form: result.error });
+            setIsPending(false);
+            return;
+          }
+          if ("id" in result && result.id) {
+            const href = successHref ? successHref.replace("{id}", result.id) : backHref;
+            router.push(href);
+            return;
+          }
+        }
+        // If no result (void return), the action handled its own navigation (e.g. documents, essays)
+      } catch (err: any) {
+        console.error("Form action error:", err);
+        setErrors({ _form: err?.message || "Something went wrong" });
+        setIsPending(false);
+      }
     },
     [action, requiredFields],
   );

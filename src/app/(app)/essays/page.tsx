@@ -58,7 +58,7 @@ export default async function EssaysPage() {
                       )}
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {prompt.word_limit ? `${prompt.word_limit}` : "—"}
+                      {prompt.word_limit ? `${prompt.word_limit}` : "-"}
                     </span>
                     <StatusBadge
                       status={

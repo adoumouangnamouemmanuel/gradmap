@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getDashboardStats, getUpcomingDeadlines, getBlockingTasks } from "@/features/programs/actions";
 import { getFundingSummary } from "@/features/scholarships/actions";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion-wrapper";
 
 export default async function DashboardPage() {
   let stats;
@@ -81,7 +82,7 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Editorial greeting */}
-      <div className="mb-8">
+      <FadeIn delay={0.1} className="mb-8">
         <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem]/[2.75rem]">
           Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"}, Emmanuel
         </h1>
@@ -103,66 +104,68 @@ export default async function DashboardPage() {
             Add your first program to start tracking deadlines and applications.
           </p>
         )}
-      </div>
+      </FadeIn>
 
       {/* Next best action */}
       {nextDeadline && (
-        <Card className="mb-6 shadow-sm border-primary/20 bg-primary/5">
-          <CardContent className="flex items-center gap-4 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <TrendingUp className="h-5 w-5" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium">Next best action</p>
-              <p className="text-sm text-muted-foreground">
-                {nextDeadline.title} — due {daysUntilDeadline === 0 ? "today" : daysUntilDeadline === 1 ? "tomorrow" : `in ${daysUntilDeadline} days`}.
-              </p>
-            </div>
-            <Button size="sm" asChild>
-              <Link href="/calendar">View</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <FadeIn delay={0.2}>
+          <Card className="mb-6 shadow-sm border-primary/20 bg-primary/5">
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Next best action</p>
+                <p className="text-sm text-muted-foreground">
+                  {nextDeadline.title} - due {daysUntilDeadline === 0 ? "today" : daysUntilDeadline === 1 ? "tomorrow" : `in ${daysUntilDeadline} days`}.
+                </p>
+              </div>
+              <Button size="sm" asChild>
+                <Link href="/calendar">View</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </FadeIn>
       )}
 
       {/* Blocking tasks alert */}
       {blockingTasks.length > 0 && (
-        <Card className="mb-6 shadow-sm border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
-          <CardContent className="flex items-center gap-4 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-400">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium">{blockingTasks.length} blocking task{blockingTasks.length !== 1 ? "s" : ""}</p>
-              <p className="text-sm text-muted-foreground">
-                {blockingTasks.map((t: any) => t.title).join(", ")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <FadeIn delay={0.25}>
+          <Card className="mb-6 shadow-sm border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-400">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">{blockingTasks.length} blocking task{blockingTasks.length !== 1 ? "s" : ""}</p>
+                <p className="text-sm text-muted-foreground">
+                  {blockingTasks.map((t: any) => t.title).join(", ")}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </FadeIn>
       )}
 
-      {/* Pipeline metrics — staggered entrance + hover lift */}
-      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      {/* Pipeline metrics - staggered entrance + hover lift */}
+      <StaggerContainer className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
           { label: "Programs", value: stats.totalPrograms },
           { label: "Applications", value: stats.totalApplications },
           { label: "Submitted", value: stats.statusCounts.submitted || 0 },
           { label: "Admits", value: stats.statusCounts.admitted || 0 },
         ].map((stat, i) => (
-          <Card
-            key={stat.label}
-            className={`shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md animate-stagger-in`}
-            style={{ animationDelay: `${i * 60}ms` }}
-          >
-            <CardContent className="p-4">
-              <Metric label={stat.label} value={stat.value} />
-            </CardContent>
-          </Card>
+          <StaggerItem key={stat.label}>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur h-full">
+              <CardContent className="p-4">
+                <Metric label={stat.label} value={stat.value} />
+              </CardContent>
+            </Card>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <FadeIn delay={0.4} className="grid gap-6 lg:grid-cols-3">
         {/* Upcoming deadlines */}
         <Card className="lg:col-span-2 shadow-sm">
           <CardHeader>
@@ -257,11 +260,11 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
-      </div>
+      </FadeIn>
 
       {/* Funding summary */}
       {fundingSummary && (fundingSummary.scholarships.length > 0 || fundingSummary.expenses.length > 0) && (
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <FadeIn delay={0.5} className="mt-6 grid gap-6 lg:grid-cols-2">
           {/* Scholarships overview */}
           {fundingSummary.scholarships.length > 0 && (
             <Card className="shadow-sm">
@@ -358,7 +361,7 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           )}
-        </div>
+        </FadeIn>
       )}
     </div>
   );
