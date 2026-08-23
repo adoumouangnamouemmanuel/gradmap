@@ -26,19 +26,25 @@ export function AppShell({ children }: AppShellProps) {
         />
 
         {/* Mobile overlay */}
-        {mobileMenuOpen && (
-          <div
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        )}
+        <div
+          className={
+            `fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 lg:hidden ${
+              mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`
+          }
+          onClick={() => setMobileMenuOpen(false)}
+        />
 
-        {/* Mobile sidebar */}
-        {mobileMenuOpen && (
-          <div className="fixed inset-y-0 left-0 z-50 w-[260px] lg:hidden">
-            <AppSidebar onToggle={() => setMobileMenuOpen(false)} />
-          </div>
-        )}
+        {/* Mobile sidebar drawer */}
+        <div
+          className={
+            `fixed inset-y-0 left-0 z-50 w-[260px] transition-transform duration-200 ease-out lg:hidden ${
+              mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            }`
+          }
+        >
+          <AppSidebar onToggle={() => setMobileMenuOpen(false)} />
+        </div>
 
         {/* Search dialog */}
         <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />

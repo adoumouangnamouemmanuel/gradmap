@@ -36,7 +36,7 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors min-w-[48px]",
+                "relative flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-medium transition-all min-w-[56px]",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground",
@@ -44,8 +44,11 @@ export function MobileNav() {
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
             >
-              <item.icon className="h-5 w-5" />
-              <span>{item.label}</span>
+              {isActive && (
+                <span className="absolute -top-1 left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-full bg-primary" />
+              )}
+              <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+              <span className={cn(isActive && "font-semibold")}>{item.label}</span>
             </Link>
           );
         })}

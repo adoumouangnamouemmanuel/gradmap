@@ -30,7 +30,7 @@ export function EmptyState({ icon, title, description, action, className }: Empt
       <h3 className="font-serif text-lg font-semibold">{title}</h3>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
       {action?.href && (
-        <Button asChild className="mt-4">
+        <Button asChild className="mt-4 hidden sm:inline-flex">
           <Link href={action.href}>
             {action.label}
           </Link>

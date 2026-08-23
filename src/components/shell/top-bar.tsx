@@ -54,8 +54,14 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
 
       <div className="flex-1 lg:hidden" />
 
-      {/* Mobile search */}
-      <Button variant="ghost" size="icon" className="sm:hidden h-10 w-10" aria-label="Search" onClick={onSearchOpen}>
+      {/* Mobile search - larger hit area */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="lg:hidden h-10 w-10 rounded-full hover:bg-accent"
+        aria-label="Search"
+        onClick={onSearchOpen}
+      >
         <Search className="h-5 w-5" />
       </Button>
 
