@@ -15,6 +15,7 @@ import {
   Building2,
   PenTool,
   Users,
+  User,
   ChevronLeft,
   LogOut,
 } from "lucide-react";
@@ -70,6 +71,7 @@ const navGroups: NavGroup[] = [
 ];
 
 const bottomItems: NavItemData[] = [
+  { href: "/settings/profile", label: "Profile", icon: User },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

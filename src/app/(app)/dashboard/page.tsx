@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   BookOpen, Calendar, FileText, Plus, TrendingUp,
-  AlertTriangle, Award, DollarSign, Rocket, ArrowRight,
+  AlertTriangle, Award, DollarSign, Rocket, ArrowRight, Wallet,
 } from "lucide-react";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { DeadlineIndicator } from "@/components/domain/deadline-indicator";
@@ -11,8 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getDashboardStats, getUpcomingDeadlines, getBlockingTasks } from "@/features/programs/actions";
-import { getFundingSummary } from "@/features/scholarships/actions";
+import { getFundingSummary, getExpenses } from "@/features/scholarships/actions";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion-wrapper";
+import { CURRENCIES } from "@/lib/constants";
 
 export default async function DashboardPage() {
   let stats;
@@ -20,12 +21,15 @@ export default async function DashboardPage() {
   let blockingTasks;
   let fundingSummary;
 
+  let expenses: any[] = [];
+
   try {
-    [stats, deadlines, blockingTasks, fundingSummary] = await Promise.all([
+    [stats, deadlines, blockingTasks, fundingSummary, expenses] = await Promise.all([
       getDashboardStats(),
       getUpcomingDeadlines(30),
       getBlockingTasks(),
       getFundingSummary(),
+      getExpenses(),
     ]);
   } catch {
     // Not authenticated or no data - show empty state
@@ -361,6 +365,74 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           )}
+        </FadeIn>
+      )}
+
+      {/* Financial Summary */}
+      {expenses.length > 0 && (
+        <FadeIn delay={0.6} className="mt-6">
+          <Card className="shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 font-serif text-lg">
+                  <Wallet className="h-4 w-4 text-muted-foreground" />
+                  Financial Summary
+                </CardTitle>
+                <Button size="sm" variant="outline" asChild>
+                  <Link href="/settings/profile">View details</Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const totals: Record<string, { paid: number; planned: number }> = {};
+                for (const e of expenses) {
+                  const cur = e.currency_code || "USD";
+                  if (!totals[cur]) totals[cur] = { paid: 0, planned: 0 };
+                  if (e.status === "paid") totals[cur].paid += Number(e.amount) || 0;
+                  else totals[cur].planned += Number(e.amount) || 0;
+                }
+
+                const FX: Record<string, number> = {
+                  GHS: 15.5, USD: 1, EUR: 0.92, GBP: 0.79, CHF: 0.88, CAD: 1.36,
+                  XAF: 605, XOF: 605, NGN: 1550, KES: 153, ZAR: 18.2,
+                };
+                const toUSD = (amt: number, cur: string) => amt / (FX[cur] || 1);
+                const totalPaidUSD = Object.entries(totals).reduce((s, [c, t]) => s + toUSD(t.paid, c), 0);
+                const totalPlannedUSD = Object.entries(totals).reduce((s, [c, t]) => s + toUSD(t.planned, c), 0);
+
+                const targets = [
+                  { code: "GHS", symbol: "GH₵", rate: 15.5 },
+                  { code: "USD", symbol: "$", rate: 1 },
+                  { code: "EUR", symbol: "€", rate: 0.92 },
+                ];
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {targets.map(({ code, symbol, rate }) => (
+                      <div key={code} className="border rounded-lg p-3">
+                        <p className="text-xs text-muted-foreground mb-1">{code}</p>
+                        <div className="flex items-baseline gap-3">
+                          <div>
+                            <p className="text-[10px] text-muted-foreground">Paid</p>
+                            <p className="text-lg font-bold text-green-600">
+                              {symbol}{(totalPaidUSD * rate).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-muted-foreground">Planned</p>
+                            <p className="text-lg font-bold text-amber-600">
+                              {symbol}{(totalPlannedUSD * rate).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
         </FadeIn>
       )}
     </div>
