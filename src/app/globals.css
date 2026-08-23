@@ -85,10 +85,17 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
+  }
+  /* Prevent iOS bounce on body */
+  html {
+    overscroll-behavior: none;
   }
 }
 
-/* Thin custom scrollbar for sidebar nav area */
+/* ─── Apple-like scrollbars ─────────────────────────────── */
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
@@ -109,6 +116,73 @@
 .scrollbar-thin:hover::-webkit-scrollbar-thumb {
   background-color: oklch(0.5 0 0 / 0.25);
 }
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Apple Spring Animations ────────────────────────────── */
+/* Spring curve: fast start, gentle overshoot, settle */
+@keyframes apple-spring-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.01) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes apple-slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes apple-slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes apple-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes apple-scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes apple-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
 
 @keyframes stagger-in {
   from {
@@ -125,10 +199,209 @@
   animation: stagger-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+/* Apple-style utility classes */
+.animate-apple-spring {
+  animation: apple-spring-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+
+.animate-apple-slide-up {
+  animation: apple-slide-up 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-apple-slide-in-right {
+  animation: apple-slide-in-right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-apple-fade {
+  animation: apple-fade-in 0.3s ease-out both;
+}
+
+.animate-apple-scale {
+  animation: apple-scale-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Stagger delay utilities for mobile lists */
+.stagger-1 { animation-delay: 0.03s; }
+.stagger-2 { animation-delay: 0.06s; }
+.stagger-3 { animation-delay: 0.09s; }
+.stagger-4 { animation-delay: 0.12s; }
+.stagger-5 { animation-delay: 0.15s; }
+.stagger-6 { animation-delay: 0.18s; }
+.stagger-7 { animation-delay: 0.21s; }
+.stagger-8 { animation-delay: 0.24s; }
+
+/* ─── Frosted Glass (Apple blur) ────────────────────────── */
+.glass-blur {
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+.glass-blur-heavy {
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+}
+
+/* ─── Apple Press States ────────────────────────────────── */
+.press-apple {
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.press-apple:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+/* For list items - more subtle press */
+.press-subtle {
+  transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.press-subtle:active {
+  transform: scale(0.98);
+}
+
+/* ─── Apple Card Styles ─────────────────────────────────── */
+.card-apple {
+  border-radius: 16px;
+  background: var(--color-card);
+  border: 0.5px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.02);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+}
+
+@media (hover: hover) {
+  .card-apple:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.04);
+  }
+}
+
+.card-apple:active {
+  transform: scale(0.985);
+}
+
+/* ─── Apple Separator ───────────────────────────────────── */
+.separator-apple {
+  height: 0.5px;
+  background: var(--color-border);
+  margin-left: 0;
+}
+
+/* ─── Safe Areas ────────────────────────────────────────── */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-both {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ─── Mobile Optimizations ──────────────────────────────── */
+@media (max-width: 1023px) {
+  /* Tighter spacing on mobile */
+  .mobile-compact {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  /* Apple-style overscroll */
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+}
+
+/* ─── iOS-style momentum scrolling ──────────────────────── */
+.scroll-ios {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ─── Tab bar pill animation ────────────────────────────── */
+@keyframes pill-bounce {
+  0% { transform: scaleX(0.8); }
+  50% { transform: scaleX(1.05); }
+  100% { transform: scaleX(1); }
+}
+
+.tab-pill-active {
+  animation: pill-bounce 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* ─── Drawer spring animation ───────────────────────────── */
+@keyframes drawer-enter {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.5;
+  }
+  70% {
+    transform: translateX(2%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes drawer-exit {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+.drawer-enter {
+  animation: drawer-enter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.drawer-exit {
+  animation: drawer-exit 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* ─── Overlay fade ──────────────────────────────────────── */
+@keyframes overlay-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes overlay-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.overlay-enter {
+  animation: overlay-in 0.25s ease-out both;
+}
+
+.overlay-exit {
+  animation: overlay-out 0.2s ease-in both;
+}
+
+/* ─── Pull-to-refresh indicator placeholder ─────────────── */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 1s linear infinite;
+}
+
+/* ─── Haptic feedback simulation ────────────────────────── */
+@media (hover: none) {
+  .haptic-press:active {
+    transform: scale(0.96);
+    transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
 }

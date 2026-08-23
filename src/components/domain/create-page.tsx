@@ -40,7 +40,6 @@ interface CreatePageProps {
   action: (formData: FormData) => Promise<{ id?: string; error?: string }> | void | Promise<void>;
   fields: (FieldConfig | FieldGroup)[];
   requiredFields?: Record<string, string>;
-  /** Path to navigate to on success. Use {id} as placeholder for the created entity's ID. */
   successHref?: string;
 }
 
@@ -71,13 +70,13 @@ function renderField(field: FieldConfig, error?: string) {
             name={field.id}
             required={field.required}
             defaultValue={field.defaultValue as string}
-            className={errClasses}
+            className={cn("rounded-xl", errClasses)}
           >
             {field.options?.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </Select>
-          {field.hint && <p className="text-xs text-muted-foreground">{field.hint}</p>}
+          {field.hint && <p className="text-[12px] text-muted-foreground mt-1">{field.hint}</p>}
         </FormField>
       );
 
@@ -90,9 +89,10 @@ function renderField(field: FieldConfig, error?: string) {
             rows={field.rows || 3}
             placeholder={field.placeholder}
             className={cn(
-              "flex w-full rounded-lg border border-border bg-background px-3 py-2 text-sm resize-none",
-              "placeholder:text-muted-foreground",
-              "focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20",
+              "flex w-full rounded-xl border border-border/50 bg-muted/30 px-3.5 py-2.5 text-[15px] resize-none",
+              "placeholder:text-muted-foreground/50",
+              "transition-all duration-150 ease-out",
+              "focus-visible:outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-primary/10",
               errClasses,
             )}
           />
@@ -172,7 +172,6 @@ export function CreatePage({
       setIsPending(true);
       try {
         const result = await action(formData);
-        // If the action returns a result with error or id, handle it
         if (result && typeof result === "object") {
           if ("error" in result && result.error) {
             setErrors({ _form: result.error });
@@ -185,7 +184,6 @@ export function CreatePage({
             return;
           }
         }
-        // If no result (void return), the action handled its own navigation (e.g. documents, essays)
       } catch (err: any) {
         console.error("Form action error:", err);
         setErrors({ _form: err?.message || "Something went wrong" });
@@ -199,7 +197,7 @@ export function CreatePage({
     <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
       <Link
         href={backHref}
-        className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        className="mb-4 inline-flex items-center gap-1 text-[14px] text-muted-foreground hover:text-foreground press-apple"
       >
         <ArrowLeft className="h-4 w-4" />
         {backLabel}
@@ -207,12 +205,12 @@ export function CreatePage({
 
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle className="font-serif text-2xl">{title}</CardTitle>
+          <CardTitle className="font-serif text-[22px] sm:text-2xl">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {errors._form && (
-              <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
+              <div className="rounded-xl bg-destructive/10 p-3.5 text-[14px] font-medium text-destructive animate-apple-fade">
                 {errors._form}
               </div>
             )}
@@ -222,7 +220,7 @@ export function CreatePage({
                 return (
                   <div key={i} className="space-y-4">
                     {item.label && (
-                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      <h3 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
                         {item.label}
                       </h3>
                     )}
@@ -242,11 +240,11 @@ export function CreatePage({
               return <div key={item.id}>{renderField(item, errors[item.id])}</div>;
             })}
 
-            <div className="flex gap-3 pt-2">
-              <Button type="submit" disabled={isPending}>
+            <div className="flex gap-3 pt-3">
+              <Button type="submit" disabled={isPending} className="rounded-xl px-6">
                 {isPending ? "Saving..." : submitLabel}
               </Button>
-              <Button type="button" variant="outline" asChild>
+              <Button type="button" variant="outline" asChild className="rounded-xl">
                 <Link href={backHref}>Cancel</Link>
               </Button>
             </div>

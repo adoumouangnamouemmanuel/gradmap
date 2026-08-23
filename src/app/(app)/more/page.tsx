@@ -1,9 +1,9 @@
 import Link from "next/link";
 import {
   BookOpen, Award, FileText, Users, Settings, Building2,
-  GraduationCap, PenTool, Wallet, HelpCircle,
+  GraduationCap, PenTool, Wallet, ChevronRight,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const sections = [
   {
@@ -36,31 +36,46 @@ const sections = [
 export default function MorePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <h1 className="font-serif text-2xl font-semibold tracking-tight">More</h1>
-        <p className="mt-1 text-sm text-muted-foreground">All sections at a glance.</p>
+      <div className="mb-6 animate-apple-fade">
+        <h1 className="font-serif text-[28px] sm:text-3xl font-semibold tracking-tight leading-tight">More</h1>
+        <p className="mt-1.5 text-[14px] text-muted-foreground">All sections at a glance.</p>
       </div>
 
       <div className="space-y-8">
-        {sections.map((section) => (
-          <div key={section.title}>
-            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+        {sections.map((section, sectionIdx) => (
+          <div 
+            key={section.title} 
+            className={cn(
+              "animate-apple-slide-up",
+              sectionIdx === 0 && "stagger-1",
+              sectionIdx === 1 && "stagger-3",
+              sectionIdx === 2 && "stagger-5",
+            )}
+          >
+            <h2 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2 px-1">
               {section.title}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {section.items.map((item) => (
-                <Link key={item.href} href={item.href}>
-                  <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
-                    <CardContent className="flex items-center gap-3 p-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                        <item.icon className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium">{item.label}</p>
-                        <p className="text-xs text-muted-foreground truncate">{item.description}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+            <div className="rounded-2xl border border-border/40 bg-card overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+              {section.items.map((item, itemIdx) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3",
+                    "transition-colors duration-150",
+                    "hover:bg-accent/50 active:bg-accent/70",
+                    "press-subtle",
+                    itemIdx < section.items.length - 1 && "separator-apple ml-[52px]"
+                  )}
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground">
+                    <item.icon className="h-4 w-4" strokeWidth={1.8} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-medium">{item.label}</p>
+                    <p className="text-[13px] text-muted-foreground truncate">{item.description}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
                 </Link>
               ))}
             </div>

@@ -92,17 +92,17 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
+    <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[20vh] sm:pt-[15vh]">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm overlay-enter"
         onClick={() => onOpenChange(false)}
       />
 
       {/* Dialog */}
-      <div className="relative z-50 w-full max-w-lg rounded-xl border border-border bg-background shadow-2xl">
+      <div className="relative z-50 w-full max-w-lg rounded-2xl border border-border/50 bg-card shadow-[0_20px_60px_rgba(0,0,0,0.15)] animate-apple-scale overflow-hidden">
         {/* Search input */}
-        <div className="flex items-center gap-3 border-b px-4">
+        <div className="flex items-center gap-3 border-b border-border/40 px-4">
           {loading ? (
             <Loader2 className="h-4 w-4 shrink-0 text-muted-foreground animate-spin" />
           ) : (
@@ -114,20 +114,20 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChan
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search programs, scholarships, institutions..."
-            className="flex h-12 w-full bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none"
+            className="flex h-12 w-full bg-transparent text-[15px] placeholder:text-muted-foreground focus:outline-none"
           />
           <button
             onClick={() => onOpenChange(false)}
-            className="rounded-md p-1 hover:bg-muted"
+            className="rounded-full p-1.5 hover:bg-accent press-apple"
           >
             <X className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
 
         {/* Results */}
-        <div className="max-h-80 overflow-y-auto p-2">
+        <div className="max-h-80 overflow-y-auto p-2 scroll-ios">
           {query.trim().length >= 2 && !loading && results.length === 0 && (
-            <p className="py-6 text-center text-sm text-muted-foreground">
+            <p className="py-8 text-center text-[14px] text-muted-foreground">
               No results for &ldquo;{query}&rdquo;
             </p>
           )}
@@ -138,18 +138,19 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChan
               onClick={() => navigateTo(result)}
               onMouseEnter={() => setSelectedIndex(index)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
+                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-100",
+                "press-subtle",
                 index === selectedIndex ? "bg-accent" : "hover:bg-accent/50",
               )}
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-lg rounded-xl bg-muted/60 text-muted-foreground">
                 {typeIcons[result.type]}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium truncate">{result.title}</p>
-                <p className="text-xs text-muted-foreground truncate">{result.subtitle}</p>
+                <p className="text-[14px] font-medium truncate">{result.title}</p>
+                <p className="text-[12px] text-muted-foreground truncate">{result.subtitle}</p>
               </div>
-              <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground capitalize">
+              <span className="shrink-0 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground capitalize">
                 {result.type}
               </span>
             </button>
@@ -157,11 +158,11 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChan
         </div>
 
         {/* Footer hint */}
-        <div className="border-t px-4 py-2">
-          <p className="text-[10px] text-muted-foreground">
-            <kbd className="rounded bg-muted px-1 py-0.5 font-mono">↑↓</kbd> to navigate ·{" "}
-            <kbd className="rounded bg-muted px-1 py-0.5 font-mono">Enter</kbd> to select ·{" "}
-            <kbd className="rounded bg-muted px-1 py-0.5 font-mono">Esc</kbd> to close
+        <div className="border-t border-border/40 px-4 py-2.5">
+          <p className="text-[11px] text-muted-foreground/60">
+            <kbd className="rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px]">↑↓</kbd> navigate ·{" "}
+            <kbd className="rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px]">Enter</kbd> select ·{" "}
+            <kbd className="rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[10px]">Esc</kbd> close
           </p>
         </div>
       </div>

@@ -5,15 +5,21 @@ interface MetricProps {
   label: string;
   value: string | number;
   description?: string;
+  icon?: React.ReactNode;
   className?: string;
 }
 
-export function Metric({ label, value, description, className }: MetricProps) {
+export function Metric({ label, value, description, icon, className }: MetricProps) {
   return (
     <div className={cn("space-y-1", className)}>
-      <p className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">{label}</p>
-      <p className="font-serif text-2xl font-semibold tracking-tight">{value}</p>
-      {description && <p className="text-xs text-muted-foreground">{description}</p>}
+      <div className="flex items-center gap-1.5">
+        {icon && <span className="text-muted-foreground/50">{icon}</span>}
+        <p className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider">{label}</p>
+      </div>
+      <p className="font-serif text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
+      {description && (
+        <p className="text-[12px] text-muted-foreground leading-relaxed">{description}</p>
+      )}
     </div>
   );
 }

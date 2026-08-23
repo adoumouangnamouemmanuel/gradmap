@@ -24,17 +24,17 @@ export function FormField({
     <div className={cn("space-y-1.5", className)}>
       <label
         htmlFor={htmlFor}
-        className="flex items-center gap-1.5 text-sm font-medium"
+        className="flex items-center gap-1.5 text-[13px] font-medium text-foreground/80"
       >
         {label}
-        {required && <span className="text-destructive text-xs">Required</span>}
+        {required && <span className="text-destructive text-[11px]">*</span>}
         {!required && (
-          <span className="text-muted-foreground/60 text-xs font-normal">(optional)</span>
+          <span className="text-muted-foreground/40 text-[11px] font-normal">optional</span>
         )}
       </label>
       {children}
       {error && (
-        <p className="text-xs text-destructive">{error}</p>
+        <p className="text-[12px] text-destructive animate-apple-fade">{error}</p>
       )}
     </div>
   );
@@ -47,7 +47,6 @@ interface FieldError {
 }
 
 export function useFormValidation(requiredFields: Record<string, string>) {
-  // requiredFields: { fieldId: errorMessage }
   const [errors, setErrors] = React.useState<FieldError>({});
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
 

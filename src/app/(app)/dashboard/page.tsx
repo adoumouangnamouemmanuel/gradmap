@@ -35,11 +35,11 @@ export default async function DashboardPage() {
     // Not authenticated or no data - show empty state
     return (
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem]/[2.75rem]">
+        <div className="mb-8 animate-apple-fade">
+          <h1 className="font-serif text-[28px] sm:text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem]/[2.75rem]">
             Welcome to GradMap
           </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground tracking-tight">
+          <p className="mt-1.5 text-[14px] text-muted-foreground tracking-tight">
             Your command center for graduate applications.
           </p>
         </div>
@@ -86,11 +86,11 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Editorial greeting */}
-      <FadeIn delay={0.1} className="mb-8">
-        <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem]/[2.75rem]">
+      <FadeIn delay={0.1} className="mb-6 sm:mb-8">
+        <h1 className="font-serif text-[28px] sm:text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem]/[2.75rem]">
           Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"}, Emmanuel
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground tracking-tight">
+        <p className="mt-1.5 text-[14px] text-muted-foreground tracking-tight">
           2027 Intake ·{" "}
           {daysUntilDeadline !== null ? (
             <>

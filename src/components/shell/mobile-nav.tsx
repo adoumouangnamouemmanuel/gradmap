@@ -22,13 +22,24 @@ const navItems = [
 
 export function MobileNav() {
   const pathname = usePathname();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className={cn(
+        "fixed bottom-0 left-0 right-0 z-40 lg:hidden",
+        "border-t border-border/40",
+        "bg-background/80 glass-blur",
+        "safe-bottom",
+        "transition-all duration-300",
+        mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-full"
+      )}
     >
-      <div className="flex h-16 items-center justify-around px-2">
+      <div className="flex h-[52px] items-center justify-around px-1">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
@@ -36,19 +47,41 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "relative flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-medium transition-all min-w-[56px]",
+                "relative flex flex-col items-center justify-center gap-0.5",
+                "min-w-[56px] h-full px-2 py-1",
+                "rounded-xl",
+                "transition-all duration-200 ease-out",
+                "press-subtle",
                 isActive
                   ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground",
+                  : "text-muted-foreground active:text-foreground"
               )}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
             >
-              {isActive && (
-                <span className="absolute -top-1 left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-full bg-primary" />
+              {/* Pill indicator */}
+              {isActive && mounted && (
+                <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 h-[3px] w-5 rounded-full bg-primary tab-pill-active" />
               )}
-              <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
-              <span className={cn(isActive && "font-semibold")}>{item.label}</span>
+              
+              <item.icon
+                className={cn(
+                  "h-[22px] w-[22px] transition-all duration-200",
+                  isActive && "text-primary"
+                )}
+                strokeWidth={isActive ? 2.2 : 1.8}
+              />
+              
+              <span
+                className={cn(
+                  "text-[10px] leading-tight transition-all duration-200",
+                  isActive
+                    ? "font-semibold text-primary"
+                    : "font-medium"
+                )}
+              >
+                {item.label}
+              </span>
             </Link>
           );
         })}

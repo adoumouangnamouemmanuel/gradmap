@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Search, Bell, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
+import { cn } from "@/lib/utils";
 
 interface TopBarProps {
   onMenuToggle?: () => void;
@@ -13,30 +14,53 @@ interface TopBarProps {
 }
 
 export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+    
+    const handleScroll = () => {
+      setScrolled(main.scrollTop > 8);
+    };
+    
+    main.addEventListener("scroll", handleScroll, { passive: true });
+    return () => main.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:px-6">
+    <header
+      className={cn(
+        "sticky top-0 z-30 flex h-[52px] items-center gap-3 px-3",
+        "transition-all duration-300 ease-out",
+        scrolled
+          ? "border-b border-border/40 bg-background/80 glass-blur shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+          : "border-b border-transparent bg-background/60 glass-blur",
+        "lg:h-[56px] lg:gap-4 lg:border-b lg:border-border/40 lg:bg-background/80 lg:px-6"
+      )}
+    >
       {/* Mobile menu toggle */}
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden h-10 w-10"
+        className="lg:hidden h-9 w-9 rounded-full hover:bg-accent press-apple"
         onClick={onMenuToggle}
         aria-label="Toggle menu"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-[22px] w-[22px]" strokeWidth={1.8} />
       </Button>
 
       {/* Mobile logo */}
       <Link href="/dashboard" className="lg:hidden">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden">
-            <Image src="/logo.jpg" alt="GradMap Logo" width={28} height={28} className="object-cover" />
+        <div className="flex items-center gap-2 press-apple">
+          <div className="flex h-[26px] w-[26px] items-center justify-center rounded-lg overflow-hidden shadow-sm">
+            <Image src="/logo.jpg" alt="GradMap Logo" width={26} height={26} className="object-cover" />
           </div>
-          <span className="font-serif text-base font-semibold">GradMap</span>
+          <span className="font-serif text-[15px] font-semibold tracking-tight">GradMap</span>
         </div>
       </Link>
 
-      {/* Search - left-aligned, capped width */}
+      {/* Search - desktop */}
       <div className="hidden lg:flex flex-1 max-w-[480px]">
         <Button
           variant="outline"
@@ -54,32 +78,31 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
 
       <div className="flex-1 lg:hidden" />
 
-      {/* Mobile search - larger hit area */}
+      {/* Mobile search */}
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden h-10 w-10 rounded-full hover:bg-accent"
+        className="lg:hidden h-9 w-9 rounded-full hover:bg-accent press-apple"
         aria-label="Search"
         onClick={onSearchOpen}
       >
-        <Search className="h-5 w-5" />
+        <Search className="h-[20px] w-[20px]" strokeWidth={1.8} />
       </Button>
 
-      {/* Spacer for right-aligned actions */}
       <div className="flex-1" />
 
-      {/* Notification bell with hover affordance */}
+      {/* Notification bell */}
       <Button
         variant="ghost"
         size="icon"
         aria-label="Notifications"
-        className="relative h-10 w-10 rounded-full hover:bg-accent"
+        className="relative h-9 w-9 rounded-full hover:bg-accent press-apple"
       >
-        <Bell className="h-5 w-5" />
-        <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+        <Bell className="h-[20px] w-[20px]" strokeWidth={1.8} />
+        <span className="absolute right-2 top-2 h-[7px] w-[7px] rounded-full bg-primary shadow-[0_0_0_2px_var(--color-background)]" />
       </Button>
 
-      {/* Theme toggle with hover affordance */}
+      {/* Theme toggle */}
       <div className="rounded-full">
         <ThemeToggle />
       </div>
