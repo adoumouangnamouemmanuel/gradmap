@@ -186,6 +186,41 @@ export async function archiveProgram(id: string) {
   revalidatePath("/programs");
 }
 
+export async function updateInstitution(
+  id: string,
+  formData: Partial<{
+    name: string;
+    country_name: string;
+    city: string;
+    website_url: string;
+    notes: string;
+  }>,
+) {
+  const { supabase } = await getUser();
+  const { data, error } = await supabase
+    .from("institutions")
+    .update(formData)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath("/institutions");
+  revalidatePath(`/institutions/${id}`);
+  return data;
+}
+
+export async function archiveInstitution(id: string) {
+  const { supabase } = await getUser();
+  const { error } = await supabase
+    .from("institutions")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+
+  if (error) throw error;
+  revalidatePath("/institutions");
+}
+
 // ============================================================
 // APPLICATIONS
 // ============================================================
@@ -320,6 +355,17 @@ export async function updateApplicationStatus(
   return data;
 }
 
+export async function archiveApplication(id: string) {
+  const { supabase } = await getUser();
+  const { error } = await supabase
+    .from("applications")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+
+  if (error) throw error;
+  revalidatePath("/applications");
+}
+
 // ============================================================
 // DEADLINES
 // ============================================================
@@ -329,14 +375,18 @@ export async function getUpcomingDeadlines(days: number = 30) {
   if (!user) return [];
 
   const now = new Date();
+  const past = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
   const future = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
-  const { data, error } = await supabase
+  // Fetch all unarchived, uncompleted deadlines within range.
+  // Also fetch without date filter as fallback if the column has non-ISO values.
+  let { data, error } = await supabase
     .from("deadlines")
     .select("*")
+    .eq("user_id", user.id)
     .is("archived_at", null)
     .is("completed_at", null)
-    .gte("due_at", now.toISOString())
+    .gte("due_at", past.toISOString())
     .lte("due_at", future.toISOString())
     .order("due_at");
 
@@ -344,6 +394,23 @@ export async function getUpcomingDeadlines(days: number = 30) {
     console.error("Error fetching deadlines:", error.message);
     return [];
   }
+
+  // If no results with date filter, try without it (handles malformed due_at values)
+  if ((!data || data.length === 0) && days >= 30) {
+    const fallback = await supabase
+      .from("deadlines")
+      .select("*")
+      .eq("user_id", user.id)
+      .is("archived_at", null)
+      .is("completed_at", null)
+      .order("due_at")
+      .limit(50);
+
+    if (!fallback.error && fallback.data && fallback.data.length > 0) {
+      data = fallback.data;
+    }
+  }
+
   return data || [];
 }
 
@@ -359,6 +426,30 @@ export async function completeDeadline(id: string) {
   if (error) throw error;
   revalidatePath("/calendar");
   return data;
+}
+
+export async function deleteDeadline(id: string) {
+  const { supabase } = await getUser();
+  const { error } = await supabase
+    .from("deadlines")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
+  revalidatePath("/calendar");
+  revalidatePath("/dashboard");
+}
+
+export async function deleteTask(id: string) {
+  const { supabase } = await getUser();
+  const { error } = await supabase
+    .from("tasks")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
+  revalidatePath("/calendar");
+  revalidatePath("/dashboard");
 }
 
 // ============================================================
@@ -420,6 +511,103 @@ export async function updateTaskStatus(id: string, status: string) {
 
   if (error) throw error;
   revalidatePath("/calendar");
+  return data;
+}
+
+export async function createTask(formData: {
+  title: string;
+  application_id?: string;
+  scholarship_id?: string;
+  description?: string;
+  due_at?: string;
+  priority?: number;
+  blocking?: boolean;
+}) {
+  const { supabase, user } = await getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  let isoDueAt: string | null = null;
+  if (formData.due_at) {
+    const formatted = formData.due_at.length === 16 ? formData.due_at + ":00" : formData.due_at;
+    isoDueAt = new Date(formatted).toISOString();
+  }
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .insert({
+      user_id: user.id,
+      title: formData.title,
+      description: formData.description || null,
+      status: "todo",
+      priority: formData.priority || 3,
+      due_at: isoDueAt,
+      application_id: formData.application_id || null,
+      scholarship_id: formData.scholarship_id || null,
+      blocking: formData.blocking || false,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  await supabase.from("activity_events").insert({
+    user_id: user.id,
+    entity_type: "task",
+    entity_id: data.id,
+    action: "created",
+    summary: `Created task: ${formData.title}`,
+  });
+
+  revalidatePath("/calendar");
+  revalidatePath("/dashboard");
+  return data;
+}
+
+export async function createDeadline(formData: {
+  title: string;
+  application_id?: string;
+  scholarship_id?: string;
+  program_id?: string;
+  deadline_type?: string;
+  due_at: string;
+  source_url?: string;
+  notes?: string;
+}) {
+  const { supabase, user } = await getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const formatted = formData.due_at.length === 16 ? formData.due_at + ":00" : formData.due_at;
+  const isoDueAt = new Date(formatted).toISOString();
+
+  const { data, error } = await supabase
+    .from("deadlines")
+    .insert({
+      user_id: user.id,
+      title: formData.title,
+      deadline_type: formData.deadline_type || "other",
+      due_at: isoDueAt,
+      timezone: "Africa/Accra",
+      source_url: formData.source_url || null,
+      application_id: formData.application_id || null,
+      scholarship_id: formData.scholarship_id || null,
+      program_id: formData.program_id || null,
+      notes: formData.notes || null,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  await supabase.from("activity_events").insert({
+    user_id: user.id,
+    entity_type: "deadline",
+    entity_id: data.id,
+    action: "created",
+    summary: `Created deadline: ${formData.title}`,
+  });
+
+  revalidatePath("/calendar");
+  revalidatePath("/dashboard");
   return data;
 }
 

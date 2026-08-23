@@ -58,7 +58,7 @@ export const fixtureDeadlines = [
   },
   {
     id: "3",
-    title: "Submit Recommendation Request — Prof. Mensah",
+    title: "Submit Recommendation Request - Prof. Mensah",
     type: "recommendation" as const,
     dueAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
     completed: false,

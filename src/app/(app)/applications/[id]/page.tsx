@@ -10,11 +10,21 @@ import { Input } from "@/components/ui/input";
 import { getExpenses } from "@/features/scholarships/actions";
 import { createExpenseFromForm } from "@/features/scholarships/form-actions";
 import { updateExpenseFromForm, archiveExpenseFromForm } from "@/features/scholarships/edit-actions";
+import { archiveApplication, getUpcomingDeadlines, getTasks, createTask, createDeadline, deleteDeadline, deleteTask } from "@/features/programs/actions";
+import { getDocuments } from "@/features/documents/actions";
+import { getEssayPrompts, getRecommendationRequests } from "@/features/essays/actions";
 import {
   CURRENCIES,
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
+  EXPENSE_STATUSES,
+  EXPENSE_STATUS_LABELS,
   APPLICATION_STATUSES,
+  APPLICATION_STATUS_LABELS,
+  TASK_STATUSES,
+  TASK_STATUS_LABELS,
+  DEADLINE_TYPES,
+  DEADLINE_TYPE_LABELS,
 } from "@/lib/constants";
 
 export default async function ApplicationDetailPage({
@@ -37,6 +47,37 @@ export default async function ApplicationDetailPage({
   } catch {
     // No expenses
   }
+
+  let deadlines: any[] = [];
+  try {
+    const allDeadlines = await getUpcomingDeadlines(365);
+    deadlines = allDeadlines.filter((d: any) => d.application_id === id);
+  } catch {}
+
+  let tasks: any[] = [];
+  try {
+    const allTasks = await getTasks();
+    tasks = allTasks.filter((t: any) => t.application_id === id);
+  } catch {}
+
+  let documents: any[] = [];
+  try {
+    const allDocs = await getDocuments();
+    // Documents linked via document_requirements
+    documents = allDocs;
+  } catch {}
+
+  let essayPrompts: any[] = [];
+  try {
+    const allEssays = await getEssayPrompts();
+    essayPrompts = allEssays.filter((e: any) => e.application_id === id);
+  } catch {}
+
+  let recRequests: any[] = [];
+  try {
+    const allRecs = await getRecommendationRequests();
+    recRequests = allRecs.filter((r: any) => r.application_id === id);
+  } catch {}
 
   const program = application.programs;
   const inst = program?.institutions;
@@ -103,7 +144,7 @@ export default async function ApplicationDetailPage({
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Round</p>
-                <p className="text-sm font-medium mt-1">{application.application_round || "—"}</p>
+                <p className="text-sm font-medium mt-1">{application.application_round || "-"}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Fee Status</p>
@@ -197,10 +238,198 @@ export default async function ApplicationDetailPage({
             </Card>
           )}
 
-          {/* Quick links to related entities */}
+          {/* Deadlines */}
           <Card>
             <CardHeader>
-              <CardTitle className="font-serif text-lg">Related</CardTitle>
+              <CardTitle className="flex items-center gap-2 font-serif text-lg">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                Deadlines ({deadlines.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {deadlines.length > 0 && (
+                <div className="space-y-2 mb-4">
+                  {deadlines.map((d: any) => (
+                    <div key={d.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                      <div>
+                        <p className="text-sm font-medium">{d.title}</p>
+                        <p className="text-xs text-muted-foreground">{DEADLINE_TYPE_LABELS[d.deadline_type] || d.deadline_type}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DeadlineIndicator dueAt={d.due_at} />
+                        <form action={async () => {
+                          "use server";
+                          await deleteDeadline(d.id);
+                        }}>
+                          <Button type="submit" size="sm" variant="ghost" className="text-destructive hover:text-destructive h-7 px-2 text-xs">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </form>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <form action={async (formData: FormData) => {
+                "use server";
+                await createDeadline({
+                  title: formData.get("title") as string,
+                  application_id: id,
+                  deadline_type: formData.get("deadline_type") as string,
+                  due_at: formData.get("due_at") as string,
+                });
+              }} className="space-y-3 border-t pt-4">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Add deadline</p>
+                <Input name="title" required placeholder="e.g. Submit recommendation letter" />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Input name="due_at" type="datetime-local" required />
+                  <select name="deadline_type" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                    {DEADLINE_TYPES.map((t) => (
+                      <option key={t} value={t}>{DEADLINE_TYPE_LABELS[t]}</option>
+                    ))}
+                  </select>
+                </div>
+                <Button type="submit" size="sm"><Plus className="mr-1 h-4 w-4" />Add deadline</Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Tasks */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 font-serif text-lg">
+                Tasks ({tasks.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {tasks.length > 0 && (
+                <div className="space-y-2 mb-4">
+                  {tasks.map((t: any) => (
+                    <div key={t.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                      <div>
+                        <p className="text-sm font-medium">{t.title}</p>
+                        <p className="text-xs text-muted-foreground">{TASK_STATUS_LABELS[t.status] || t.status}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <StatusBadge
+                          status={
+                            t.status === "done" ? "done" :
+                            t.status === "in_progress" ? "preparing" :
+                            t.status === "cancelled" ? "blocked" :
+                            "draft"
+                          }
+                          label={TASK_STATUS_LABELS[t.status] || t.status}
+                        />
+                        <form action={async () => {
+                          "use server";
+                          await deleteTask(t.id);
+                        }}>
+                          <Button type="submit" size="sm" variant="ghost" className="text-destructive hover:text-destructive h-7 px-2 text-xs">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </form>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <form action={async (formData: FormData) => {
+                "use server";
+                await createTask({
+                  title: formData.get("title") as string,
+                  application_id: id,
+                  due_at: formData.get("due_at") as string || undefined,
+                  priority: Number(formData.get("priority")) || 3,
+                  blocking: formData.get("blocking") === "on",
+                });
+              }} className="space-y-3 border-t pt-4">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Add task</p>
+                <Input name="title" required placeholder="e.g. Gather recommendation letters" />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Input name="due_at" type="datetime-local" />
+                  <select name="priority" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                    {[1,2,3,4,5].map((p) => <option key={p} value={p}>Priority {p}</option>)}
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="blocking" name="blocking" className="rounded border-input" />
+                  <label htmlFor="blocking" className="text-sm">Blocking</label>
+                </div>
+                <Button type="submit" size="sm"><Plus className="mr-1 h-4 w-4" />Add task</Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Related Essay Prompts */}
+          {essayPrompts.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-serif text-lg">
+                  Essay Prompts ({essayPrompts.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {essayPrompts.map((e: any) => (
+                    <Link
+                      key={e.id}
+                      href={`/essays/${e.id}`}
+                      className="flex items-center justify-between py-2 border-b last:border-b-0 hover:bg-accent/50 rounded px-2 -mx-2 transition-colors"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{e.title}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{e.status?.replace(/_/g, " ")}</p>
+                      </div>
+                      <StatusBadge
+                        status={
+                          e.status === "final" || e.status === "submitted" ? "done" :
+                          "draft"
+                        }
+                        label={e.status?.replace(/_/g, " ") || "draft"}
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Related Recommendation Requests */}
+          {recRequests.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-serif text-lg">
+                  Recommendation Requests ({recRequests.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {recRequests.map((r: any) => (
+                    <div key={r.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                      <div>
+                        <p className="text-sm font-medium">{r.recommenders?.name || "Request"}</p>
+                        <p className="text-xs text-muted-foreground">{r.notes || "No notes"}</p>
+                      </div>
+                      <StatusBadge
+                        status={
+                          r.status === "submitted" ? "done" :
+                          r.status === "accepted" ? "preparing" :
+                          r.status === "declined" ? "blocked" :
+                          "draft"
+                        }
+                        label={r.status || "pending"}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Quick links */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-serif text-lg">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline" asChild>
@@ -381,6 +610,15 @@ export default async function ApplicationDetailPage({
               <Button asChild className="w-full" variant="outline">
                 <Link href={`/calendar?application=${application.id}`}>View deadlines</Link>
               </Button>
+              <form action={async () => {
+                "use server";
+                await archiveApplication(application.id);
+              }}>
+                <Button type="submit" className="w-full" variant="ghost" size="sm">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Archive application
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>

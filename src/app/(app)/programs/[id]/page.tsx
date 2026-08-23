@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getScholarships } from "@/features/scholarships/actions";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion-wrapper";
 
 export default async function ProgramDetailPage({
   params,
@@ -68,16 +69,18 @@ export default async function ProgramDetailPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <Link
-        href="/programs"
-        className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Programs
-      </Link>
+      <FadeIn delay={0.1}>
+        <Link
+          href="/programs"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Programs
+        </Link>
+      </FadeIn>
 
       {/* Header */}
-      <div className="mb-8">
+      <FadeIn delay={0.15} className="mb-8">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="font-serif text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -108,13 +111,14 @@ export default async function ProgramDetailPage({
             label={program.status}
           />
         </div>
-      </div>
+      </FadeIn>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <StaggerContainer className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           {/* Program Details */}
-          <Card>
-            <CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
               <CardTitle className="font-serif text-lg">Program Details</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -128,7 +132,7 @@ export default async function ProgramDetailPage({
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Intake</p>
-                <p className="text-sm font-medium mt-1">{program.intake_term || "—"} {program.intake_year}</p>
+                <p className="text-sm font-medium mt-1">{program.intake_term || "-"} {program.intake_year}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Duration</p>
@@ -142,12 +146,14 @@ export default async function ProgramDetailPage({
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Priority</p>
                 <p className="text-sm font-medium mt-1">{program.display_priority}/5</p>
               </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </StaggerItem>
 
           {program.program_url && (
-            <Card>
-              <CardContent className="p-4">
+            <StaggerItem>
+              <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+                <CardContent className="p-4">
                 <a
                   href={program.program_url}
                   target="_blank"
@@ -157,24 +163,28 @@ export default async function ProgramDetailPage({
                   <ExternalLink className="h-4 w-4" />
                   View official program page
                 </a>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </StaggerItem>
           )}
 
           {program.research_notes && (
-            <Card>
-              <CardHeader>
+            <StaggerItem>
+              <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+                <CardHeader>
                 <CardTitle className="font-serif text-lg">Research Notes</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{program.research_notes}</p>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </StaggerItem>
           )}
 
           {/* Applications for this program */}
-          <Card>
-            <CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                   <FileText className="h-4 w-4 text-muted-foreground" />
@@ -224,23 +234,25 @@ export default async function ProgramDetailPage({
                     </Link>
                   ))}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </StaggerItem>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Evaluation score */}
-          <Card>
-            <CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
               <CardTitle className="font-serif text-lg">Evaluation</CardTitle>
             </CardHeader>
             <CardContent>
               {normalizedScore !== null ? (
                 <div className="text-center">
-                  <p className="font-serif text-4xl font-bold text-primary">{normalizedScore}</p>
-                  <p className="text-xs text-muted-foreground mt-1">out of 5.0</p>
+                  <p className="font-serif text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary/60">{normalizedScore}</p>
+                  <p className="text-xs text-muted-foreground mt-2">out of 5.0</p>
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">
@@ -258,16 +270,18 @@ export default async function ProgramDetailPage({
                 ].map((item) => (
                   <div key={item.label} className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">{item.label}</span>
-                    <span className="font-medium">{item.value != null ? `${item.value}/5` : "—"}</span>
+                    <span className="font-medium">{item.value != null ? `${item.value}/5` : "-"}</span>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
+          </StaggerItem>
 
           {/* Quick actions */}
-          <Card>
-            <CardHeader>
+          <StaggerItem>
+            <Card className="shadow-sm border-border/50 bg-background/50 backdrop-blur">
+              <CardHeader>
               <CardTitle className="font-serif text-lg">Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -294,8 +308,9 @@ export default async function ProgramDetailPage({
               </Button>
             </CardContent>
           </Card>
+          </StaggerItem>
         </div>
-      </div>
+      </StaggerContainer>
     </div>
   );
 }
