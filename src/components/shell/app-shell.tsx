@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/shell/app-sidebar";
 import { TopBar } from "@/components/shell/top-bar";
 import { MobileNav } from "@/components/shell/mobile-nav";
+import { SearchDialog } from "@/components/domain/search-dialog";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [searchOpen, setSearchOpen] = React.useState(false);
 
   return (
     <TooltipProvider>
@@ -38,9 +40,15 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         )}
 
+        {/* Search dialog */}
+        <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+
         {/* Main content area */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          <TopBar onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <TopBar
+            onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onSearchOpen={() => setSearchOpen(true)}
+          />
 
           <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
             {children}
