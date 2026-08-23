@@ -47,7 +47,7 @@ export default function NewProgramForm({ institutions }: Props) {
               label: "Degree type",
               options: [
                 { value: "", label: "Select" },
-                ...DEGREE_TYPES.map((dt) => ({ value: dt.toLowerCase(), label: dt })),
+                ...DEGREE_TYPES.map((dt) => ({ value: dt, label: dt })),
               ],
             },
             {

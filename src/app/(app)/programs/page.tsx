@@ -8,9 +8,41 @@ import { EmptyState } from "@/components/domain/empty-state";
 import { MobileListItem } from "@/components/domain/mobile-list-item";
 import { getPrograms } from "@/features/programs/actions";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion-wrapper";
+import { ProgramFilters } from "./program-filters";
 
-export default async function ProgramsPage() {
-  const programs = await getPrograms();
+export default async function ProgramsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { institution, degree, status } = await searchParams;
+  let programs = await getPrograms();
+
+  const instMap = new Map();
+  const degreeSet = new Set<string>();
+  const statusSet = new Set<string>();
+
+  programs.forEach((p: any) => {
+    if (p.institutions) {
+      instMap.set(p.institution_id, p.institutions.name);
+    }
+    if (p.degree_type) degreeSet.add(p.degree_type);
+    if (p.status) statusSet.add(p.status);
+  });
+
+  const uniqueInstitutions = Array.from(instMap.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  const uniqueDegrees = Array.from(degreeSet).sort();
+  const uniqueStatuses = Array.from(statusSet).sort();
+
+  if (institution && typeof institution === 'string') {
+    programs = programs.filter((p: any) => p.institution_id === institution);
+  }
+  if (degree && typeof degree === 'string') {
+    programs = programs.filter((p: any) => p.degree_type === degree);
+  }
+  if (status && typeof status === 'string') {
+    programs = programs.filter((p: any) => p.status === status);
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -19,14 +51,22 @@ export default async function ProgramsPage() {
           title="Programs"
           description="Track graduate programs across institutions."
           action={
-            <Button asChild className="shadow-sm shadow-primary/20">
+            <Button asChild size="icon" className="shadow-sm shadow-primary/20 shrink-0 h-8 w-8 sm:h-9 sm:w-auto sm:px-4">
               <Link href="/programs/new">
-                <Plus className="mr-1 h-4 w-4" />
-                Add program
+                <Plus className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Add program</span>
               </Link>
             </Button>
           }
-        />
+        >
+          <div className="mt-2">
+            <ProgramFilters 
+              institutions={uniqueInstitutions} 
+              degreeTypes={uniqueDegrees} 
+              statuses={uniqueStatuses} 
+            />
+          </div>
+        </PageHeader>
       </FadeIn>
 
       {programs.length === 0 ? (
