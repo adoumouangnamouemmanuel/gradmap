@@ -42,7 +42,7 @@ Known interests include computer science, AI/machine learning and technology for
 - Online-first; no offline application-data layer or sync engine.
 - Installable PWA for phone and desktop.
 - Production access is personal/invite-only.
-- Email/password login plus mandatory TOTP MFA.
+- Email/password login with secure password recovery. MFA is intentionally deferred for now.
 - Supabase backend and private Storage.
 - In-app and Web Push notifications.
 - Security and exceptional UI quality are both P0.
@@ -79,9 +79,9 @@ Requirement keywords: **Must** is MVP/release-blocking; **Should** is expected b
 | --- | --- |
 | AUTH-01 | The system must support email/password login and safe password recovery. |
 | AUTH-02 | Production public registration must be disabled after the owner account is provisioned. |
-| AUTH-03 | The system must provide complete TOTP enrollment, verification, challenge and factor-management flows. |
-| AUTH-04 | Protected application data and files must require an AAL2 session. |
-| AUTH-05 | Anonymous or AAL1 visits to protected routes must be redirected without leaking private data. |
+| AUTH-03 | The system must provide secure password recovery and reset flows. |
+| AUTH-04 | Protected application data and files must require an authenticated session. |
+| AUTH-05 | Anonymous visits to protected routes must be redirected without leaking private data. |
 | AUTH-06 | The user must be able to view basic session/device security information and sign out. |
 | AUTH-07 | Auth callback and recovery redirects must use an exact internal allowlist. |
 
@@ -269,7 +269,7 @@ The dashboard is the command center, not a decorative report.
 - Theme: light, dark and system.
 - Program score weights.
 - Notification privacy, default offsets, quiet hours and device subscriptions.
-- MFA factor management.
+- MFA factor management (deferred).
 - Data export.
 - Archive and destructive account/data actions with clear warnings.
 
@@ -313,7 +313,7 @@ Risk combines time remaining, completion state and priority. The UI must show th
 
 ### Security and privacy
 
-All controls in `SECURITY.md` are mandatory. No anonymous data access, cross-user access, AAL1 protected access or public file access is acceptable.
+All controls in `SECURITY.md` are mandatory. No anonymous data access, cross-user access or public file access is acceptable. MFA is deferred; password sessions must still use secure recovery, protected routes, owner-scoped RLS and private storage.
 
 ### Visual quality
 
@@ -384,7 +384,7 @@ Every major screen must define:
 ## 11. Release acceptance scenarios
 
 1. **URL discovery:** anonymous visitor opens production URL and can access only public login/recovery/static routes.
-2. **MFA:** owner signs in with password, completes TOTP challenge and reaches dashboard; AAL1 direct database/file request fails.
+2. **Authentication:** owner signs in with email and password, can recover and reset the password, and reaches the dashboard; anonymous direct database/file requests fail.
 3. **First program:** owner creates institution, program, evaluation, application and verified deadline; dashboard updates correctly.
 4. **Funding:** owner creates Eiffel Scholarship record, links it to a program and tracks a separate scholarship application.
 5. **Documents:** owner uploads a CV, creates a second version, marks it current, links the exact version to a requirement and securely downloads it.
@@ -392,7 +392,7 @@ Every major screen must define:
 7. **Recommendations:** owner tracks two recommender requests with different application deadlines and sees follow-up needs.
 8. **Mobile:** owner installs PWA on phone, navigates comfortably at 390px width, enables push and follows a notification deep link.
 9. **Cross-user isolation:** test user B cannot read, mutate, reference or download test user A's data/files.
-10. **Export:** owner at AAL2 exports JSON/CSV that contains application data but no auth/push secrets or signed URLs.
+10. **Export:** owner exports JSON/CSV that contains application data but no auth/push secrets or signed URLs.
 11. **Visual QA:** dashboard, lists, details, forms, calendar, documents and settings pass responsive/accessibility review in light and dark themes.
 12. **Recovery:** fresh local database reset applies migrations, generates types and passes RLS tests.
 
