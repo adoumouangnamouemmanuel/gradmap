@@ -25,7 +25,6 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -36,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${fonts.sans} ${fonts.serif} ${fonts.mono} min-h-screen bg-background font-sans antialiased`}
+        className={`${fonts.sans} ${fonts.mono} min-h-screen bg-background font-sans antialiased`}
       >
         <ThemeProvider>
           {children}
