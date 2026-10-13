@@ -2,38 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { createActionClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
+  const headers = { "Cache-Control": "private, no-store", "Referrer-Policy": "no-referrer" };
   try {
-    const supabase = await createActionClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const path = searchParams.get("path");
-    const name = searchParams.get("name");
-
-    if (!path) {
-      return NextResponse.json({ error: "Missing path parameter" }, { status: 400 });
-    }
-
-    // Verify the path belongs to the user
-    if (!path.startsWith(`${user.id}/`)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    // Create signed URL (expires in 60 seconds)
-    const { data, error } = await supabase.storage
-      .from("application-files")
-      .createSignedUrl(path, 60);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    // Redirect to the signed URL for download
-    return NextResponse.redirect(data.signedUrl);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
-  }
+    const client = await createActionClient();
+    const { data: { user } } = await client.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Please sign in again." }, { status: 401, headers });
+    const path = request.nextUrl.searchParams.get("path");
+    if (!path || path.length > 500 || path.includes("..") || !path.startsWith(`${user.id}/`)) return NextResponse.json({ error: "This file is unavailable." }, { status: 404, headers });
+    const { data: version, error: readError } = await client.from("document_versions").select("file_name").eq("storage_path", path).eq("user_id", user.id).maybeSingle();
+    if (readError || !version) return NextResponse.json({ error: "This file is unavailable." }, { status: 404, headers });
+    const name = version.file_name.replace(/[\\/\x00-\x1f\x7f]/g, "_").slice(0, 200);
+    const { data, error } = await client.storage.from("application-files").createSignedUrl(path, 60, { download: name });
+    if (error || !data) return NextResponse.json({ error: "The download couldn’t start. Please try again." }, { status: 503, headers });
+    return NextResponse.redirect(data.signedUrl, { headers });
+  } catch { return NextResponse.json({ error: "The download couldn’t start. Please try again." }, { status: 503, headers }); }
 }
