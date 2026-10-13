@@ -1,5 +1,8 @@
 "use server";
+import type { ApplicationPage } from "./workspace";
+import { z } from "zod";
 
+import { guardEntry } from "@/features/entries/relationships";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
@@ -104,6 +107,7 @@ export async function createProgram(formData: {
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
+  await guardEntry("program", formData, supabase, user.id);
 
   const { data, error } = await supabase
     .from("programs")
@@ -263,6 +267,7 @@ export async function getApplication(id: string) {
 }
 
 export async function createApplication(formData: {
+  institution_id?: string;
   program_id: string;
   status?: string;
   priority?: number;
@@ -272,6 +277,7 @@ export async function createApplication(formData: {
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
+  await guardEntry("application", formData, supabase, user.id);
 
   const initialStatus = formData.status || "researching";
 
@@ -515,6 +521,12 @@ export async function updateTaskStatus(id: string, status: string) {
 }
 
 export async function createTask(formData: {
+  program_id?: string;
+  scholarship_application_id?: string;
+  document_id?: string;
+  essay_prompt_id?: string;
+  recommendation_request_id?: string;
+  timezone?: string;
   title: string;
   application_id?: string;
   scholarship_id?: string;
@@ -525,6 +537,7 @@ export async function createTask(formData: {
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
+  await guardEntry("task", formData, supabase, user.id);
 
   let isoDueAt: string | null = null;
   if (formData.due_at) {
@@ -537,6 +550,11 @@ export async function createTask(formData: {
     .insert({
       user_id: user.id,
       title: formData.title,
+      program_id: formData.program_id || null,
+      scholarship_application_id: formData.scholarship_application_id || null,
+      document_id: formData.document_id || null,
+      essay_prompt_id: formData.essay_prompt_id || null,
+      recommendation_request_id: formData.recommendation_request_id || null,
       description: formData.description || null,
       status: "todo",
       priority: formData.priority || 3,
@@ -564,6 +582,8 @@ export async function createTask(formData: {
 }
 
 export async function createDeadline(formData: {
+  timezone?: string;
+  scholarship_application_id?: string;
   title: string;
   application_id?: string;
   scholarship_id?: string;
@@ -575,6 +595,7 @@ export async function createDeadline(formData: {
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
+  await guardEntry("deadline", formData, supabase, user.id);
 
   const formatted = formData.due_at.length === 16 ? formData.due_at + ":00" : formData.due_at;
   const isoDueAt = new Date(formatted).toISOString();
@@ -586,7 +607,8 @@ export async function createDeadline(formData: {
       title: formData.title,
       deadline_type: formData.deadline_type || "other",
       due_at: isoDueAt,
-      timezone: "Africa/Accra",
+      timezone: formData.timezone || "Africa/Accra",
+      scholarship_application_id: formData.scholarship_application_id || null,
       source_url: formData.source_url || null,
       application_id: formData.application_id || null,
       scholarship_id: formData.scholarship_id || null,
@@ -684,4 +706,13 @@ export async function getProgramEvaluation(programId: string) {
 
   if (error && error.code !== "PGRST116") return null;
   return data;
+}
+
+export async function getApplicationPage(options: { query?: string; status?: string; page?: number } = {}): Promise<ApplicationPage> {
+  const input = z.object({ query: z.string().trim().max(120).default(""), status: z.string().max(60).default("all"), page: z.number().int().min(1).max(10000).default(1) }).parse(options);
+  const { supabase, user } = await getUser();
+  if (!user) throw new Error("Please sign in again.");
+  const { data, error } = await supabase.rpc("get_application_page", { p_query: input.query, p_status: input.status, p_page: input.page });
+  if (error) throw new Error("Applications couldn’t load. Please retry.");
+  return z.object({ items: z.array(z.object({ id: z.string().uuid(), status: z.string(), priority: z.number(), programs: z.object({ name: z.string(), institutions: z.object({ name: z.string(), country_name: z.string().nullable() }).nullable() }).nullable() })).max(24), page: z.number().int().positive(), total: z.number().int().nonnegative(), pageSize: z.literal(24), stages: z.array(z.string()) }).parse(data);
 }
