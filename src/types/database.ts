@@ -890,6 +890,19 @@ export type Database = {
       }
       profiles: {
         Row: {
+          field_of_study: string | null
+          current_qualification: string | null
+          academic_institution: string | null
+          career_goal: string | null
+          research_interests: string[]
+          preferred_countries: string[]
+          target_degrees: string[]
+          preferred_languages: string[]
+          delivery_preferences: string[]
+          funding_preference: string
+          annual_tuition_budget: number | null
+          budget_currency: string
+          study_start_term: string
           created_at: string
           expected_graduation_date: string | null
           full_name: string
@@ -902,6 +915,19 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          field_of_study?: string | null
+          current_qualification?: string | null
+          academic_institution?: string | null
+          career_goal?: string | null
+          research_interests?: string[]
+          preferred_countries?: string[]
+          target_degrees?: string[]
+          preferred_languages?: string[]
+          delivery_preferences?: string[]
+          funding_preference?: string
+          annual_tuition_budget?: number | null
+          budget_currency?: string
+          study_start_term?: string
           created_at?: string
           expected_graduation_date?: string | null
           full_name: string
@@ -914,6 +940,19 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          field_of_study?: string | null
+          current_qualification?: string | null
+          academic_institution?: string | null
+          career_goal?: string | null
+          research_interests?: string[]
+          preferred_countries?: string[]
+          target_degrees?: string[]
+          preferred_languages?: string[]
+          delivery_preferences?: string[]
+          funding_preference?: string
+          annual_tuition_budget?: number | null
+          budget_currency?: string
+          study_start_term?: string
           created_at?: string
           expected_graduation_date?: string | null
           full_name?: string
@@ -1510,7 +1549,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_application_page: { Args: { p_query?: string; p_status?: string; p_page?: number }; Returns: Json };
+      get_preparation_page: { Args: { p_kind: string; p_tab?: string; p_query?: string; p_application_id?: string | null; p_page?: number }; Returns: Json };
+      create_scholarship_entry: { Args: { p_input: Json }; Returns: string };
+      create_essay_revision: { Args: { p_prompt_id: string; p_content: string; p_notes?: string | null }; Returns: string }
+      create_document_revision: { Args: { p_document_id: string; p_file_name: string; p_mime_type: string; p_file_size: number; p_storage_path: string; p_sha256?: string | null; p_notes?: string | null }; Returns: string }
     }
     Enums: {
       [_ in never]: never
