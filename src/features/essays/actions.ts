@@ -1,5 +1,7 @@
 "use server";
 
+import { z } from "zod";
+import { guardEntry } from "@/features/entries/relationships";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
@@ -55,6 +57,7 @@ export async function createEssayPrompt(formData: {
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
+  await guardEntry("essay", formData, supabase, user.id);
 
   const { data, error } = await supabase
     .from("essay_prompts")
@@ -86,17 +89,17 @@ export async function createEssayPrompt(formData: {
 }
 
 export async function updateEssayPromptStatus(id: string, status: string) {
-  const { supabase } = await getUser();
-  const { data, error } = await supabase
-    .from("essay_prompts")
-    .update({ status })
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  revalidatePath("/essays");
-  revalidatePath(`/essays/${id}`);
+  z.string().uuid().parse(id); z.enum(["not_started", "outlining", "drafting", "reviewing", "final", "submitted"]).parse(status);
+  const { supabase, user } = await getUser(); if (!user) throw new Error("Please sign in again.");
+  if (["final", "submitted"].includes(status)) {
+    const { data: prompt } = await supabase.from("essay_prompts").select("current_version_id,word_limit,character_limit").eq("id", id).eq("user_id", user.id).is("archived_at", null).maybeSingle();
+    if (!prompt?.current_version_id) throw new Error("Save a revision before marking this writing final or submitted.");
+    const { data: version } = await supabase.from("essay_versions").select("word_count,character_count").eq("id", prompt.current_version_id).eq("essay_prompt_id", id).eq("user_id", user.id).maybeSingle();
+    if (!version || prompt.word_limit && version.word_count > prompt.word_limit || prompt.character_limit && version.character_count > prompt.character_limit) throw new Error("The saved revision exceeds its submission limit. Edit it before marking it final or submitted.");
+  }
+  const { data, error } = await supabase.from("essay_prompts").update({ status }).eq("id", id).eq("user_id", user.id).is("archived_at", null).select().single();
+  if (error || !data) throw new Error("Writing status couldn’t save.");
+  revalidatePath("/essays"); revalidatePath('/essays/' + id); revalidatePath("/applications", "layout");
   return data;
 }
 
@@ -104,50 +107,15 @@ export async function updateEssayPromptStatus(id: string, status: string) {
 // ESSAY VERSIONS
 // ============================================================
 
-export async function createEssayVersion(formData: {
-  essay_prompt_id: string;
-  content: string;
-  notes?: string;
-}) {
+export async function createEssayVersion(formData: { essay_prompt_id: string; content: string; notes?: string }) {
+  const input = z.object({ essay_prompt_id: z.string().uuid(), content: z.string().min(1).max(1000000).refine((value) => !!value.trim()), notes: z.string().max(10000).optional() }).parse(formData);
   const { supabase, user } = await getUser();
-  if (!user) throw new Error("Not authenticated");
-
-  // Get next version number
-  const { data: existing } = await supabase
-    .from("essay_versions")
-    .select("version_number")
-    .eq("essay_prompt_id", formData.essay_prompt_id)
-    .order("version_number", { ascending: false })
-    .limit(1);
-
-  const nextVersion = (existing?.[0]?.version_number || 0) + 1;
-  const wordCount = formData.content.trim().split(/\s+/).filter(Boolean).length;
-  const charCount = formData.content.length;
-
-  const { data, error } = await supabase
-    .from("essay_versions")
-    .insert({
-      user_id: user.id,
-      essay_prompt_id: formData.essay_prompt_id,
-      version_number: nextVersion,
-      content: formData.content,
-      word_count: wordCount,
-      character_count: charCount,
-      notes: formData.notes || null,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  // Update current_version_id
-  await supabase
-    .from("essay_prompts")
-    .update({ current_version_id: data.id })
-    .eq("id", formData.essay_prompt_id);
-
-  revalidatePath("/essays");
-  revalidatePath(`/essays/${formData.essay_prompt_id}`);
+  if (!user) throw new Error("Please sign in again.");
+  const { data: id, error } = await supabase.rpc("create_essay_revision", { p_prompt_id: input.essay_prompt_id, p_content: input.content, p_notes: input.notes || null });
+  if (error || !id) throw new Error("The revision save couldn’t be confirmed. Refresh the writing history before retrying.");
+  const { data, error: readError } = await supabase.from("essay_versions").select("*").eq("id", id).eq("user_id", user.id).single();
+  if (readError || !data) throw new Error("The revision saved but could not reload. Refresh before saving another copy.");
+  revalidatePath("/essays"); revalidatePath('/essays/' + input.essay_prompt_id); revalidatePath("/applications", "layout");
   return data;
 }
 
@@ -196,6 +164,7 @@ export async function createRecommender(formData: {
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
+  await guardEntry("recommender", formData, supabase, user.id);
 
   const { data, error } = await supabase
     .from("recommenders")
@@ -254,6 +223,7 @@ export async function createRecommendationRequest(formData: {
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
+  await guardEntry("recommendation", formData, supabase, user.id);
 
   // Ensure datetime-local values get seconds for PostgreSQL timestamptz
   let isoDueAt: string | null = null;
@@ -267,6 +237,7 @@ export async function createRecommendationRequest(formData: {
     .insert({
       user_id: user.id,
       recommender_id: formData.recommender_id,
+      status: "pending",
       application_id: formData.application_id || null,
       scholarship_application_id: formData.scholarship_application_id || null,
       due_at: isoDueAt,
@@ -290,7 +261,10 @@ export async function createRecommendationRequest(formData: {
 }
 
 export async function updateRecommendationRequestStatus(id: string, status: string) {
-  const { supabase } = await getUser();
+  z.string().uuid().parse(id);
+  z.enum(["pending", "sent", "accepted", "submitted", "declined"]).parse(status);
+  const { supabase, user } = await getUser();
+  if (!user) throw new Error("Please sign in again.");
   const { data, error } = await supabase
     .from("recommendation_requests")
     .update({
@@ -298,11 +272,14 @@ export async function updateRecommendationRequestStatus(id: string, status: stri
       submitted_at: status === "submitted" ? new Date().toISOString() : null,
     })
     .eq("id", id)
+    .eq("user_id", user.id)
     .select()
     .single();
 
   if (error) throw error;
   revalidatePath("/recommenders");
+  revalidatePath("/calendar");
+  revalidatePath("/applications", "layout");
   return data;
 }
 
@@ -352,6 +329,7 @@ export async function createContact(formData: {
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
+  await guardEntry("contact", formData, supabase, user.id);
 
   const { data, error } = await supabase
     .from("contacts")
