@@ -3,15 +3,29 @@ import type { Tables } from "@/types/database";
 import { createClient } from "@/lib/supabase/server";
 import { EntryRetry } from "@/features/entries/retry";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Building2, Globe, Clock, DollarSign, Plus, Pencil, Trash2, Trophy } from "lucide-react";
-import { getApplication } from "@/features/programs/actions";
+import {
+  ArrowLeft,
+  Building2,
+  Globe,
+  Clock,
+  DollarSign,
+  Plus,
+  Pencil,
+  Trash2,
+  Trophy,
+} from "lucide-react";
+import { getApplication, updateApplicationStatusFromForm } from "@/features/programs/actions";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { DeadlineIndicator } from "@/components/domain/deadline-indicator";
+import { StatusSelect } from "@/components/domain/status-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createExpenseFromForm } from "@/features/scholarships/form-actions";
-import { updateExpenseFromForm, archiveExpenseFromForm } from "@/features/scholarships/edit-actions";
+import {
+  updateExpenseFromForm,
+  archiveExpenseFromForm,
+} from "@/features/scholarships/edit-actions";
 import { archiveApplication, deleteDeadline, deleteTask } from "@/features/programs/actions";
 import {
   CURRENCIES,
@@ -19,6 +33,8 @@ import {
   EXPENSE_CATEGORY_LABELS,
   TASK_STATUS_LABELS,
   DEADLINE_TYPE_LABELS,
+  APPLICATION_STATUSES,
+  APPLICATION_STATUS_LABELS,
 } from "@/lib/constants";
 
 export default async function ApplicationDetailPage({
@@ -35,28 +51,76 @@ export default async function ApplicationDetailPage({
   }
 
   const client = await createClient();
-  const { data: { user } } = await client.auth.getUser();
+  const {
+    data: { user },
+  } = await client.auth.getUser();
   if (!user) redirect("/login");
   const results = await Promise.all([
-    client.from("expenses").select("*").eq("user_id", user.id).eq("application_id", id).order("created_at").limit(501),
-    client.from("deadlines").select("*").eq("user_id", user.id).eq("application_id", id).is("archived_at", null).order("due_at").limit(501),
-    client.from("document_requirements").select("*,document_versions!document_requirements_satisfied_by_version_id_fkey(document_id)").eq("user_id", user.id).eq("application_id", id).order("created_at").limit(501),
-    client.from("essay_prompts").select("*").eq("user_id", user.id).eq("application_id", id).is("archived_at", null).order("created_at").limit(501),
-    client.from("recommendation_requests").select("*,recommenders!recommendation_requests_recommender_owner_fkey(name)").eq("user_id", user.id).eq("application_id", id).order("created_at").limit(501),
+    client
+      .from("expenses")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("application_id", id)
+      .order("created_at")
+      .limit(501),
+    client
+      .from("deadlines")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("application_id", id)
+      .is("archived_at", null)
+      .order("due_at")
+      .limit(501),
+    client
+      .from("document_requirements")
+      .select("*,document_versions!document_requirements_satisfied_by_version_id_fkey(document_id)")
+      .eq("user_id", user.id)
+      .eq("application_id", id)
+      .order("created_at")
+      .limit(501),
+    client
+      .from("essay_prompts")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("application_id", id)
+      .is("archived_at", null)
+      .order("created_at")
+      .limit(501),
+    client
+      .from("recommendation_requests")
+      .select("*,recommenders!recommendation_requests_recommender_owner_fkey(name)")
+      .eq("user_id", user.id)
+      .eq("application_id", id)
+      .order("created_at")
+      .limit(501),
   ]);
   if (results.some((result) => result.error)) return <EntryRetry href="/applications" />;
   const expenses: Tables<"expenses">[] = results[0].data || [];
   const deadlines: Tables<"deadlines">[] = results[1].data || [];
   const documents: Tables<"document_requirements">[] = results[2].data || [];
   const essayPrompts: Tables<"essay_prompts">[] = results[3].data || [];
-  const recRequests: (Tables<"recommendation_requests"> & { recommenders?: { name: string } | null })[] = results[4].data || [];
+  const recRequests: (Tables<"recommendation_requests"> & {
+    recommenders?: { name: string } | null;
+  })[] = results[4].data || [];
   const taskContexts = [`application_id.eq.${application.id}`];
-  if (essayPrompts.length) taskContexts.push(`essay_prompt_id.in.(${essayPrompts.map((item) => item.id).join(",")})`);
-  if (recRequests.length) taskContexts.push(`recommendation_request_id.in.(${recRequests.map((item) => item.id).join(",")})`);
-  const taskResult = await client.from("tasks").select("*").eq("user_id", user.id).is("archived_at", null).or(taskContexts.join(",")).order("due_at").limit(501);
+  if (essayPrompts.length)
+    taskContexts.push(`essay_prompt_id.in.(${essayPrompts.map((item) => item.id).join(",")})`);
+  if (recRequests.length)
+    taskContexts.push(
+      `recommendation_request_id.in.(${recRequests.map((item) => item.id).join(",")})`,
+    );
+  const taskResult = await client
+    .from("tasks")
+    .select("*")
+    .eq("user_id", user.id)
+    .is("archived_at", null)
+    .or(taskContexts.join(","))
+    .order("due_at")
+    .limit(501);
   if (taskResult.error) return <EntryRetry href="/applications" />;
   const tasks: Tables<"tasks">[] = taskResult.data || [];
-  const truncated = results.some((result) => (result.data?.length || 0) > 500) || tasks.length > 500;
+  const truncated =
+    results.some((result) => (result.data?.length || 0) > 500) || tasks.length > 500;
 
   const program = application.programs;
   const inst = program?.institutions;
@@ -69,19 +133,17 @@ export default async function ApplicationDetailPage({
     <div className="workspace-page">
       <Link
         href="/applications"
-        className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1 text-sm"
       >
         <ArrowLeft className="h-4 w-4" />
         Applications
       </Link>
 
-      <div className="mb-8 rounded-3xl border bg-card p-6 sm:p-8">
+      <div className="bg-card mb-8 rounded-3xl border p-6 sm:p-8">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="font-serif text-3xl tracking-tight sm:text-4xl">
-              {program?.name}
-            </h1>
-            <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <h1 className="font-serif text-3xl tracking-tight sm:text-4xl">{program?.name}</h1>
+            <p className="text-muted-foreground mt-3 flex flex-wrap items-center gap-2 text-sm">
               <Building2 className="h-4 w-4" />
               {inst?.name}
               {inst?.country_name && (
@@ -93,126 +155,207 @@ export default async function ApplicationDetailPage({
               )}
             </p>
           </div>
-          <StatusBadge
-            status={
-              application.status === "submitted" ? "submitted" :
-              application.status === "admitted" ? "done" :
-              application.status === "rejected" ? "blocked" :
-              application.status === "preparing" || application.status === "ready" ? "preparing" :
-              "exploring"
-            }
-            label={application.status}
-          />
+          <div className="flex flex-col items-end gap-2">
+            <StatusBadge
+              status={
+                application.status === "submitted"
+                  ? "submitted"
+                  : application.status === "admitted"
+                    ? "done"
+                    : application.status === "rejected"
+                      ? "blocked"
+                      : application.status === "preparing" || application.status === "ready"
+                        ? "preparing"
+                        : "exploring"
+              }
+              label={APPLICATION_STATUS_LABELS[application.status] || application.status}
+            />
+            <form action={updateApplicationStatusFromForm.bind(null, id)}>
+              <label htmlFor="application-status" className="sr-only">
+                Update application status
+              </label>
+              <StatusSelect
+                id="application-status"
+                defaultValue={application.status}
+                options={APPLICATION_STATUSES.map((status) => ({
+                  value: status,
+                  label: APPLICATION_STATUS_LABELS[status],
+                }))}
+              />
+            </form>
+          </div>
         </div>
       </div>
 
-      {truncated && <p role="status" className="mb-5 text-sm text-muted-foreground">Some older entries exceed this workspace’s limit. Their detail pages remain available.</p>}
+      {truncated && (
+        <p role="status" className="text-muted-foreground mb-5 text-sm">
+          Some older entries exceed this workspace’s limit. Their detail pages remain available.
+        </p>
+      )}
       <nav aria-label="Application sections" className="workspace-section-nav">
         <a href="#overview">Overview</a>
         <a href="#deadlines">Deadlines · {deadlines.length}</a>
-        <a href="#tasks">Tasks · {tasks.filter((task) => task.status !== "done" && task.status !== "cancelled").length} open</a>
+        <a href="#tasks">
+          Tasks ·{" "}
+          {tasks.filter((task) => task.status !== "done" && task.status !== "cancelled").length}{" "}
+          open
+        </a>
         {essayPrompts.length > 0 && <a href="#writing">Writing · {essayPrompts.length}</a>}
         {recRequests.length > 0 && <a href="#people">Recommendations · {recRequests.length}</a>}
         <a href="#documents">Documents · {documents.length}</a>
       </nav>
-      <section className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-primary/5 p-5" aria-label="Task progress">
-        <div><p className="text-sm font-semibold">Your preparation, at a glance</p><p className="mt-1 text-sm text-muted-foreground">{tasks.filter((task) => task.status === "done").length} of {tasks.filter((task) => task.status !== "cancelled").length} tracked tasks complete. {tasks.length ? "Every finished task is a step forward." : "Add tasks below to build your plan."}</p></div>
-        <a href="#tasks" className="text-sm font-medium text-primary hover:underline">Continue preparation →</a>
+      <section
+        className="bg-primary/5 mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border p-5"
+        aria-label="Task progress"
+      >
+        <div>
+          <p className="text-sm font-semibold">Your preparation, at a glance</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {tasks.filter((task) => task.status === "done").length} of{" "}
+            {tasks.filter((task) => task.status !== "cancelled").length} tracked tasks complete.{" "}
+            {tasks.length
+              ? "Every finished task is a step forward."
+              : "Add tasks below to build your plan."}
+          </p>
+        </div>
+        <a href="#tasks" className="text-primary text-sm font-medium hover:underline">
+          Continue preparation →
+        </a>
       </section>
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           <Card id="overview">
             <CardHeader>
               <CardTitle className="font-serif text-lg">Application Details</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</p>
-                <p className="text-sm font-medium mt-1 capitalize">{application.status}</p>
+                <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                  Status
+                </p>
+                <p className="mt-1 text-sm font-medium capitalize">{application.status}</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Priority</p>
-                <p className="text-sm font-medium mt-1">{application.priority}/5</p>
+                <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                  Priority
+                </p>
+                <p className="mt-1 text-sm font-medium">{application.priority}/5</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Round</p>
-                <p className="text-sm font-medium mt-1">{application.application_round || "-"}</p>
+                <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                  Round
+                </p>
+                <p className="mt-1 text-sm font-medium">{application.application_round || "-"}</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Fee Status</p>
-                <p className="text-sm font-medium mt-1 capitalize">{application.fee_status}</p>
+                <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                  Fee Status
+                </p>
+                <p className="mt-1 text-sm font-medium capitalize">{application.fee_status}</p>
               </div>
               {application.fee_amount && (
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Application Fee</p>
-                  <p className="text-sm font-medium mt-1">{application.fee_currency_code} {application.fee_amount}</p>
+                  <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                    Application Fee
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {application.fee_currency_code} {application.fee_amount}
+                  </p>
                 </div>
               )}
               {application.submitted_at && (
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Submitted</p>
-                  <p className="text-sm font-medium mt-1">{new Date(application.submitted_at).toLocaleDateString()}</p>
+                  <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                    Submitted
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {new Date(application.submitted_at).toLocaleDateString()}
+                  </p>
                 </div>
               )}
               {application.response_due_at && (
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Response Due</p>
+                  <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                    Response Due
+                  </p>
                   <DeadlineIndicator dueAt={application.response_due_at} />
                 </div>
               )}
               {application.decision_at && (
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Decision Date</p>
-                  <p className="text-sm font-medium mt-1">{new Date(application.decision_at).toLocaleDateString()}</p>
+                  <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                    Decision Date
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {new Date(application.decision_at).toLocaleDateString()}
+                  </p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Decision / Offer Card */}
-          {(application.decision_type || application.offer_amount || application.enrollment_deadline) && (
+          {(application.decision_type ||
+            application.offer_amount ||
+            application.enrollment_deadline) && (
             <Card className="border-primary/20 bg-primary/5">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
-                  <Trophy className="h-4 w-4 text-primary" />
+                  <Trophy className="text-primary h-4 w-4" />
                   Decision & Offer
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
                 {application.decision_type && (
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Decision</p>
-                    <p className="text-sm font-medium mt-1 capitalize">{application.decision_type}</p>
+                    <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                      Decision
+                    </p>
+                    <p className="mt-1 text-sm font-medium capitalize">
+                      {application.decision_type}
+                    </p>
                   </div>
                 )}
                 {application.offer_amount && (
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Offer Amount</p>
-                    <p className="text-sm font-medium mt-1">{application.offer_currency_code} {application.offer_amount.toLocaleString()}</p>
+                    <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                      Offer Amount
+                    </p>
+                    <p className="mt-1 text-sm font-medium">
+                      {application.offer_currency_code} {application.offer_amount.toLocaleString()}
+                    </p>
                   </div>
                 )}
                 {application.offer_financial_aid && (
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Financial Aid</p>
-                    <p className="text-sm font-medium mt-1">Yes</p>
+                    <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                      Financial Aid
+                    </p>
+                    <p className="mt-1 text-sm font-medium">Yes</p>
                   </div>
                 )}
                 {application.offer_aid_details && (
                   <div className="sm:col-span-2">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Aid Details</p>
-                    <p className="text-sm font-medium mt-1">{application.offer_aid_details}</p>
+                    <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                      Aid Details
+                    </p>
+                    <p className="mt-1 text-sm font-medium">{application.offer_aid_details}</p>
                   </div>
                 )}
                 {application.enrollment_deadline && (
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Enrollment Deadline</p>
+                    <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                      Enrollment Deadline
+                    </p>
                     <DeadlineIndicator dueAt={application.enrollment_deadline} />
                   </div>
                 )}
                 {application.decision_conditions && (
                   <div className="sm:col-span-2">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Conditions</p>
-                    <p className="text-sm font-medium mt-1">{application.decision_conditions}</p>
+                    <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                      Conditions
+                    </p>
+                    <p className="mt-1 text-sm font-medium">{application.decision_conditions}</p>
                   </div>
                 )}
               </CardContent>
@@ -225,7 +368,9 @@ export default async function ApplicationDetailPage({
                 <CardTitle className="font-serif text-lg">Notes</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{application.notes}</p>
+                <p className="text-muted-foreground text-sm whitespace-pre-wrap">
+                  {application.notes}
+                </p>
               </CardContent>
             </Card>
           )}
@@ -234,26 +379,38 @@ export default async function ApplicationDetailPage({
           <Card id="deadlines">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 font-serif text-lg">
-                <Clock className="h-4 w-4 text-muted-foreground" />
+                <Clock className="text-muted-foreground h-4 w-4" />
                 Deadlines ({deadlines.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               {deadlines.length > 0 && (
-                <div className="space-y-2 mb-4">
+                <div className="mb-4 space-y-2">
                   {deadlines.map((d) => (
-                    <div key={d.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                    <div
+                      key={d.id}
+                      className="flex items-center justify-between border-b py-2 last:border-b-0"
+                    >
                       <div>
                         <p className="text-sm font-medium">{d.title}</p>
-                        <p className="text-xs text-muted-foreground">{DEADLINE_TYPE_LABELS[d.deadline_type] || d.deadline_type}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {DEADLINE_TYPE_LABELS[d.deadline_type] || d.deadline_type}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <DeadlineIndicator dueAt={d.due_at} />
-                        <form action={async () => {
-                          "use server";
-                          await deleteDeadline(d.id);
-                        }}>
-                          <Button type="submit" size="sm" variant="ghost" className="text-destructive hover:text-destructive h-7 px-2 text-xs">
+                        <form
+                          action={async () => {
+                            "use server";
+                            await deleteDeadline(d.id);
+                          }}
+                        >
+                          <Button
+                            type="submit"
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive h-7 px-2 text-xs"
+                          >
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </form>
@@ -262,7 +419,12 @@ export default async function ApplicationDetailPage({
                   ))}
                 </div>
               )}
-              <Button size="sm" asChild><Link href={`/calendar/new?application=${id}`}><Plus className="h-4 w-4" />Add deadline</Link></Button>
+              <Button size="sm" asChild>
+                <Link href={`/calendar/new?application=${id}`}>
+                  <Plus className="h-4 w-4" />
+                  Add deadline
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -275,28 +437,43 @@ export default async function ApplicationDetailPage({
             </CardHeader>
             <CardContent>
               {tasks.length > 0 && (
-                <div className="space-y-2 mb-4">
+                <div className="mb-4 space-y-2">
                   {tasks.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                    <div
+                      key={t.id}
+                      className="flex items-center justify-between border-b py-2 last:border-b-0"
+                    >
                       <div>
                         <p className="text-sm font-medium">{t.title}</p>
-                        <p className="text-xs text-muted-foreground">{TASK_STATUS_LABELS[t.status] || t.status}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {TASK_STATUS_LABELS[t.status] || t.status}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <StatusBadge
                           status={
-                            t.status === "done" ? "done" :
-                            t.status === "in_progress" ? "preparing" :
-                            t.status === "cancelled" ? "blocked" :
-                            "draft"
+                            t.status === "done"
+                              ? "done"
+                              : t.status === "in_progress"
+                                ? "preparing"
+                                : t.status === "cancelled"
+                                  ? "blocked"
+                                  : "draft"
                           }
                           label={TASK_STATUS_LABELS[t.status] || t.status}
                         />
-                        <form action={async () => {
-                          "use server";
-                          await deleteTask(t.id);
-                        }}>
-                          <Button type="submit" size="sm" variant="ghost" className="text-destructive hover:text-destructive h-7 px-2 text-xs">
+                        <form
+                          action={async () => {
+                            "use server";
+                            await deleteTask(t.id);
+                          }}
+                        >
+                          <Button
+                            type="submit"
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive h-7 px-2 text-xs"
+                          >
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </form>
@@ -305,7 +482,12 @@ export default async function ApplicationDetailPage({
                   ))}
                 </div>
               )}
-              <Button size="sm" asChild><Link href={`/calendar/new?kind=task&application=${id}`}><Plus className="h-4 w-4" />Plan a task</Link></Button>
+              <Button size="sm" asChild>
+                <Link href={`/calendar/new?kind=task&application=${id}`}>
+                  <Plus className="h-4 w-4" />
+                  Plan a task
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -323,17 +505,16 @@ export default async function ApplicationDetailPage({
                     <Link
                       key={e.id}
                       href={`/essays/${e.id}`}
-                      className="flex items-center justify-between py-2 border-b last:border-b-0 hover:bg-accent/50 rounded px-2 -mx-2 transition-colors"
+                      className="hover:bg-accent/50 -mx-2 flex items-center justify-between rounded border-b px-2 py-2 transition-colors last:border-b-0"
                     >
                       <div>
                         <p className="text-sm font-medium">{e.title}</p>
-                        <p className="text-xs text-muted-foreground capitalize">{e.status?.replace(/_/g, " ")}</p>
+                        <p className="text-muted-foreground text-xs capitalize">
+                          {e.status?.replace(/_/g, " ")}
+                        </p>
                       </div>
                       <StatusBadge
-                        status={
-                          e.status === "final" || e.status === "submitted" ? "done" :
-                          "draft"
-                        }
+                        status={e.status === "final" || e.status === "submitted" ? "done" : "draft"}
                         label={e.status?.replace(/_/g, " ") || "draft"}
                       />
                     </Link>
@@ -354,17 +535,23 @@ export default async function ApplicationDetailPage({
               <CardContent>
                 <div className="space-y-2">
                   {recRequests.map((r) => (
-                    <div key={r.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                    <div
+                      key={r.id}
+                      className="flex items-center justify-between border-b py-2 last:border-b-0"
+                    >
                       <div>
                         <p className="text-sm font-medium">{r.recommenders?.name || "Request"}</p>
-                        <p className="text-xs text-muted-foreground">{r.notes || "No notes"}</p>
+                        <p className="text-muted-foreground text-xs">{r.notes || "No notes"}</p>
                       </div>
                       <StatusBadge
                         status={
-                          r.status === "submitted" ? "done" :
-                          r.status === "accepted" ? "preparing" :
-                          r.status === "declined" ? "blocked" :
-                          "draft"
+                          r.status === "submitted"
+                            ? "done"
+                            : r.status === "accepted"
+                              ? "preparing"
+                              : r.status === "declined"
+                                ? "blocked"
+                                : "draft"
                         }
                         label={r.status || "pending"}
                       />
@@ -375,7 +562,37 @@ export default async function ApplicationDetailPage({
             </Card>
           )}
 
-          <Card id="documents"><CardHeader><CardTitle>Document requirements · {documents.length}</CardTitle></CardHeader><CardContent><div className="space-y-3">{documents.map((document) => <div key={document.id} className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 p-3"><p className="text-sm font-medium">{document.requirement_name}</p><span className="text-xs text-muted-foreground">{document.satisfied_by_version_id ? "Ready" : "Missing file"}</span></div>)}{!documents.length && <p className="text-sm text-muted-foreground">Track what this application needs, then attach reusable file versions from your library.</p>}<Button variant="outline" size="sm" asChild><Link href={`/documents?application=${id}&tab=requirements`}>Manage requirements</Link></Button></div></CardContent></Card>
+          <Card id="documents">
+            <CardHeader>
+              <CardTitle>Document requirements · {documents.length}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {documents.map((document) => (
+                  <div
+                    key={document.id}
+                    className="bg-muted/50 flex items-center justify-between gap-3 rounded-xl p-3"
+                  >
+                    <p className="text-sm font-medium">{document.requirement_name}</p>
+                    <span className="text-muted-foreground text-xs">
+                      {document.satisfied_by_version_id ? "Ready" : "Missing file"}
+                    </span>
+                  </div>
+                ))}
+                {!documents.length && (
+                  <p className="text-muted-foreground text-sm">
+                    Track what this application needs, then attach reusable file versions from your
+                    library.
+                  </p>
+                )}
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/documents?application=${id}&tab=requirements`}>
+                    Manage requirements
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Quick links */}
           <Card>
@@ -403,10 +620,10 @@ export default async function ApplicationDetailPage({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <DollarSign className="text-muted-foreground h-4 w-4" />
                   Expenses
                   {totalExpenses > 0 && (
-                    <span className="text-sm font-normal text-muted-foreground">
+                    <span className="text-muted-foreground text-sm font-normal">
                       (Paid: {totalExpenses.toLocaleString()})
                     </span>
                   )}
@@ -415,30 +632,34 @@ export default async function ApplicationDetailPage({
             </CardHeader>
             <CardContent>
               {expenses.length > 0 && (
-                <div className="space-y-3 mb-4">
+                <div className="mb-4 space-y-3">
                   {expenses.map((expense) => (
-                    <div key={expense.id} className="border rounded-lg p-3">
+                    <div key={expense.id} className="rounded-lg border p-3">
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium">{expense.description}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             {expense.category.replace(/_/g, " ")}
-                            {expense.due_on && ` · Due ${new Date(expense.due_on).toLocaleDateString()}`}
+                            {expense.due_on &&
+                              ` · Due ${new Date(expense.due_on).toLocaleDateString()}`}
                           </p>
                           {expense.notes && (
-                            <p className="text-xs text-muted-foreground mt-1">{expense.notes}</p>
+                            <p className="text-muted-foreground mt-1 text-xs">{expense.notes}</p>
                           )}
                         </div>
-                        <div className="text-right ml-4">
+                        <div className="ml-4 text-right">
                           <p className="text-sm font-medium">
                             {expense.currency_code} {Number(expense.amount).toLocaleString()}
                           </p>
                           <StatusBadge
                             status={
-                              expense.status === "paid" ? "done" :
-                              expense.status === "waived" ? "exploring" :
-                              expense.status === "due" ? "submitted" :
-                              "draft"
+                              expense.status === "paid"
+                                ? "done"
+                                : expense.status === "waived"
+                                  ? "exploring"
+                                  : expense.status === "due"
+                                    ? "submitted"
+                                    : "draft"
                             }
                             label={expense.status}
                           />
@@ -447,30 +668,59 @@ export default async function ApplicationDetailPage({
 
                       {/* Inline edit form */}
                       <details className="mt-2">
-                        <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                        <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-xs">
                           Edit expense
                         </summary>
-                        <form action={updateExpenseFromForm} className="mt-2 space-y-2 border-t pt-2">
+                        <form
+                          action={updateExpenseFromForm}
+                          className="mt-2 space-y-2 border-t pt-2"
+                        >
                           <input type="hidden" name="id" value={expense.id} />
                           <input type="hidden" name="application_id" value={id} />
 
                           <div className="grid gap-2 sm:grid-cols-2">
-                            <Input name="description" defaultValue={expense.description} placeholder="Description" />
-                            <select name="category" defaultValue={expense.category} className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                            <Input
+                              name="description"
+                              defaultValue={expense.description}
+                              placeholder="Description"
+                            />
+                            <select
+                              name="category"
+                              defaultValue={expense.category}
+                              className="border-input bg-background flex h-10 w-full rounded-lg border px-3 py-2 text-sm"
+                            >
                               {EXPENSE_CATEGORIES.map((c) => (
-                                <option key={c} value={c}>{EXPENSE_CATEGORY_LABELS[c]}</option>
+                                <option key={c} value={c}>
+                                  {EXPENSE_CATEGORY_LABELS[c]}
+                                </option>
                               ))}
                             </select>
                           </div>
 
                           <div className="grid gap-2 sm:grid-cols-3">
-                            <Input name="amount" type="number" min={0} step={0.01} defaultValue={expense.amount} />
-                            <select name="currency_code" defaultValue={expense.currency_code} className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                            <Input
+                              name="amount"
+                              type="number"
+                              min={0}
+                              step={0.01}
+                              defaultValue={expense.amount}
+                            />
+                            <select
+                              name="currency_code"
+                              defaultValue={expense.currency_code}
+                              className="border-input bg-background flex h-10 w-full rounded-lg border px-3 py-2 text-sm"
+                            >
                               {CURRENCIES.map((c) => (
-                                <option key={c.code} value={c.code}>{c.code}</option>
+                                <option key={c.code} value={c.code}>
+                                  {c.code}
+                                </option>
                               ))}
                             </select>
-                            <select name="status" defaultValue={expense.status} className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                            <select
+                              name="status"
+                              defaultValue={expense.status}
+                              className="border-input bg-background flex h-10 w-full rounded-lg border px-3 py-2 text-sm"
+                            >
                               <option value="planned">Planned</option>
                               <option value="due">Due</option>
                               <option value="paid">Paid</option>
@@ -494,7 +744,12 @@ export default async function ApplicationDetailPage({
                       <form action={archiveExpenseFromForm} className="mt-1">
                         <input type="hidden" name="id" value={expense.id} />
                         <input type="hidden" name="application_id" value={id} />
-                        <Button type="submit" size="sm" variant="ghost" className="text-destructive hover:text-destructive h-7 px-2 text-xs">
+                        <Button
+                          type="submit"
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive hover:text-destructive h-7 px-2 text-xs"
+                        >
                           <Trash2 className="mr-1 h-3 w-3" />
                           Remove
                         </Button>
@@ -506,7 +761,7 @@ export default async function ApplicationDetailPage({
 
               {/* Create new expense */}
               <div className="border-t pt-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                <p className="text-muted-foreground mb-3 text-xs font-medium tracking-wider uppercase">
                   Add expense
                 </p>
                 <form action={createExpenseFromForm} className="space-y-3">
@@ -514,22 +769,43 @@ export default async function ApplicationDetailPage({
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Input name="description" required placeholder="e.g. Application fee" />
-                    <select name="category" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                    <select
+                      name="category"
+                      className="border-input bg-background flex h-10 w-full rounded-lg border px-3 py-2 text-sm"
+                    >
                       {EXPENSE_CATEGORIES.map((c) => (
-                        <option key={c} value={c}>{EXPENSE_CATEGORY_LABELS[c]}</option>
+                        <option key={c} value={c}>
+                          {EXPENSE_CATEGORY_LABELS[c]}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-3">
-                    <Input name="amount" type="number" min={0} step={0.01} required placeholder="0.00" />
-                    <select name="currency_code" required className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                    <Input
+                      name="amount"
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      required
+                      placeholder="0.00"
+                    />
+                    <select
+                      name="currency_code"
+                      required
+                      className="border-input bg-background flex h-10 w-full rounded-lg border px-3 py-2 text-sm"
+                    >
                       <option value="">Currency</option>
                       {CURRENCIES.map((c) => (
-                        <option key={c.code} value={c.code}>{c.code}</option>
+                        <option key={c.code} value={c.code}>
+                          {c.code}
+                        </option>
                       ))}
                     </select>
-                    <select name="status" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                    <select
+                      name="status"
+                      className="border-input bg-background flex h-10 w-full rounded-lg border px-3 py-2 text-sm"
+                    >
                       <option value="planned">Planned</option>
                       <option value="due">Due</option>
                       <option value="paid">Paid</option>
@@ -561,10 +837,12 @@ export default async function ApplicationDetailPage({
               <Button asChild className="w-full" variant="outline">
                 <Link href={`/calendar?application=${application.id}`}>View deadlines</Link>
               </Button>
-              <form action={async () => {
-                "use server";
-                await archiveApplication(application.id);
-              }}>
+              <form
+                action={async () => {
+                  "use server";
+                  await archiveApplication(application.id);
+                }}
+              >
                 <Button type="submit" className="w-full" variant="ghost" size="sm">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Archive application
