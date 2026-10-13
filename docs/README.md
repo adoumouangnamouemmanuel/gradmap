@@ -55,4 +55,6 @@ When documents appear to conflict, use this order:
 
 ## Definition of success
 
+For the implemented connected workspace, migration/deployment status, verification commands, and complete changed-file inventory, see [Workspace upgrade](WORKSPACE_UPGRADE.md).
+
 The product is ready when Emmanuel can securely install it on his phone, sign in with MFA, track real programs and scholarships, store private document versions, see upcoming work, and receive reliable reminders without any other authenticated user or anonymous visitor being able to access his records or files.
