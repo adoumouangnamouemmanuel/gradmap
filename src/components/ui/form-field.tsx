@@ -24,17 +24,23 @@ export function FormField({
     <div className={cn("space-y-1.5", className)}>
       <label
         htmlFor={htmlFor}
-        className="flex items-center gap-1 text-[13px] font-medium text-foreground/70"
+        className="text-foreground/70 flex items-center gap-1 text-[13px] font-medium"
       >
         {label}
         {required && <span className="text-destructive text-[11px]">*</span>}
         {!required && (
-          <span className="text-muted-foreground/30 text-[11px] font-normal">optional</span>
+          <span className="text-muted-foreground/70 text-[11px] font-normal">optional</span>
         )}
       </label>
       {children}
       {error && (
-        <p className="text-[12px] text-destructive animate-content-enter">{error}</p>
+        <p
+          id={htmlFor ? `${htmlFor}-error` : undefined}
+          role="alert"
+          className="text-destructive animate-content-enter text-[12px]"
+        >
+          {error}
+        </p>
       )}
     </div>
   );
