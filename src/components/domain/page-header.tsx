@@ -14,11 +14,11 @@ export function PageHeader({ title, description, action, children, className }: 
     <div className={cn("mb-5 sm:mb-6 animate-content-enter", className)}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="text-[34px] sm:text-[34px] font-bold tracking-tight leading-[1.1]">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-[1.15]">
             {title}
           </h1>
           {description && (
-            <p className="mt-1 text-[14px] text-muted-foreground leading-relaxed">
+            <p className="mt-3 text-[14px] text-muted-foreground leading-relaxed">
               {description}
             </p>
           )}
