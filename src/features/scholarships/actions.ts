@@ -293,7 +293,7 @@ export async function updateScholarshipApplicationStatus(
 
   const { data: current } = await supabase
     .from("scholarship_applications")
-    .select("status")
+    .select("status, scholarship_id")
     .eq("id", id)
     .single();
 
@@ -315,7 +315,9 @@ export async function updateScholarshipApplicationStatus(
   });
 
   revalidatePath("/scholarships");
-  revalidatePath(`/scholarships/${id}`);
+  if (current?.scholarship_id) {
+    revalidatePath(`/scholarships/${current.scholarship_id}`);
+  }
   return data;
 }
 

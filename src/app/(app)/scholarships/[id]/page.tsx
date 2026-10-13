@@ -284,45 +284,68 @@ export default async function ScholarshipDetailPage({
                 {scholarshipApps.length > 0 ? (
                   <div className="space-y-2">
                     {scholarshipApps.map((sa: any) => (
-                      <div key={sa.id} className="flex items-center justify-between py-2">
-                        <div>
+                      <div
+                        key={sa.id}
+                        className="flex flex-wrap items-center justify-between gap-3 border-b py-2 last:border-b-0"
+                      >
+                        <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium capitalize">
                             {sa.status.replace(/_/g, " ")}
                           </p>
+                          {sa.application_id &&
+                            (() => {
+                              const application = applications.find(
+                                (item: any) => item.id === sa.application_id,
+                              );
+                              const program = application?.programs;
+                              if (!program) return null;
+                              return (
+                                <p className="text-muted-foreground mt-0.5 truncate text-xs">
+                                  {program.name}
+                                  {program.institutions?.name
+                                    ? ` · ${program.institutions.name}`
+                                    : ""}
+                                </p>
+                              );
+                            })()}
                           {sa.submitted_at && (
                             <p className="text-muted-foreground text-xs">
                               Submitted {new Date(sa.submitted_at).toLocaleDateString()}
                             </p>
                           )}
                         </div>
-                        <StatusBadge
-                          status={
-                            sa.status === "awarded"
-                              ? "done"
-                              : sa.status === "submitted"
-                                ? "submitted"
-                                : sa.status === "rejected"
-                                  ? "blocked"
-                                  : "preparing"
-                          }
-                          label={sa.status.replace(/_/g, " ")}
-                        />
-                        <form action={updateScholarshipApplicationStatusFromForm.bind(null, sa.id)}>
-                          <label
-                            htmlFor={`scholarship-application-status-${sa.id}`}
-                            className="sr-only"
-                          >
-                            Update scholarship application status
-                          </label>
-                          <StatusSelect
-                            id={`scholarship-application-status-${sa.id}`}
-                            defaultValue={sa.status}
-                            options={SCHOLARSHIP_STATUSES.map((status) => ({
-                              value: status,
-                              label: SCHOLARSHIP_STATUS_LABELS[status],
-                            }))}
+                        <div className="flex shrink-0 items-center gap-2">
+                          <StatusBadge
+                            status={
+                              sa.status === "awarded"
+                                ? "done"
+                                : sa.status === "submitted"
+                                  ? "submitted"
+                                  : sa.status === "rejected"
+                                    ? "blocked"
+                                    : "preparing"
+                            }
+                            label={sa.status.replace(/_/g, " ")}
                           />
-                        </form>
+                          <form
+                            action={updateScholarshipApplicationStatusFromForm.bind(null, sa.id)}
+                          >
+                            <label
+                              htmlFor={`scholarship-application-status-${sa.id}`}
+                              className="sr-only"
+                            >
+                              Update scholarship application status
+                            </label>
+                            <StatusSelect
+                              id={`scholarship-application-status-${sa.id}`}
+                              defaultValue={sa.status}
+                              options={SCHOLARSHIP_STATUSES.map((status) => ({
+                                value: status,
+                                label: SCHOLARSHIP_STATUS_LABELS[status],
+                              }))}
+                            />
+                          </form>
+                        </div>
                       </div>
                     ))}
                   </div>
