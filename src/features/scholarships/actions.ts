@@ -3,11 +3,14 @@
 import { guardEntry } from "@/features/entries/relationships";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { ELIGIBILITY_STATUSES, SCHOLARSHIP_STATUSES } from "@/lib/constants";
 
 // Helper to get authenticated user
 async function getUser() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return { supabase, user };
 }
 
@@ -36,11 +39,7 @@ export async function getScholarship(id: string) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const { data, error } = await supabase
-    .from("scholarships")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data, error } = await supabase.from("scholarships").select("*").eq("id", id).single();
 
   if (error) throw error;
   return data;
@@ -128,6 +127,14 @@ export async function updateScholarship(
   return data;
 }
 
+export async function updateScholarshipEligibilityFromForm(id: string, formData: FormData) {
+  const status = String(formData.get("status") || "");
+  if (!ELIGIBILITY_STATUSES.includes(status as (typeof ELIGIBILITY_STATUSES)[number])) {
+    throw new Error("Invalid scholarship eligibility status");
+  }
+  return updateScholarship(id, { eligibility_status: status });
+}
+
 export async function archiveScholarship(id: string) {
   const { supabase } = await getUser();
   const { error } = await supabase
@@ -149,7 +156,9 @@ export async function getProgramScholarships(scholarshipId: string) {
 
   const { data, error } = await supabase
     .from("program_scholarships")
-    .select("*, programs!program_scholarships_program_owner_fkey(name, institution_id, institutions!programs_institution_id_fkey(name))")
+    .select(
+      "*, programs!program_scholarships_program_owner_fkey(name, institution_id, institutions!programs_institution_id_fkey(name))",
+    )
     .eq("scholarship_id", scholarshipId)
     .order("created_at");
 
@@ -189,10 +198,7 @@ export async function linkScholarshipToProgram(
 
 export async function removeScholarshipFromProgram(id: string) {
   const { supabase } = await getUser();
-  const { error } = await supabase
-    .from("program_scholarships")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("program_scholarships").delete().eq("id", id);
 
   if (error) throw error;
   revalidatePath("/scholarships");
@@ -209,7 +215,9 @@ export async function getScholarshipApplications() {
 
   const { data, error } = await supabase
     .from("scholarship_applications")
-    .select("*, scholarships!scholarship_applications_scholarship_owner_fkey(name, provider, funding_type, amount, currency_code)")
+    .select(
+      "*, scholarships!scholarship_applications_scholarship_owner_fkey(name, provider, funding_type, amount, currency_code)",
+    )
     .is("archived_at", null)
     .order("created_at");
 
@@ -226,7 +234,9 @@ export async function getScholarshipApplication(id: string) {
 
   const { data, error } = await supabase
     .from("scholarship_applications")
-    .select("*, scholarships!scholarship_applications_scholarship_owner_fkey(name, provider, funding_type, amount, currency_code, coverage_notes, application_mechanism)")
+    .select(
+      "*, scholarships!scholarship_applications_scholarship_owner_fkey(name, provider, funding_type, amount, currency_code, coverage_notes, application_mechanism)",
+    )
     .eq("id", id)
     .single();
 
@@ -309,6 +319,14 @@ export async function updateScholarshipApplicationStatus(
   return data;
 }
 
+export async function updateScholarshipApplicationStatusFromForm(id: string, formData: FormData) {
+  const status = String(formData.get("status") || "");
+  if (!SCHOLARSHIP_STATUSES.includes(status as (typeof SCHOLARSHIP_STATUSES)[number])) {
+    throw new Error("Invalid scholarship application status");
+  }
+  return updateScholarshipApplicationStatus(id, status);
+}
+
 export async function archiveScholarshipApplication(id: string) {
   const { supabase } = await getUser();
   const { error } = await supabase
@@ -345,11 +363,7 @@ export async function getExpense(id: string) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const { data, error } = await supabase
-    .from("expenses")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data, error } = await supabase.from("expenses").select("*").eq("id", id).single();
 
   if (error) throw error;
   return data;
