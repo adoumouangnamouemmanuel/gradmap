@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Upload, FileCheck, AlertCircle, Loader2, File, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { uploadDocumentVersion } from "@/features/documents/actions";
+import { uploadFileVersion } from "@/features/documents/workspace-actions";
 
 interface DocumentUploadProps {
   documentId: string;
@@ -12,17 +12,9 @@ interface DocumentUploadProps {
   onUploadComplete?: () => void;
 }
 
-const ALLOWED_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/plain",
-];
-
-const MAX_SIZE = 20 * 1024 * 1024;
+import { DOCUMENT_MIME_TYPES, MAX_DOCUMENT_BYTES } from "@/features/documents/upload-validation";
+const ALLOWED_TYPES: readonly string[] = DOCUMENT_MIME_TYPES;
+const MAX_SIZE = MAX_DOCUMENT_BYTES;
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -30,25 +22,36 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function DocumentUpload({ documentId, currentVersionNumber, onUploadComplete }: DocumentUploadProps) {
+export function DocumentUpload({
+  documentId,
+  currentVersionNumber,
+  onUploadComplete,
+}: DocumentUploadProps) {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState(false);
+  const [dragging, setDragging] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    chooseFile(file);
+  }
+
+  function chooseFile(file: File) {
+    if (isUploading) return;
     setError(null);
     setSuccess(false);
+    setSelectedFile(null);
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setError(`File type "${file.type}" is not allowed. Accepted: PDF, JPEG, PNG, WebP, DOC, DOCX, TXT`);
+      setError(`File type "${file.type}" is not allowed. Accepted: PDF, JPEG, PNG, DOCX`);
       return;
     }
-    if (file.size > MAX_SIZE) {
+    if (file.size === 0 || file.size > MAX_SIZE) {
       setError(`File is ${formatSize(file.size)}. Maximum is 20 MB.`);
       return;
     }
@@ -56,7 +59,7 @@ export function DocumentUpload({ documentId, currentVersionNumber, onUploadCompl
   }
 
   async function handleUpload() {
-    if (!selectedFile) return;
+    if (!selectedFile || isUploading) return;
     setIsUploading(true);
     setError(null);
 
@@ -74,7 +77,7 @@ export function DocumentUpload({ documentId, currentVersionNumber, onUploadCompl
       }
       const base64 = btoa(binary);
 
-      await uploadDocumentVersion({
+      const result = await uploadFileVersion({
         document_id: documentId,
         file_name: selectedFile.name,
         mime_type: selectedFile.type,
@@ -82,12 +85,19 @@ export function DocumentUpload({ documentId, currentVersionNumber, onUploadCompl
         file_base64: base64,
       });
 
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
       setSuccess(true);
       setSelectedFile(null);
       router.refresh();
       onUploadComplete?.();
-    } catch (err: any) {
-      setError(err.message || "Upload failed");
+    } catch {
+      setError(
+        "This file couldn’t save. Check the file type and connection, then retry. Your earlier versions are unchanged.",
+      );
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -95,27 +105,59 @@ export function DocumentUpload({ documentId, currentVersionNumber, onUploadCompl
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <input
         ref={fileInputRef}
         type="file"
-        accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt"
+        accept=".pdf,.jpg,.jpeg,.png,.docx"
         onChange={handleFileSelect}
         className="hidden"
       />
 
+      {!selectedFile && (
+        <button
+          type="button"
+          disabled={isUploading}
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(event) => {
+            event.preventDefault();
+            setDragging(false);
+            const file = event.dataTransfer.files[0];
+            if (file) chooseFile(file);
+          }}
+          className={`flex min-h-40 w-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-5 py-7 text-center transition-colors ${dragging ? "border-primary bg-primary/10" : "border-primary/25 bg-primary/5 hover:bg-primary/10"}`}
+        >
+          <span className="bg-card text-primary rounded-2xl p-3">
+            <Upload size={22} />
+          </span>
+          <span className="text-sm font-medium">Choose a file or drop it here</span>
+          <span className="text-muted-foreground text-xs">
+            Private upload · previous versions stay available
+          </span>
+        </button>
+      )}
+
       {/* File preview */}
       {selectedFile && !isUploading && !success && (
-        <div className="flex items-center gap-3 rounded-[12px] border border-border/50 bg-muted/20 p-3 animate-content-enter">
-          <div className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-[10px] bg-primary/[0.08] text-primary/60">
+        <div className="border-border/50 bg-muted/20 animate-content-enter flex items-center gap-3 rounded-[12px] border p-3">
+          <div className="bg-primary/[0.08] text-primary/60 flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-[10px]">
             <File className="h-[18px] w-[18px]" />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-medium truncate">{selectedFile.name}</p>
-            <p className="text-[12px] text-muted-foreground">{formatSize(selectedFile.size)}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[14px] font-medium">{selectedFile.name}</p>
+            <p className="text-muted-foreground text-[12px]">{formatSize(selectedFile.size)}</p>
           </div>
-          <button onClick={() => setSelectedFile(null)} className="p-1.5 rounded-full hover:bg-accent press-apple">
-            <X className="h-[16px] w-[16px] text-muted-foreground/50" />
+          <button
+            aria-label="Remove selected file"
+            onClick={() => setSelectedFile(null)}
+            className="hover:bg-accent press-apple rounded-full p-1.5"
+          >
+            <X className="text-muted-foreground/50 h-[16px] w-[16px]" />
           </button>
         </div>
       )}
@@ -127,37 +169,34 @@ export function DocumentUpload({ documentId, currentVersionNumber, onUploadCompl
         </Button>
       )}
 
-      {!selectedFile && (
-        <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="w-full rounded-[12px]">
-          <Upload className="mr-2 h-4 w-4" />
-          Choose file (v{currentVersionNumber + 1})
-        </Button>
-      )}
-
       {isUploading && (
-        <div className="flex items-center justify-center gap-2 py-3 text-[14px] text-muted-foreground">
+        <div className="text-muted-foreground flex items-center justify-center gap-2 py-3 text-[14px]">
           <Loader2 className="h-4 w-4 animate-spin" />
           Uploading...
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-2 text-[13px] text-destructive animate-content-enter">
+        <div
+          role="alert"
+          className="text-destructive animate-content-enter flex items-center gap-2 text-[13px]"
+        >
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
       )}
 
       {success && (
-        <div className="flex items-center gap-2 text-[13px] text-emerald-600 animate-content-enter">
+        <div
+          role="status"
+          className="animate-content-enter flex items-center gap-2 text-[13px] text-emerald-600"
+        >
           <FileCheck className="h-4 w-4 shrink-0" />
           Uploaded successfully!
         </div>
       )}
 
-      <p className="text-[11px] text-muted-foreground/50">
-        PDF, JPEG, PNG, WebP, DOC, DOCX, TXT · Max 20 MB
-      </p>
+      <p className="text-muted-foreground/50 text-[11px]">PDF, JPEG, PNG, DOCX · Max 20 MB</p>
     </div>
   );
 }
