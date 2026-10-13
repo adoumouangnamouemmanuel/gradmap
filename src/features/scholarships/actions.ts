@@ -1,5 +1,6 @@
 "use server";
 
+import { guardEntry } from "@/features/entries/relationships";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
@@ -242,6 +243,7 @@ export async function createScholarshipApplication(formData: {
 }) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
+  await guardEntry("scholarshipApplication", formData, supabase, user.id);
 
   const { data, error } = await supabase
     .from("scholarship_applications")
