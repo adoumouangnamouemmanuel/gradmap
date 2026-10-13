@@ -10,7 +10,6 @@ import { StatusBadge } from "@/components/domain/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createScholarshipApplicationFromForm, createScholarshipDeadlineFromForm, createScholarshipTaskFromForm } from "@/features/scholarships/form-actions";
 import { archiveScholarshipFromForm } from "@/features/scholarships/edit-actions";
 import { getUpcomingDeadlines, getTasks } from "@/features/programs/actions";
 import { DeadlineIndicator } from "@/components/domain/deadline-indicator";
@@ -257,59 +256,7 @@ export default async function ScholarshipDetailPage({
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                   New scholarship application
                 </p>
-                <form action={createScholarshipApplicationFromForm} className="space-y-3">
-                  <input type="hidden" name="scholarship_id" value={scholarship.id} />
-
-                  <div className="space-y-1">
-                    <label htmlFor="application_id" className="text-sm font-medium">
-                      Link to program application (optional)
-                    </label>
-                    <select
-                      id="application_id"
-                      name="application_id"
-                      className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                    >
-                      <option value="">No linked application</option>
-                      {applications.map((app: any) => (
-                        <option key={app.id} value={app.id}>
-                          {app.programs?.name} - {app.status}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label htmlFor="sa_status" className="text-sm font-medium">
-                      Status
-                    </label>
-                    <select
-                      id="sa_status"
-                      name="status"
-                      className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                    >
-                      {SCHOLARSHIP_STATUSES.map((s) => (
-                        <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="nomination_required"
-                      name="nomination_required"
-                      className="rounded border-input"
-                    />
-                    <label htmlFor="nomination_required" className="text-sm">
-                      Nomination required
-                    </label>
-                  </div>
-
-                  <Button type="submit" size="sm">
-                    <Plus className="mr-1 h-4 w-4" />
-                    Add scholarship application
-                  </Button>
-                </form>
+                <Button asChild variant="outline"><Link href={`/scholarships/new?mode=application&scholarship=${id}`}><Plus size={15} />Start a scholarship application</Link></Button>
               </div>
             </CardContent>
           </Card>
@@ -340,23 +287,7 @@ export default async function ScholarshipDetailPage({
 
               <div className="border-t pt-4">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Add deadline</p>
-                <form action={createScholarshipDeadlineFromForm} className="space-y-3">
-                  <input type="hidden" name="scholarship_id" value={id} />
-                  <Input name="title" required placeholder="e.g. Eiffel nomination deadline" />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Input name="due_at" type="datetime-local" required />
-                    <select name="deadline_type" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
-                      <option value="funding">Funding</option>
-                      <option value="priority">Priority</option>
-                      <option value="final">Final</option>
-                      <option value="document">Document</option>
-                      <option value="decision">Decision</option>
-                      <option value="custom">Custom</option>
-                    </select>
-                  </div>
-                  <Input name="source_url" type="url" placeholder="Source URL (optional)" />
-                  <Button type="submit" size="sm"><Plus className="mr-1 h-4 w-4" />Add deadline</Button>
-                </form>
+                <Button asChild variant="outline"><Link href={`/calendar/new?scholarship=${id}`}><Plus size={15} />Add deadline</Link></Button>
               </div>
             </CardContent>
           </Card>
@@ -395,21 +326,7 @@ export default async function ScholarshipDetailPage({
 
               <div className="border-t pt-4">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Add task</p>
-                <form action={createScholarshipTaskFromForm} className="space-y-3">
-                  <input type="hidden" name="scholarship_id" value={id} />
-                  <Input name="title" required placeholder="e.g. Gather recommendation letters" />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Input name="due_at" type="datetime-local" />
-                    <select name="priority" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
-                      {[1,2,3,4,5].map((p) => <option key={p} value={p}>Priority {p}</option>)}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" id="blocking" name="blocking" className="rounded border-input" />
-                    <label htmlFor="blocking" className="text-sm">Blocking</label>
-                  </div>
-                  <Button type="submit" size="sm"><Plus className="mr-1 h-4 w-4" />Add task</Button>
-                </form>
+                <Button asChild variant="outline"><Link href={`/calendar/new?kind=task&scholarship=${id}`}><Plus size={15} />Plan a task</Link></Button>
               </div>
             </CardContent>
           </Card>
