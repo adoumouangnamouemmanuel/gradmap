@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import type { Tables } from "@/types/database";
+import { createClient } from "@/lib/supabase/server";
+import { EntryRetry } from "@/features/entries/retry";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Building2, Globe, Clock, DollarSign, Plus, Pencil, Trash2, Trophy } from "lucide-react";
 import { getApplication } from "@/features/programs/actions";
 import { StatusBadge } from "@/components/domain/status-badge";
@@ -7,23 +10,14 @@ import { DeadlineIndicator } from "@/components/domain/deadline-indicator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getExpenses } from "@/features/scholarships/actions";
 import { createExpenseFromForm } from "@/features/scholarships/form-actions";
 import { updateExpenseFromForm, archiveExpenseFromForm } from "@/features/scholarships/edit-actions";
-import { archiveApplication, getUpcomingDeadlines, getTasks, createTask, createDeadline, deleteDeadline, deleteTask } from "@/features/programs/actions";
-import { getDocuments } from "@/features/documents/actions";
-import { getEssayPrompts, getRecommendationRequests } from "@/features/essays/actions";
+import { archiveApplication, deleteDeadline, deleteTask } from "@/features/programs/actions";
 import {
   CURRENCIES,
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
-  EXPENSE_STATUSES,
-  EXPENSE_STATUS_LABELS,
-  APPLICATION_STATUSES,
-  APPLICATION_STATUS_LABELS,
-  TASK_STATUSES,
   TASK_STATUS_LABELS,
-  DEADLINE_TYPES,
   DEADLINE_TYPE_LABELS,
 } from "@/lib/constants";
 
@@ -40,54 +34,39 @@ export default async function ApplicationDetailPage({
     notFound();
   }
 
-  let expenses: any[] = [];
-  try {
-    const allExpenses = await getExpenses();
-    expenses = allExpenses.filter((e: any) => e.application_id === id);
-  } catch {
-    // No expenses
-  }
-
-  let deadlines: any[] = [];
-  try {
-    const allDeadlines = await getUpcomingDeadlines(365);
-    deadlines = allDeadlines.filter((d: any) => d.application_id === id);
-  } catch {}
-
-  let tasks: any[] = [];
-  try {
-    const allTasks = await getTasks();
-    tasks = allTasks.filter((t: any) => t.application_id === id);
-  } catch {}
-
-  let documents: any[] = [];
-  try {
-    const allDocs = await getDocuments();
-    // Documents linked via document_requirements
-    documents = allDocs;
-  } catch {}
-
-  let essayPrompts: any[] = [];
-  try {
-    const allEssays = await getEssayPrompts();
-    essayPrompts = allEssays.filter((e: any) => e.application_id === id);
-  } catch {}
-
-  let recRequests: any[] = [];
-  try {
-    const allRecs = await getRecommendationRequests();
-    recRequests = allRecs.filter((r: any) => r.application_id === id);
-  } catch {}
+  const client = await createClient();
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) redirect("/login");
+  const results = await Promise.all([
+    client.from("expenses").select("*").eq("user_id", user.id).eq("application_id", id).order("created_at").limit(501),
+    client.from("deadlines").select("*").eq("user_id", user.id).eq("application_id", id).is("archived_at", null).order("due_at").limit(501),
+    client.from("document_requirements").select("*,document_versions!document_requirements_satisfied_by_version_id_fkey(document_id)").eq("user_id", user.id).eq("application_id", id).order("created_at").limit(501),
+    client.from("essay_prompts").select("*").eq("user_id", user.id).eq("application_id", id).is("archived_at", null).order("created_at").limit(501),
+    client.from("recommendation_requests").select("*,recommenders!recommendation_requests_recommender_owner_fkey(name)").eq("user_id", user.id).eq("application_id", id).order("created_at").limit(501),
+  ]);
+  if (results.some((result) => result.error)) return <EntryRetry href="/applications" />;
+  const expenses: Tables<"expenses">[] = results[0].data || [];
+  const deadlines: Tables<"deadlines">[] = results[1].data || [];
+  const documents: Tables<"document_requirements">[] = results[2].data || [];
+  const essayPrompts: Tables<"essay_prompts">[] = results[3].data || [];
+  const recRequests: (Tables<"recommendation_requests"> & { recommenders?: { name: string } | null })[] = results[4].data || [];
+  const taskContexts = [`application_id.eq.${application.id}`];
+  if (essayPrompts.length) taskContexts.push(`essay_prompt_id.in.(${essayPrompts.map((item) => item.id).join(",")})`);
+  if (recRequests.length) taskContexts.push(`recommendation_request_id.in.(${recRequests.map((item) => item.id).join(",")})`);
+  const taskResult = await client.from("tasks").select("*").eq("user_id", user.id).is("archived_at", null).or(taskContexts.join(",")).order("due_at").limit(501);
+  if (taskResult.error) return <EntryRetry href="/applications" />;
+  const tasks: Tables<"tasks">[] = taskResult.data || [];
+  const truncated = results.some((result) => (result.data?.length || 0) > 500) || tasks.length > 500;
 
   const program = application.programs;
   const inst = program?.institutions;
 
   const totalExpenses = expenses
-    .filter((e: any) => e.status === "paid")
-    .reduce((sum: number, e: any) => sum + (Number(e.amount) || 0), 0);
+    .filter((e) => e.status === "paid")
+    .reduce((sum: number, e) => sum + (Number(e.amount) || 0), 0);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="workspace-page">
       <Link
         href="/applications"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -96,13 +75,13 @@ export default async function ApplicationDetailPage({
         Applications
       </Link>
 
-      <div className="mb-8">
+      <div className="mb-8 rounded-3xl border bg-card p-6 sm:p-8">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="font-serif text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h1 className="font-serif text-3xl tracking-tight sm:text-4xl">
               {program?.name}
             </h1>
-            <p className="mt-1 flex items-center gap-2 text-muted-foreground">
+            <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <Building2 className="h-4 w-4" />
               {inst?.name}
               {inst?.country_name && (
@@ -127,9 +106,22 @@ export default async function ApplicationDetailPage({
         </div>
       </div>
 
+      {truncated && <p role="status" className="mb-5 text-sm text-muted-foreground">Some older entries exceed this workspace’s limit. Their detail pages remain available.</p>}
+      <nav aria-label="Application sections" className="workspace-section-nav">
+        <a href="#overview">Overview</a>
+        <a href="#deadlines">Deadlines · {deadlines.length}</a>
+        <a href="#tasks">Tasks · {tasks.filter((task) => task.status !== "done" && task.status !== "cancelled").length} open</a>
+        {essayPrompts.length > 0 && <a href="#writing">Writing · {essayPrompts.length}</a>}
+        {recRequests.length > 0 && <a href="#people">Recommendations · {recRequests.length}</a>}
+        <a href="#documents">Documents · {documents.length}</a>
+      </nav>
+      <section className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-primary/5 p-5" aria-label="Task progress">
+        <div><p className="text-sm font-semibold">Your preparation, at a glance</p><p className="mt-1 text-sm text-muted-foreground">{tasks.filter((task) => task.status === "done").length} of {tasks.filter((task) => task.status !== "cancelled").length} tracked tasks complete. {tasks.length ? "Every finished task is a step forward." : "Add tasks below to build your plan."}</p></div>
+        <a href="#tasks" className="text-sm font-medium text-primary hover:underline">Continue preparation →</a>
+      </section>
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <Card>
+          <Card id="overview">
             <CardHeader>
               <CardTitle className="font-serif text-lg">Application Details</CardTitle>
             </CardHeader>
@@ -239,7 +231,7 @@ export default async function ApplicationDetailPage({
           )}
 
           {/* Deadlines */}
-          <Card>
+          <Card id="deadlines">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 font-serif text-lg">
                 <Clock className="h-4 w-4 text-muted-foreground" />
@@ -249,7 +241,7 @@ export default async function ApplicationDetailPage({
             <CardContent>
               {deadlines.length > 0 && (
                 <div className="space-y-2 mb-4">
-                  {deadlines.map((d: any) => (
+                  {deadlines.map((d) => (
                     <div key={d.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
                       <div>
                         <p className="text-sm font-medium">{d.title}</p>
@@ -270,32 +262,12 @@ export default async function ApplicationDetailPage({
                   ))}
                 </div>
               )}
-              <form action={async (formData: FormData) => {
-                "use server";
-                await createDeadline({
-                  title: formData.get("title") as string,
-                  application_id: id,
-                  deadline_type: formData.get("deadline_type") as string,
-                  due_at: formData.get("due_at") as string,
-                });
-              }} className="space-y-3 border-t pt-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Add deadline</p>
-                <Input name="title" required placeholder="e.g. Submit recommendation letter" />
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Input name="due_at" type="datetime-local" required />
-                  <select name="deadline_type" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
-                    {DEADLINE_TYPES.map((t) => (
-                      <option key={t} value={t}>{DEADLINE_TYPE_LABELS[t]}</option>
-                    ))}
-                  </select>
-                </div>
-                <Button type="submit" size="sm"><Plus className="mr-1 h-4 w-4" />Add deadline</Button>
-              </form>
+              <Button size="sm" asChild><Link href={`/calendar/new?application=${id}`}><Plus className="h-4 w-4" />Add deadline</Link></Button>
             </CardContent>
           </Card>
 
           {/* Tasks */}
-          <Card>
+          <Card id="tasks">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 font-serif text-lg">
                 Tasks ({tasks.length})
@@ -304,7 +276,7 @@ export default async function ApplicationDetailPage({
             <CardContent>
               {tasks.length > 0 && (
                 <div className="space-y-2 mb-4">
-                  {tasks.map((t: any) => (
+                  {tasks.map((t) => (
                     <div key={t.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
                       <div>
                         <p className="text-sm font-medium">{t.title}</p>
@@ -333,36 +305,13 @@ export default async function ApplicationDetailPage({
                   ))}
                 </div>
               )}
-              <form action={async (formData: FormData) => {
-                "use server";
-                await createTask({
-                  title: formData.get("title") as string,
-                  application_id: id,
-                  due_at: formData.get("due_at") as string || undefined,
-                  priority: Number(formData.get("priority")) || 3,
-                  blocking: formData.get("blocking") === "on",
-                });
-              }} className="space-y-3 border-t pt-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Add task</p>
-                <Input name="title" required placeholder="e.g. Gather recommendation letters" />
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Input name="due_at" type="datetime-local" />
-                  <select name="priority" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
-                    {[1,2,3,4,5].map((p) => <option key={p} value={p}>Priority {p}</option>)}
-                  </select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input type="checkbox" id="blocking" name="blocking" className="rounded border-input" />
-                  <label htmlFor="blocking" className="text-sm">Blocking</label>
-                </div>
-                <Button type="submit" size="sm"><Plus className="mr-1 h-4 w-4" />Add task</Button>
-              </form>
+              <Button size="sm" asChild><Link href={`/calendar/new?kind=task&application=${id}`}><Plus className="h-4 w-4" />Plan a task</Link></Button>
             </CardContent>
           </Card>
 
           {/* Related Essay Prompts */}
           {essayPrompts.length > 0 && (
-            <Card>
+            <Card id="writing">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                   Essay Prompts ({essayPrompts.length})
@@ -370,7 +319,7 @@ export default async function ApplicationDetailPage({
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {essayPrompts.map((e: any) => (
+                  {essayPrompts.map((e) => (
                     <Link
                       key={e.id}
                       href={`/essays/${e.id}`}
@@ -396,7 +345,7 @@ export default async function ApplicationDetailPage({
 
           {/* Related Recommendation Requests */}
           {recRequests.length > 0 && (
-            <Card>
+            <Card id="people">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-serif text-lg">
                   Recommendation Requests ({recRequests.length})
@@ -404,7 +353,7 @@ export default async function ApplicationDetailPage({
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {recRequests.map((r: any) => (
+                  {recRequests.map((r) => (
                     <div key={r.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
                       <div>
                         <p className="text-sm font-medium">{r.recommenders?.name || "Request"}</p>
@@ -426,6 +375,8 @@ export default async function ApplicationDetailPage({
             </Card>
           )}
 
+          <Card id="documents"><CardHeader><CardTitle>Document requirements · {documents.length}</CardTitle></CardHeader><CardContent><div className="space-y-3">{documents.map((document) => <div key={document.id} className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 p-3"><p className="text-sm font-medium">{document.requirement_name}</p><span className="text-xs text-muted-foreground">{document.satisfied_by_version_id ? "Ready" : "Missing file"}</span></div>)}{!documents.length && <p className="text-sm text-muted-foreground">Track what this application needs, then attach reusable file versions from your library.</p>}<Button variant="outline" size="sm" asChild><Link href={`/documents?application=${id}&tab=requirements`}>Manage requirements</Link></Button></div></CardContent></Card>
+
           {/* Quick links */}
           <Card>
             <CardHeader>
@@ -442,7 +393,7 @@ export default async function ApplicationDetailPage({
                 <Link href={`/documents/new?application=${id}`}>Add document requirement</Link>
               </Button>
               <Button size="sm" variant="outline" asChild>
-                <Link href={`/calendar?application=${id}`}>Add deadline</Link>
+                <Link href={`/calendar/new?application=${id}`}>Add deadline</Link>
               </Button>
             </CardContent>
           </Card>
@@ -465,7 +416,7 @@ export default async function ApplicationDetailPage({
             <CardContent>
               {expenses.length > 0 && (
                 <div className="space-y-3 mb-4">
-                  {expenses.map((expense: any) => (
+                  {expenses.map((expense) => (
                     <div key={expense.id} className="border rounded-lg p-3">
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1">
