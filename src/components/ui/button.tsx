@@ -6,14 +6,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[12px] text-[15px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-40 active:scale-[0.97] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "ui-button inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[14px] text-[14px] font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.96] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-elevation-1 active:shadow-none",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-elevation-1",
-        outline: "border border-border/60 bg-background hover:bg-accent hover:text-accent-foreground shadow-elevation-1",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-elevation-1",
+        default:
+          "button-primary bg-primary text-primary-foreground hover:bg-primary/90 active:shadow-none",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-elevation-1",
+        outline:
+          "border border-border/60 bg-card hover:border-primary/25 hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-elevation-1",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
@@ -37,7 +41,9 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+    return (
+      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+    );
   },
 );
 Button.displayName = "Button";
