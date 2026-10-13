@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Compass,
   BookOpen,
   Award,
   FileText,
@@ -18,6 +17,7 @@ import {
   ChevronLeft,
   X,
 } from "lucide-react";
+import { LogoMark } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -176,8 +176,8 @@ export function AppSidebar({
           collapsed ? "px-3" : "px-5",
         )}
       >
-        <div className="brand-mark bg-primary text-primary-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl">
-          <Compass size={21} strokeWidth={1.8} />
+        <div className="brand-mark bg-primary text-primary-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl p-2">
+          <LogoMark className="h-full w-full" />
         </div>
         <span
           className={cn(

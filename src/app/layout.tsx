@@ -17,6 +17,10 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "GradMap",
   },
+  icons: {
+    icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
+    apple: "/icons/icon-192.png",
+  },
 };
 
 export const viewport: Viewport = {

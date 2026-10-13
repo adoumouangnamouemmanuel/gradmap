@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowUpRight, Compass } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
 
 export function AuthShell({
   children,
@@ -20,10 +21,7 @@ export function AuthShell({
             href="/login"
             className="flex items-center gap-3 text-[21px] font-semibold tracking-tight"
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#63b8a5] text-[#10231f] shadow-lg shadow-black/20">
-              <Compass size={23} strokeWidth={1.8} />
-            </span>
-            GradMap
+            <Logo markClassName="h-11 w-11 rounded-2xl bg-[#63b8a5] p-2 text-[#10231f] shadow-lg shadow-black/20" />
           </Link>
 
           <div className="max-w-md">
@@ -40,16 +38,13 @@ export function AuthShell({
         </section>
 
         <section className="relative flex min-h-[calc(100svh-2rem)] items-center justify-center py-2 sm:min-h-[calc(100svh-5rem)] sm:py-0 lg:absolute lg:inset-0 lg:items-center lg:justify-end lg:px-14">
-          <div className="mx-auto w-full max-w-[440px]">
+          <div className="w-full max-w-[440px] lg:mr-0 lg:ml-auto">
             <div className="mb-5 flex items-center justify-between lg:hidden">
               <Link
                 href="/login"
                 className="flex items-center gap-2 text-base font-semibold tracking-tight text-white"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#24463b] text-white">
-                  <Compass size={17} />
-                </span>
-                GradMap
+                <Logo markClassName="h-8 w-8 rounded-xl bg-[#24463b] p-1.5 text-white" />
               </Link>
               <Link href="/login" className="text-sm text-white/75 hover:text-white">
                 Sign in <ArrowUpRight className="ml-1 inline h-3.5 w-3.5" />

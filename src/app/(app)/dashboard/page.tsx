@@ -5,11 +5,11 @@ import {
   Award,
   CalendarDays,
   CheckCircle2,
-  Compass,
   FileText,
   Plus,
   Sparkles,
 } from "lucide-react";
+import { LogoMark } from "@/components/brand/logo";
 import {
   getApplications,
   getUpcomingDeadlines,
@@ -83,7 +83,6 @@ export default async function DashboardPage() {
             {/* <span /> */}
             {/* <span /> */}
             {/* <span /> */}
-            {/* <Compass /> */}
           </div>
           <div className="relative z-10 max-w-md">
             <p className="text-primary mb-6 flex items-center gap-2 text-xs font-medium tracking-[0.18em] uppercase">
@@ -115,7 +114,7 @@ export default async function DashboardPage() {
         <MotionPanel className="workspace-panel progress-panel flex flex-col justify-between p-7">
           <div className="flex items-center justify-between">
             <p className="eyebrow">YOUR MOMENTUM</p>
-            <Compass size={20} className="text-primary" />
+            <LogoMark className="text-primary h-5 w-5" />
           </div>
           <div className="my-6 grid grid-cols-3 gap-3">
             {[

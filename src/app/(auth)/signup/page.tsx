@@ -5,6 +5,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/auth/password-input";
+import { AuthForm, PendingButton } from "@/components/auth/auth-form";
 
 export default async function SignupPage({
   searchParams,
@@ -27,21 +28,30 @@ export default async function SignupPage({
           </div>
         )}
         <form action={signInWithGoogle} className="mt-4 sm:mt-5">
-          <Button
+          <PendingButton
             type="submit"
             variant="outline"
             className="border-border/70 text-foreground hover:bg-muted h-11 w-full rounded-xl bg-white dark:bg-white/5"
           >
             <span className="mr-2 text-base font-semibold text-[#4285F4]">G</span>
             Continue with Google
-          </Button>
+          </PendingButton>
         </form>
         <div className="text-muted-foreground my-4 flex items-center gap-3 text-xs">
           <span className="bg-border h-px flex-1" />
           <span>or use email</span>
           <span className="bg-border h-px flex-1" />
         </div>
-        <form action={signup} className="space-y-3 sm:space-y-4">
+        <AuthForm
+          action={signup}
+          className="space-y-3 sm:space-y-4"
+          submit={
+            <>
+              Create my workspace <ArrowRight className="ml-2 h-4 w-4" />
+            </>
+          }
+          submitClassName="mt-2 h-11 w-full rounded-xl bg-[#24463b] text-white hover:bg-[#1c392f]"
+        >
           <div className="space-y-3">
             <div className="space-y-1.5">
               <label htmlFor="full_name" className="text-sm font-medium">
@@ -102,13 +112,7 @@ export default async function SignupPage({
               />
             </div>
           </div>
-          <Button
-            type="submit"
-            className="mt-2 h-11 w-full rounded-xl bg-[#24463b] text-white hover:bg-[#1c392f]"
-          >
-            Create my workspace <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </form>
+        </AuthForm>
         <p className="text-muted-foreground mt-5 pb-1 text-center text-sm">
           Already have an account?{" "}
           <Link

@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Search, CalendarDays, Menu, Compass, User, Settings, LogOut } from "lucide-react";
+import { Search, CalendarDays, Menu, User, Settings, LogOut } from "lucide-react";
+import { LogoMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -61,7 +62,7 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
       <Link href="/dashboard" className="press-apple lg:hidden">
         <div className="flex items-center gap-2">
           <div className="shadow-elevation-1 flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-[7px]">
-            <Compass size={22} className="text-primary" />
+            <LogoMark className="text-primary h-6 w-6" />
           </div>
           <span className="text-[16px] font-semibold tracking-tight">GradMap</span>
         </div>

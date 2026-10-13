@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title>GradMap logo</title>
+  <rect width="512" height="512" rx="112" fill="#17352f"/>
+  <path d="M150 96a38 38 0 0 1 38-38h222a42 42 0 0 1 42 42v278a27 27 0 0 1-43 21l-108-70-108 70a27 27 0 0 1-43-21V96Z" fill="#8bd4bf" fill-opacity=".14" stroke="#8bd4bf" stroke-linecap="round" stroke-linejoin="round" stroke-width="28"/>
+  <path d="M194 296c31-63 75-92 131-88 41 3 70-14 87-51" fill="none" stroke="#8bd4bf" stroke-linecap="round" stroke-width="28"/>
+  <path d="m386 123 11 32 32 11-32 11-11 32-11-32-32-11 32-11 11-32Z" fill="#f2c879"/>
+</svg>
