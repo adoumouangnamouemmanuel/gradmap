@@ -1,12 +1,21 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { Search, CalendarDays, Menu, Compass, User } from "lucide-react";
+import { Search, CalendarDays, Menu, Compass, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { logout } from "@/lib/auth/actions";
 
 interface TopBarProps {
   onMenuToggle?: () => void;
@@ -105,13 +114,49 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
         </Link>
       </Button>
 
-      <Link
-        href="/settings/profile"
-        aria-label="Open profile"
-        className="bg-primary/10 text-primary hover:bg-primary/20 hidden h-10 w-10 items-center justify-center rounded-2xl transition-colors lg:flex"
-      >
-        <User size={18} />
-      </Link>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Open profile menu"
+            className="bg-primary/10 text-primary hover:bg-primary/20 h-10 w-10 rounded-2xl"
+          >
+            <User size={18} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" sideOffset={10} className="w-56 p-2">
+          <DropdownMenuLabel className="px-3 py-2">
+            <span className="block text-sm font-semibold">Your workspace</span>
+            <span className="text-muted-foreground mt-0.5 block text-xs font-normal">
+              Account and preferences
+            </span>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild className="cursor-pointer px-3 py-2.5">
+            <Link href="/settings/profile">
+              <User />
+              Profile
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer px-3 py-2.5">
+            <Link href="/settings">
+              <Settings />
+              Settings
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <form action={logout} className="p-0">
+            <button
+              type="submit"
+              className="text-destructive hover:bg-accent focus:bg-accent flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors outline-none"
+            >
+              <LogOut className="size-4 shrink-0" />
+              Sign out
+            </button>
+          </form>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Theme toggle */}
       <div className="rounded-full">
