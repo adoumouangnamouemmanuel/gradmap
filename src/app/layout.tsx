@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ServiceWorkerRegister } from "@/components/providers/service-worker-register";
 import { fonts } from "@/lib/fonts";
 import "./globals.css";
 
@@ -35,9 +36,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${fonts.sans} ${fonts.mono} min-h-screen bg-background font-sans antialiased`}
+        className={`${fonts.sans} ${fonts.mono} bg-background min-h-screen font-sans antialiased`}
       >
         <ThemeProvider>
+          <ServiceWorkerRegister />
           {children}
         </ThemeProvider>
       </body>

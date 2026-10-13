@@ -469,7 +469,7 @@ export async function getTasks(applicationId?: string) {
 
   let query = supabase
     .from("tasks")
-    .select("*")
+    .select("id, title, status, due_at, application_id, blocking")
     .is("archived_at", null)
     .order("due_at", { ascending: true });
 
@@ -491,7 +491,7 @@ export async function getBlockingTasks() {
 
   const { data, error } = await supabase
     .from("tasks")
-    .select("*")
+    .select("id, title, status, due_at, application_id, blocking")
     .is("archived_at", null)
     .eq("blocking", true)
     .not("status", "in", "(done,cancelled)")

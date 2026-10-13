@@ -2,26 +2,26 @@
   "name": "GradMap",
   "short_name": "GradMap",
   "description": "Secure command center for graduate-program and scholarship applications.",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0a0a0f",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/logo.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/logo.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg"
     },
     {
-      "src": "/icons/icon-maskable.png",
+      "src": "/logo.jpg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "maskable"
     }
   ]
