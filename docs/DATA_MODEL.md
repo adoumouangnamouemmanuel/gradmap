@@ -734,3 +734,17 @@ Never seed Emmanuel's real documents, passwords, phone numbers or private recomm
 - Due-reminder index supports dispatcher query.
 - Storage path policies deny other-user prefixes.
 - Generated TypeScript types match the migrated schema.
+
+## 22. Implemented workspace additions (migrations 00009–00013)
+
+`profiles` now stores academic direction, qualification/institution, research interests, preferred countries/degrees/languages/formats, funding preference, annual tuition budget/currency, preferred starting term, and career objective. Budgets use `numeric(12,2)`; forms send decimal strings. Neutral defaults preserve existing users. Empty preferences mean undecided and do not imply eligibility.
+
+Institutions → programs → applications remain the required academic chain. Deadlines and tasks may be general or have one context. Tasks can additionally belong to a document, writing brief, or recommendation request. Documents, writing briefs, recommenders and scholarships can exist independently. A document requirement and recommendation request each require exactly one program-application or scholarship-application context.
+
+Owner-aware composite foreign keys now cover task/deadline parents and satisfied document versions. Current document/writing pointers reference a version of that same owner and parent. New constraints use `NOT VALID` to preserve historical rows while checking new writes. Audit existing data before running `VALIDATE CONSTRAINT`; historical invalid rows are not silently deleted or repaired.
+
+`create_essay_revision` and `create_document_revision` lock the parent, allocate the next version, insert the immutable revision, update the current pointer, and write an activity event in one transaction. Submission triggers reject final/submitted writing without a saved revision within its limits. Requirement triggers reject unavailable or mismatched file types. Writing counts follow the editor’s whitespace rules while preserving the original saved text.
+
+`create_scholarship_entry` atomically creates an opportunity, optional verified-owned program links (initially Needs verification), and its activity record. A failed link rolls back the whole operation.
+
+`get_preparation_page` and `get_application_page` return 24 owner-filtered metadata records with stable ordering, counts, server-side search/filters, and a clamped page. No writing content or storage paths are included. All five RPCs are security invoker, have an empty search path and schema-qualified relations, and deny execution to PUBLIC/anon.
