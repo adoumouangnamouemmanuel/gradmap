@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Mail, Plus, Trash2 } from "lucide-react";
-import { getRecommender, createRecommendationRequest, updateRecommendationRequestStatus, archiveRecommender } from "@/features/essays/actions";
-import { getApplications } from "@/features/programs/actions";
+import { getRecommender, archiveRecommender } from "@/features/essays/actions";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import type { Tables } from "@/types/database";
 
 export default async function RecommenderDetailPage({
   params,
@@ -21,18 +20,11 @@ export default async function RecommenderDetailPage({
     notFound();
   }
 
-  let applications: any[] = [];
-  try {
-    applications = await getApplications();
-  } catch {
-    // No applications
-  }
-
-  const requests = (recommender.recommendation_requests || [])
-    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const requests: Tables<"recommendation_requests">[] = (recommender.recommendation_requests || [])
+    .sort((a: Tables<"recommendation_requests">, b: Tables<"recommendation_requests">) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="workspace-page">
       <Link
         href="/recommenders"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -68,7 +60,7 @@ export default async function RecommenderDetailPage({
             <CardContent>
               {requests.length > 0 ? (
                 <div className="space-y-2 mb-4">
-                  {requests.map((req: any) => (
+                  {requests.map((req) => (
                     <div key={req.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
                       <div>
                         <p className="text-sm font-medium">
@@ -79,6 +71,8 @@ export default async function RecommenderDetailPage({
                             Due: {new Date(req.due_at).toLocaleDateString()}
                           </p>
                         )}
+                        {req.application_id && <Link className="mt-2 block text-xs text-primary" href={`/applications/${req.application_id}#people`}>View application →</Link>}
+                        <Link className="mt-2 block text-xs text-primary" href={`/calendar/new?kind=task&request=${req.id}`}>Plan a follow-up →</Link>
                         {req.notes && (
                           <p className="text-xs text-muted-foreground">{req.notes}</p>
                         )}
@@ -108,30 +102,7 @@ export default async function RecommenderDetailPage({
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                   New request
                 </p>
-                <form action={async (formData: FormData) => {
-                  "use server";
-                  await createRecommendationRequest({
-                    recommender_id: id,
-                    application_id: formData.get("application_id") as string || undefined,
-                    due_at: formData.get("due_at") as string || undefined,
-                    notes: formData.get("notes") as string || undefined,
-                  });
-                }} className="space-y-3">
-                  <select name="application_id" className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
-                    <option value="">General request (no specific application)</option>
-                    {applications.map((app: any) => (
-                      <option key={app.id} value={app.id}>
-                        {app.programs?.name} - {app.status}
-                      </option>
-                    ))}
-                  </select>
-                  <Input name="due_at" type="datetime-local" />
-                  <Input name="notes" placeholder="Notes (optional)" />
-                  <Button type="submit" size="sm">
-                    <Plus className="mr-1 h-4 w-4" />
-                    Create request
-                  </Button>
-                </form>
+                <Button asChild size="sm"><Link href={`/recommenders/new?mode=request&recommender=${id}`}><Plus size={15} />Track an application request</Link></Button><p className="mt-3 text-xs text-muted-foreground">Choose an application and due date in the connected form. No message is sent.</p>
               </div>
             </CardContent>
           </Card>
