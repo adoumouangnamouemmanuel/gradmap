@@ -3,7 +3,16 @@ import { type NextRequest, NextResponse } from "next/server";
 import { securityHeaders } from "@/lib/security/headers";
 
 // Public routes that don't require authentication
-const publicRoutes = ["/login", "/logout", "/auth/callback", "/auth/recovery", "/offline"];
+const publicRoutes = [
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+  "/logout",
+  "/auth/callback",
+  "/auth/recovery",
+  "/offline",
+];
 
 function isPublicRoute(pathname: string): boolean {
   return publicRoutes.some((route) => pathname.startsWith(route));
@@ -23,9 +32,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({
             request,
           });
@@ -40,7 +47,9 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: Do not run code between createServerClient and
   // supabase.auth.getClaims(). A simple mistake could make it very
   // hard to debug issues with users being randomly logged out.
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const isAuthenticated = !!user;
 
   // Redirect unauthenticated users to login
@@ -51,7 +60,10 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect authenticated users away from login
-  if (isAuthenticated && request.nextUrl.pathname === "/login") {
+  if (
+    isAuthenticated &&
+    ["/login", "/signup", "/forgot-password"].includes(request.nextUrl.pathname)
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
