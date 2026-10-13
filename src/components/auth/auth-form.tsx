@@ -20,10 +20,7 @@ function FormSubmitButton({ children, className, disabled, ...props }: ButtonPro
   );
 }
 
-export function PendingButton({
-  children,
-  ...props
-}: ButtonProps) {
+export function PendingButton({ children, ...props }: ButtonProps) {
   const { pending } = useFormStatus();
 
   return (

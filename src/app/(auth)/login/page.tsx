@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight, LockKeyhole } from "lucide-react";
 import { login, signInWithGoogle } from "@/lib/auth/actions";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/auth/password-input";
 import { AuthForm, PendingButton } from "@/components/auth/auth-form";
