@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, PenTool, Clock, Plus } from "lucide-react";
-import { getEssayPrompt, updateEssayPromptStatus, createEssayVersion } from "@/features/essays/actions";
+import { ArrowLeft, PenTool, Clock } from "lucide-react";
+import { getEssayPrompt } from "@/features/essays/actions";
 import { StatusBadge } from "@/components/domain/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { EssayEditor } from "@/features/essays/essay-editor";
+import type { Tables } from "@/types/database";
+import { EssayStatus } from "@/features/essays/essay-status";
 
 export default async function EssayPromptDetailPage({
   params,
@@ -20,11 +22,11 @@ export default async function EssayPromptDetailPage({
     notFound();
   }
 
-  const versions = (prompt.essay_versions || [])
-    .sort((a: any, b: any) => b.version_number - a.version_number);
+  const versions: Tables<"essay_versions">[] = (prompt.essay_versions || [])
+    .sort((a: Tables<"essay_versions">, b: Tables<"essay_versions">) => b.version_number - a.version_number);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="workspace-page">
       <Link
         href="/essays"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -56,6 +58,7 @@ export default async function EssayPromptDetailPage({
         </div>
       </div>
 
+      <div className="mb-6 flex flex-wrap gap-3">{prompt.application_id && <Button asChild variant="outline" size="sm"><Link href={`/applications/${prompt.application_id}#writing`}>View application</Link></Button>}<Button asChild variant="outline" size="sm"><Link href={`/calendar/new?kind=task&essay=${id}`}>Plan a writing task</Link></Button></div>
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           {/* Versions */}
@@ -68,7 +71,7 @@ export default async function EssayPromptDetailPage({
                 <p className="text-sm text-muted-foreground text-center py-4">No versions yet.</p>
               ) : (
                 <div className="space-y-3">
-                  {versions.map((v: any) => (
+                  {versions.map((v) => (
                     <div key={v.id} className="border rounded-lg p-3">
                       <div className="flex items-center justify-between">
                         <div>
@@ -94,35 +97,7 @@ export default async function EssayPromptDetailPage({
             </CardContent>
           </Card>
 
-          {/* New version form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif text-lg">Add new version</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form action={async (formData: FormData) => {
-                "use server";
-                await createEssayVersion({
-                  essay_prompt_id: id,
-                  content: formData.get("content") as string,
-                  notes: formData.get("notes") as string || undefined,
-                });
-              }} className="space-y-3">
-                <textarea
-                  name="content"
-                  rows={8}
-                  required
-                  className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground font-mono"
-                  placeholder="Paste or type your essay content here..."
-                />
-                <Input name="notes" placeholder="Version notes (optional)" />
-                <Button type="submit" size="sm">
-                  <Plus className="mr-1 h-4 w-4" />
-                  Save version
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <EssayEditor id={id} initialContent={versions[0]?.content || ""} wordLimit={prompt.word_limit} characterLimit={prompt.character_limit} />
         </div>
 
         <div className="space-y-6">
@@ -158,21 +133,7 @@ export default async function EssayPromptDetailPage({
               <CardTitle className="font-serif text-lg">Status</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {["not_started", "outlining", "drafting", "reviewing", "final", "submitted"].map((status) => (
-                <form key={status} action={async () => {
-                  "use server";
-                  await updateEssayPromptStatus(id, status);
-                }}>
-                  <Button
-                    type="submit"
-                    variant={prompt.status === status ? "default" : "ghost"}
-                    className="w-full justify-start text-sm"
-                    size="sm"
-                  >
-                    {status.replace(/_/g, " ")}
-                  </Button>
-                </form>
-              ))}
+              <EssayStatus id={id} status={prompt.status} />
             </CardContent>
           </Card>
         </div>
