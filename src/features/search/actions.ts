@@ -43,6 +43,8 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
 
   const term = escapeSearchTerm(query.trim().slice(0, 80));
   const pattern = `%${term}%`;
+  const numericTerm = Number(query.trim());
+  const isNumericSearch = Number.isFinite(numericTerm);
   const results: SearchResult[] = [];
 
   // Search in parallel for speed
@@ -55,6 +57,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
     contactsRes,
     recommendersRes,
     applicationsRes,
+    appsByNameRes,
     tasksRes,
     deadlinesRes,
     expensesRes,
@@ -127,11 +130,19 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
     // Applications (search via program name join)
     supabase
       .from("applications")
-      .select("id, status, programs!applications_program_id_fkey(name)")
+      .select("id, status, priority, programs!applications_program_id_fkey(name)")
       .eq("user_id", user.id)
       .is("archived_at", null)
       .ilike("status", pattern)
       .limit(6),
+
+    // Applications by program name
+    supabase
+      .from("applications")
+      .select("id, status, priority, programs!applications_program_id_fkey(name, id)")
+      .eq("user_id", user.id)
+      .is("archived_at", null)
+      .limit(100),
 
     // Tasks
     supabase
@@ -238,15 +249,8 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
     });
   }
 
-  // Applications (also search by program name)
-  const { data: appsByName } = await supabase
-    .from("applications")
-    .select("id, status, programs!applications_program_id_fkey(name, id)")
-    .eq("user_id", user.id)
-    .is("archived_at", null)
-    .limit(100);
-
-  for (const a of appsByName || []) {
+  // Applications (search by program name or status without a second unbounded query)
+  for (const a of appsByNameRes.data || []) {
     const progName = (a as any).programs?.name || "";
     if (
       progName.toLowerCase().includes(term.toLowerCase()) ||
@@ -295,6 +299,63 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
       href: "/settings/profile",
       type: "expense",
     });
+  }
+
+  if (isNumericSearch) {
+    const [scholarshipsByAmount, applicationsByPriority, expensesByAmount] = await Promise.all([
+      supabase
+        .from("scholarships")
+        .select("id, name, provider, amount")
+        .eq("user_id", user.id)
+        .is("archived_at", null)
+        .eq("amount", numericTerm)
+        .limit(6),
+      supabase
+        .from("applications")
+        .select("id, status, priority, programs!applications_program_id_fkey(name)")
+        .eq("user_id", user.id)
+        .is("archived_at", null)
+        .eq("priority", numericTerm)
+        .limit(6),
+      supabase
+        .from("expenses")
+        .select("id, description, category, currency_code, amount")
+        .eq("user_id", user.id)
+        .is("archived_at", null)
+        .eq("amount", numericTerm)
+        .limit(6),
+    ]);
+
+    for (const scholarship of scholarshipsByAmount.data || []) {
+      results.push({
+        id: scholarship.id,
+        title: scholarship.name,
+        subtitle: `${scholarship.provider || "Scholarship"} · ${Number(scholarship.amount).toLocaleString()}`,
+        href: `/scholarships/${scholarship.id}`,
+        type: "scholarship",
+      });
+    }
+
+    for (const application of applicationsByPriority.data || []) {
+      const programName = (application as any).programs?.name || "Application";
+      results.push({
+        id: application.id,
+        title: programName,
+        subtitle: `Priority ${application.priority} · ${application.status?.replace(/_/g, " ")}`,
+        href: `/applications/${application.id}`,
+        type: "application",
+      });
+    }
+
+    for (const expense of expensesByAmount.data || []) {
+      results.push({
+        id: expense.id,
+        title: expense.description,
+        subtitle: `${expense.currency_code} ${Number(expense.amount).toLocaleString()} · ${expense.category?.replace(/_/g, " ")}`,
+        href: "/settings/profile",
+        type: "expense",
+      });
+    }
   }
 
   // Deduplicate by type+id

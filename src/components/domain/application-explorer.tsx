@@ -17,16 +17,34 @@ import {
   type ApplicationPage,
 } from "@/features/programs/workspace";
 
-export function ApplicationExplorer({ applications, pagination, initialQuery = "", initialStatus = "all", initialView = "list" }: { applications: ApplicationSummary[]; pagination?: Omit<ApplicationPage, "items">; initialQuery?: string; initialStatus?: string; initialView?: "list" | "board" }) {
+export function ApplicationExplorer({
+  applications,
+  pagination,
+  initialQuery = "",
+  initialStatus = "all",
+  initialView = "list",
+}: {
+  applications: ApplicationSummary[];
+  pagination?: Omit<ApplicationPage, "items">;
+  initialQuery?: string;
+  initialStatus?: string;
+  initialView?: "list" | "board";
+}) {
   const [query, setQuery] = useState(initialQuery);
   const [status, setStatus] = useState(initialStatus);
   const [view, setView] = useState<"list" | "board">(initialView);
   const filtered = pagination ? applications : filterApplications(applications, query, status);
-  const router = useRouter(); const pathname = usePathname(); const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
   function navigate(changes: Record<string, string>) {
-    const params = new URLSearchParams(searchParams.toString()); params.set("view", view);
-    for (const [key, value] of Object.entries(changes)) { if (value) params.set(key, value); else params.delete(key); }
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", view);
+    for (const [key, value] of Object.entries(changes)) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
     startTransition(() => router.push(pathname + "?" + params.toString()));
   }
   const hasApplications = pagination ? pagination.stages.length > 0 : applications.length > 0;
@@ -73,7 +91,13 @@ export function ApplicationExplorer({ applications, pagination, initialQuery = "
   return (
     <div>
       <div className="mb-5 flex flex-wrap items-center gap-3">
-        <form onSubmit={(event) => { event.preventDefault(); if (pagination) navigate({ q: query, page: "" }); }} className="bg-card flex w-full min-w-0 flex-none items-center gap-2 rounded-2xl border px-3 py-3 sm:w-auto sm:flex-1">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (pagination) navigate({ q: query, page: "" });
+          }}
+          className="bg-card flex w-full min-w-0 flex-none items-center gap-2 rounded-2xl border px-3 py-3 sm:w-auto sm:flex-1"
+        >
           <Search size={16} className="text-muted-foreground" />
           <input
             aria-label="Search applications"
@@ -83,22 +107,34 @@ export function ApplicationExplorer({ applications, pagination, initialQuery = "
             maxLength={120}
             className="w-full min-w-0 bg-transparent text-sm outline-none"
           />
-          {pagination && <Button type="submit" size="sm" variant="ghost" disabled={pending}>Search</Button>}
+          {pagination && (
+            <Button type="submit" size="sm" variant="ghost" disabled={pending}>
+              Search
+            </Button>
+          )}
         </form>
         <select
           aria-label="Filter applications by status"
           value={status}
-          onChange={(event) => { setStatus(event.target.value); if (pagination) navigate({ status: event.target.value === "all" ? "" : event.target.value, page: "" }); }}
+          onChange={(event) => {
+            setStatus(event.target.value);
+            if (pagination)
+              navigate({
+                status: event.target.value === "all" ? "" : event.target.value,
+                page: "",
+              });
+          }}
           className="bg-card h-11 max-w-full rounded-xl border px-3 text-sm"
         >
           <option value="all">All stages</option>
-          {(pagination?.stages || Array.from(new Set(applications.map((application) => application.status)))).map(
-            (value) => (
-              <option key={value} value={value}>
-                {APPLICATION_STATUS_LABELS[value] || value}
-              </option>
-            ),
-          )}
+          {(
+            pagination?.stages ||
+            Array.from(new Set(applications.map((application) => application.status)))
+          ).map((value) => (
+            <option key={value} value={value}>
+              {APPLICATION_STATUS_LABELS[value] || value}
+            </option>
+          ))}
         </select>
         <div
           className="bg-card flex rounded-xl border p-1"
@@ -125,8 +161,16 @@ export function ApplicationExplorer({ applications, pagination, initialQuery = "
           ))}
         </div>
       </div>
-      {pending && <p role="status" className="mb-4 text-sm text-muted-foreground">Loading applications…</p>}
-      {pagination && view === "board" && pagination.total > pagination.pageSize && <p className="mb-4 text-xs text-muted-foreground">The board groups the applications on this page.</p>}
+      {pending && (
+        <p role="status" className="text-muted-foreground mb-4 text-sm">
+          Loading applications…
+        </p>
+      )}
+      {pagination && view === "board" && pagination.total > pagination.pageSize && (
+        <p className="text-muted-foreground mb-4 text-xs">
+          The board groups the applications on this page.
+        </p>
+      )}
       <p className="sr-only" role="status">
         {filtered.length} applications found
       </p>
@@ -164,8 +208,26 @@ export function ApplicationExplorer({ applications, pagination, initialQuery = "
           )}
         </div>
       ) : view === "list" ? (
-        <div className="bg-card overflow-hidden rounded-2xl border">
-          {filtered.map(applicationCard)}
+        <div className="space-y-5">
+          {groupApplications(filtered).map((stage) => (
+            <section key={stage.label} className="bg-card overflow-hidden rounded-2xl border">
+              <div className="bg-muted/35 border-b px-4 py-3">
+                <h3 className="flex items-center justify-between text-sm font-semibold">
+                  {stage.label}
+                  <span className="text-muted-foreground font-normal">
+                    {stage.applications.length}
+                  </span>
+                </h3>
+              </div>
+              {stage.applications.length > 0 ? (
+                stage.applications.map(applicationCard)
+              ) : (
+                <p className="text-muted-foreground px-4 py-5 text-sm">
+                  No applications in this stage.
+                </p>
+              )}
+            </section>
+          ))}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-3">
@@ -190,7 +252,15 @@ export function ApplicationExplorer({ applications, pagination, initialQuery = "
           })}
         </div>
       )}
-      {pagination && <PageNavigation page={pagination.page} total={pagination.total} pageSize={pagination.pageSize} pending={pending} onChange={(page) => navigate({ page: String(page) })} />}
+      {pagination && (
+        <PageNavigation
+          page={pagination.page}
+          total={pagination.total}
+          pageSize={pagination.pageSize}
+          pending={pending}
+          onChange={(page) => navigate({ page: String(page) })}
+        />
+      )}
     </div>
   );
 }

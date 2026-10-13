@@ -152,7 +152,7 @@ export default async function DashboardPage() {
               View all ↗
             </Link>
           </div>
-          <ApplicationExplorer applications={applications} />
+          <ApplicationExplorer applications={applications} initialView="board" />
         </MotionPanel>
         <div className="space-y-5">
           <MotionPanel delay={0.15} className="workspace-panel p-6">

@@ -147,18 +147,25 @@ export function SearchDialog({
       setResults([]);
       return;
     }
+    let active = true;
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        setResults(await globalSearch(query));
-        setSelectedIndex(0);
+        const nextResults = await globalSearch(query);
+        if (active) {
+          setResults(nextResults);
+          setSelectedIndex(0);
+        }
       } catch {
-        setResults([]);
+        if (active) setResults([]);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [query]);
 
   // Keyboard navigation
@@ -230,8 +237,18 @@ export function SearchDialog({
               autoComplete="off"
               spellCheck={false}
             />
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              aria-label="Close search"
+              title="Close search"
+              className="hover:bg-accent press-apple rounded-full p-2"
+            >
+              <X className="text-muted-foreground h-[18px] w-[18px]" />
+            </button>
             {query && (
               <button
+                type="button"
                 onClick={() => {
                   setQuery("");
                   inputRef.current?.focus();
