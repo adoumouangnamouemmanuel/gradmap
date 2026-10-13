@@ -57,8 +57,8 @@ self.addEventListener("push", (event) => {
   const data = event.data.json();
   const options = {
     body: data.body || "You have a GradMap reminder.",
-    icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-192x192.png",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
     vibrate: [100, 50, 100],
     data: { url: data.url || "/dashboard" },
   };

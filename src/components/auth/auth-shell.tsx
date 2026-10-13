@@ -39,8 +39,8 @@ export function AuthShell({
           <p className="text-xs text-white/45">Private workspace · GradMap</p>
         </section>
 
-        <section className="relative flex min-h-[calc(100svh-2rem)] items-start justify-center py-2 sm:min-h-[calc(100svh-5rem)] sm:py-0 lg:absolute lg:inset-0 lg:items-center lg:justify-end lg:px-14">
-          <div className="w-full max-w-[440px]">
+        <section className="relative flex min-h-[calc(100svh-2rem)] items-center justify-center py-2 sm:min-h-[calc(100svh-5rem)] sm:py-0 lg:absolute lg:inset-0 lg:items-center lg:justify-end lg:px-14">
+          <div className="mx-auto w-full max-w-[440px]">
             <div className="mb-5 flex items-center justify-between lg:hidden">
               <Link
                 href="/login"
