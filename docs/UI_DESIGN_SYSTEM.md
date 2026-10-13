@@ -2,15 +2,15 @@
 
 Visual quality is a P0 product requirement. This document defines a distinctive interface direction so implementation does not collapse into a generic shadcn dashboard.
 
-## 1. Design concept: academic editorial command center
+## 1. Design concept: calm, fluid application workspace
 
-GradMap should feel like a beautifully designed personal research journal combined with a precise mission-control workspace.
+GradMap should feel like a clear, inviting personal workspace with responsive controls, soft surfaces and purposeful motion.
 
 Desired qualities:
 
 - Intelligent, calm and aspirational.
 - Serious enough for consequential decisions, warm enough for daily use.
-- Editorial typography paired with highly legible operational UI.
+- Clean sans-serif typography paired with highly legible operational UI.
 - Data-dense without feeling cramped.
 - Refined on desktop and genuinely native-feeling as an installed mobile PWA.
 
@@ -41,7 +41,7 @@ If a final custom mark is not available, use a restrained monogram placeholder a
 
 ### Families
 
-- Display/editorial: `Newsreader` or an equivalent refined serif via `next/font`.
+- Display/headings: bundled `Geist Sans`, consistent with the revised workspace direction.
 - UI/body: `Geist Sans` or an equivalent modern sans via `next/font`.
 - Monospace: `Geist Mono` only for IDs, technical values and keyboard hints.
 
@@ -59,7 +59,7 @@ Fonts must be optimized/self-hosted through Next.js. Do not load runtime font CS
 | `small` | 13/19 | 13/19 | Supporting metadata |
 | `micro` | 11/16 | 11/16 | Labels used sparingly, never core content |
 
-Use editorial serif for selective high-level titles and numbers, not forms or dense tables. Operational text remains sans-serif.
+Use Geist Sans for headings, numbers and operational UI. The legacy `font-serif` token resolves to Geist Sans so existing detail screens remain consistent. The app no longer fetches Google font files during builds.
 
 ## 4. Color system
 
@@ -67,9 +67,9 @@ Use semantic tokens implemented with CSS variables/OKLCH and consumed through Ta
 
 ### Light theme direction
 
-- Background: warm paper, not stark blue-white.
+- Background: cool silver and blue-gray, with no warm cream or reddish tint.
 - Foreground: deep ink/navy.
-- Primary: confident indigo.
+- Primary: clear blue.
 - Secondary accent: scholarly teal/emerald.
 - Muted surface: cool-warm neutral with clear separation.
 - Warning: amber/ochre.
@@ -79,10 +79,10 @@ Use semantic tokens implemented with CSS variables/OKLCH and consumed through Ta
 Suggested starting tokens:
 
 ```css
---background: oklch(0.985 0.008 85);
+--background: oklch(0.972 0.008 255);
 --foreground: oklch(0.205 0.025 255);
 --card: oklch(1 0 0);
---primary: oklch(0.49 0.19 267);
+--primary: oklch(0.55 0.19 260);
 --primary-foreground: oklch(0.985 0 0);
 --secondary: oklch(0.95 0.025 180);
 --secondary-foreground: oklch(0.31 0.075 180);
@@ -95,8 +95,8 @@ Suggested starting tokens:
 
 ### Dark theme direction
 
-- Background: deep ink, not pure black.
-- Surfaces: gently lifted navy-charcoal.
+- Background: brighter midnight slate with readable surface separation.
+- Surfaces: softly lifted slate with lighter borders and supporting text.
 - Primary: luminous but controlled indigo/lilac.
 - Borders: visible at low contrast without creating boxes everywhere.
 - Preserve WCAG contrast for text and state indicators.
@@ -333,3 +333,27 @@ Reject release for horizontal overflow, clipped controls, inconsistent density, 
 ## 16. Design acceptance statement
 
 The interface is acceptable only when a reviewer can tell that GradMap was designed specifically for a serious graduate-application journey-not merely recolored from a component-library dashboard.
+
+## 17. Implemented daily workspace
+
+The Overview dashboard uses clean sans-serif headings, a light blue focus panel, a softly tinted momentum surface, a searchable application explorer, and a deadline/funding context rail. The revised palette uses cool blue-gray light backgrounds and a brighter slate dark theme in response to Emmanuel’s visual feedback. It prioritizes an outstanding blocking task, then the earliest uncompleted deadline returned by the existing query (including overdue items), then program exploration. Progress reflects tracked tasks only; it does not imply overall application readiness or admission probability.
+
+The shared application explorer supports text search across program, institution and country, a status filter, and list/grouped board views. The board is a read-only navigation view: opening an item leads to its existing application workspace. Unknown statuses remain visible in an Other stages column. No drag-and-drop mutation or automatic status transition is implemented.
+
+Application detail pages provide section links to overview, deadlines, tasks, linked writing, recommendation records, and actual document requirements, plus a task completion summary. Contextual creation links preserve the application, and the requirements link opens that application’s filtered collection.
+
+The shell uses Overview navigation, a floating rounded desktop sidebar, a compact contextual header, global search, an actionable deadline shortcut, and mobile bottom navigation. Font theme tokens resolve Next.js font variables inline. Mobile zoom, keyboard focus and skip navigation are supported. Framer Motion drives spring panel entrances, a shared navigation highlight and route transitions. Buttons provide press/lift feedback, and cards have soft hover elevation. MotionConfig and reduced-motion checks respect system preferences; there are no continuous decorative animations. The dashboard has route-level loading and retry states; existing query helpers can still report database failures as empty results, which requires separate data-layer work.
+
+No estimated exchange-rate totals are shown on the new dashboard. Existing expense management remains available on application pages.
+
+## 18. Connected preparation flows
+
+Creation pages share grouped fields, searchable single/multiple choices, visible validation, pending locks, and recoverable errors. Institution → program → application selection is dependent; changing the institution clears the chosen program. Required missing parents block saving and provide a creation link. Independent documents, recommenders, writing, scholarships, and general tasks remain possible. A document requirement or recommendation request requires exactly one application context.
+
+The calendar provides a Monday-first month grid, daily agenda, agenda view, application/type filters, completion/reopening, and an undated task queue. Document and recommendation dates appear alongside tasks and deadlines. Suggested tasks open a reviewable form; nothing is silently created. Dates use the profile timezone and ambiguous/nonexistent daylight-saving times are rejected.
+
+Documents distinguish reusable library entries from application requirements. Requirements accept a matching uploaded version. Recommendations distinguish people from letter requests; stage changes do not send messages. Writing has a revision editor with live limits and preserves over-limit drafts, while final/submitted states require a saved revision within limits.
+
+Profiles capture academic direction, interests, countries, degrees, formats, languages, timing, funding preference, tuition budget/currency, and career objective. These are structured preferences for future matching; no LLM, web scan, or eligibility inference is implemented. Until the profile migration is applied, account fields remain editable and study preferences show a disabled fallback.
+
+Popover and menu tokens use opaque surfaces in both themes; native selects use the same surface palette. Large searchable choice lists initially render 60 options and provide Show more, while search examines the complete supplied list. Application and preparation collections use 24-row server pages; searches apply to the whole collection rather than only the displayed page. Board groups represent the current application page. Funding-application and expense sections page independently. The calendar’s loaded undated queue has its own pagination.
