@@ -29,7 +29,7 @@ export async function login(formData: FormData) {
 
 export async function signInWithGoogle() {
   const supabase = await createActionClient();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.APP_URL || "http://localhost:3000";
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -76,7 +76,7 @@ export async function signup(formData: FormData) {
     password,
     options: {
       data: { full_name: fullName || undefined },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/callback`,
+      emailRedirectTo: `${process.env.APP_URL || "http://localhost:3000"}/auth/callback`,
     },
   });
 
@@ -104,7 +104,7 @@ export async function resetPassword(formData: FormData) {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/reset-password`,
+    redirectTo: `${process.env.APP_URL || "http://localhost:3000"}/reset-password`,
   });
 
   if (error) {
@@ -149,7 +149,7 @@ export async function magicLink(formData: FormData) {
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/callback`,
+      emailRedirectTo: `${process.env.APP_URL || "http://localhost:3000"}/auth/callback`,
     },
   });
 
