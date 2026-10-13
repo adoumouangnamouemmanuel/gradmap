@@ -63,15 +63,12 @@ export default async function DashboardPage() {
   return (
     <div className="workspace-page">
       <FadeIn y={18}>
-        <header className="mb-8 flex flex-wrap items-end justify-between gap-5">
+        <header className="mb-7 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="eyebrow mb-3">YOUR APPLICATION WORKSPACE</p>
-            <h1 className="text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
-              {name ? `Ready for your next move, ${name}?` : "Good things are ahead."}
+            <p className="eyebrow mb-2">OVERVIEW</p>
+            <h1 className="text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
+              {name ? `Welcome back, ${name}.` : "Your overview"}
             </h1>
-            <p className="text-muted-foreground mt-3 text-sm">
-              A fresh start, a clear plan, and a little momentum.
-            </p>
           </div>
           <Button asChild className="h-11 rounded-xl">
             <Link href="/applications/new">
@@ -96,10 +93,10 @@ export default async function DashboardPage() {
                   ? "YOUR NEXT MOVE"
                   : "A WORLD OF POSSIBILITIES"}
             </p>
-            <h2 className="text-3xl leading-tight font-semibold tracking-[-0.035em] sm:text-4xl">
+            <h2 className="text-2xl leading-tight font-semibold tracking-[-0.03em] sm:text-3xl">
               {focusTitle}
             </h2>
-            <p className="text-muted-foreground mt-4 max-w-sm text-sm leading-relaxed">
+            <p className="text-muted-foreground mt-3 max-w-sm text-sm leading-relaxed">
               {blocker
                 ? `${blockers.length} outstanding blocking task${blockers.length === 1 ? " needs" : "s need"} your attention. Start with this one.`
                 : next
@@ -150,7 +147,6 @@ export default async function DashboardPage() {
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold tracking-tight">Your applications</h2>
-              <p className="text-muted-foreground mt-1 text-sm">Possibilities becoming plans.</p>
             </div>
             <Link href="/applications" className="text-primary text-sm font-medium hover:underline">
               View all ↗
@@ -161,7 +157,7 @@ export default async function DashboardPage() {
         <div className="space-y-5">
           <MotionPanel delay={0.15} className="workspace-panel p-6">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-semibold tracking-tight">Coming up next</h2>
+              <h2 className="text-base font-semibold tracking-tight">Upcoming</h2>
               <CalendarDays size={18} className="text-muted-foreground" />
             </div>
             {deadlines.length ? (
