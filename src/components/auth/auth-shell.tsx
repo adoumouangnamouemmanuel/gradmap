@@ -10,12 +10,12 @@ export function AuthShell({
 }) {
   return (
     <main
-      className="relative min-h-screen overflow-hidden bg-[#18231f] bg-cover bg-center text-[#1d211f] dark:text-[#f4f5f1]"
+      className="relative min-h-[100svh] overflow-x-hidden overflow-y-auto bg-[#18231f] bg-cover bg-center text-[#1d211f] dark:text-[#f4f5f1]"
       style={{ backgroundImage: "url('/auth-neutral.svg')" }}
     >
       <div className="absolute inset-0 bg-black/10" />
-      <div className="relative z-10 mx-auto min-h-screen max-w-[1600px] p-6 sm:p-10 lg:p-14">
-        <section className="flex min-h-[calc(100vh-3rem)] flex-col justify-between text-white sm:min-h-[calc(100vh-5rem)] lg:min-h-[calc(100vh-7rem)]">
+      <div className="relative z-10 mx-auto min-h-[100svh] max-w-[1600px] p-4 sm:p-10 lg:p-14">
+        <section className="hidden min-h-[calc(100vh-7rem)] flex-col justify-between text-white lg:flex">
           <Link
             href="/login"
             className="flex items-center gap-3 text-[21px] font-semibold tracking-tight"
@@ -39,15 +39,15 @@ export function AuthShell({
           <p className="text-xs text-white/45">Private workspace · GradMap</p>
         </section>
 
-        <section className="absolute inset-0 flex items-center justify-center px-4 py-20 sm:justify-end sm:px-10 lg:px-14">
+        <section className="relative flex min-h-[calc(100svh-2rem)] items-start justify-center py-2 sm:min-h-[calc(100svh-5rem)] sm:py-0 lg:absolute lg:inset-0 lg:items-center lg:justify-end lg:px-14">
           <div className="w-full max-w-[440px]">
-            <div className="mb-8 flex items-center justify-between lg:hidden">
+            <div className="mb-5 flex items-center justify-between lg:hidden">
               <Link
                 href="/login"
-                className="flex items-center gap-2 text-lg font-semibold tracking-tight text-white"
+                className="flex items-center gap-2 text-base font-semibold tracking-tight text-white"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#24463b] text-white">
-                  <Compass size={19} />
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#24463b] text-white">
+                  <Compass size={17} />
                 </span>
                 GradMap
               </Link>
