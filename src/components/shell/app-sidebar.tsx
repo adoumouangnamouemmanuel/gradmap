@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
+  Compass,
   BookOpen,
   Award,
   FileText,
@@ -43,20 +44,20 @@ interface NavGroup {
 
 const navGroups: NavGroup[] = [
   {
-    items: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+    items: [{ href: "/dashboard", label: "Overview", icon: LayoutDashboard }],
   },
   {
     label: "WORKSPACE",
     items: [
-      { href: "/institutions", label: "Institutions", icon: Building2 },
-      { href: "/programs", label: "Programs", icon: BookOpen },
-      { href: "/scholarships", label: "Scholarships", icon: Award },
       { href: "/applications", label: "Applications", icon: FileText },
       { href: "/calendar", label: "Calendar", icon: Calendar },
+      { href: "/programs", label: "Explore programs", icon: BookOpen },
+      { href: "/institutions", label: "Institutions", icon: Building2 },
+      { href: "/scholarships", label: "Funding", icon: Award },
     ],
   },
   {
-    label: "CONTENT",
+    label: "LIBRARY",
     items: [
       { href: "/documents", label: "Documents", icon: FolderOpen },
       { href: "/essays", label: "Essays", icon: PenTool },
@@ -107,35 +108,39 @@ function NavItemLink({
   isActive,
   collapsed,
   onClick,
+  navigationId,
 }: {
   item: NavItemData;
   isActive: boolean;
   collapsed: boolean;
   onClick?: () => void;
+  navigationId: string;
 }) {
   const link = (
     <Link
       href={item.href}
       onClick={onClick}
+      aria-label={item.label}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
-        "group relative flex items-center gap-3 rounded-md py-2 text-sm font-medium transition-all duration-200 ease-out",
+        "sidebar-link group relative flex items-center gap-3 rounded-2xl py-2.5 text-sm font-medium transition-all duration-300",
         collapsed ? "justify-center px-0 h-10 w-10 mx-auto" : "px-3",
         isActive
-          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-          : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground active:scale-[0.98]",
+          ? "text-primary"
+          : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground motion-safe:hover:translate-x-1",
       )}
     >
       {isActive && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-md bg-primary" />
+        <motion.span layoutId={`${navigationId}-active-${collapsed ? "collapsed" : "expanded"}`} className="absolute inset-0 rounded-2xl bg-primary/10" transition={{ type: "spring", stiffness: 350, damping: 32 }} />
       )}
       <item.icon
         className={cn(
-          "h-4 w-4 shrink-0 transition-colors duration-200",
+          "relative z-10 h-[18px] w-[18px] shrink-0 transition-colors duration-200",
           isActive ? "text-primary" : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground",
         )}
         strokeWidth={isActive ? 2.5 : 2}
       />
-      {!collapsed && <span>{item.label}</span>}
+      {!collapsed && <span className="relative z-10">{item.label}</span>}
     </Link>
   );
 
@@ -157,25 +162,26 @@ interface AppSidebarProps {
 
 export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className }: AppSidebarProps) {
   const pathname = usePathname();
+  const navigationId = React.useId();
 
   return (
     <aside
       className={cn(
-        "flex flex-col h-full border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
-        "lg:bg-sidebar/95 lg:backdrop-blur-xl lg:supports-[backdrop-filter]:bg-sidebar/60",
+        "app-sidebar flex flex-col h-full border border-sidebar-border/50 bg-sidebar text-sidebar-foreground",
+        "lg:rounded-[28px]",
         "transition-[width] duration-300 ease-[cubic-bezier(0.2,1,0.2,1)] shadow-[-1px_0_10px_rgba(0,0,0,0.02)_inset]",
-        collapsed ? "w-[72px]" : "w-[260px]",
+        collapsed ? "w-[76px]" : "w-[238px]",
         className
       )}
     >
       {/* ── Logo row + collapse toggle ── */}
-      <div className="relative flex h-16 shrink-0 items-center gap-2 px-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm shadow-primary/20 ring-1 ring-primary/20 overflow-hidden">
-          <Image src="/logo.jpg" alt="GradMap Logo" width={32} height={32} className="object-cover" />
+      <div className={cn("relative flex h-20 shrink-0 items-center gap-3", collapsed ? "px-3" : "px-5")}>
+        <div className="brand-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+          <Compass size={21} strokeWidth={1.8} />
         </div>
         <span
           className={cn(
-            "font-serif text-lg font-semibold tracking-tight whitespace-nowrap overflow-hidden",
+            "text-lg font-bold tracking-tight whitespace-nowrap overflow-hidden",
             "transition-all duration-300 ease-[cubic-bezier(0.2,1,0.2,1)]",
             collapsed ? "w-0 opacity-0" : "w-auto opacity-100",
           )}
@@ -233,7 +239,7 @@ export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className
                     {collapsed ? (
                       <div className="mx-2 my-2 h-px bg-sidebar-border/60" />
                     ) : (
-                      <span className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
+                      <span className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/60">
                         {group.label}
                       </span>
                     )}
@@ -247,6 +253,7 @@ export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className
                   <NavItemLink
                     key={item.href}
                     item={item}
+                    navigationId={navigationId}
                     isActive={pathname.startsWith(item.href)}
                     collapsed={collapsed}
                     onClick={onNavSelect}
@@ -268,6 +275,7 @@ export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className
             <NavItemLink
               key={item.href}
               item={item}
+              navigationId={navigationId}
               isActive={pathname.startsWith(item.href)}
               collapsed={collapsed}
               onClick={onNavSelect}
@@ -284,6 +292,7 @@ export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className
             <Popover>
               <PopoverTrigger asChild>
                 <button
+                  aria-label="Account menu"
                   className={cn(
                     "flex h-10 w-10 mx-auto items-center justify-center rounded-md",
                     "transition-all duration-200 ease-out cursor-pointer",
@@ -292,7 +301,7 @@ export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                      E
+                      <User className="h-4 w-4" aria-hidden="true" />
                     </AvatarFallback>
                   </Avatar>
                 </button>
@@ -302,13 +311,13 @@ export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                        E
+                        <User className="h-4 w-4" aria-hidden="true" />
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">Emmanuel</p>
+                      <p className="text-sm font-medium truncate">Your workspace</p>
                       <p className="text-xs text-muted-foreground truncate">
-                        emmanuel@example.com
+                        Personal workspace
                       </p>
                     </div>
                   </div>
@@ -339,13 +348,13 @@ export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className
                 >
                   <Avatar className="h-9 w-9 shrink-0">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                      E
+                      <User className="h-4 w-4" aria-hidden="true" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">Emmanuel</p>
+                    <p className="text-sm font-medium truncate">Your workspace</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      emmanuel@example.com
+                      Personal workspace
                     </p>
                   </div>
                   <LogOut className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -356,13 +365,13 @@ export function AppSidebar({ collapsed = false, onToggle, onNavSelect, className
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                        E
+                        <User className="h-4 w-4" aria-hidden="true" />
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">Emmanuel</p>
+                      <p className="text-sm font-medium truncate">Your workspace</p>
                       <p className="text-xs text-muted-foreground truncate">
-                        emmanuel@example.com
+                        Personal workspace
                       </p>
                     </div>
                   </div>
