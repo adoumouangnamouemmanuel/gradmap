@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -14,24 +13,14 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-  { href: "/applications", label: "Apps", icon: FileText },
+  { href: "/applications", label: "Apply", icon: FileText },
   { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/documents", label: "Files", icon: FolderOpen },
+  { href: "/documents", label: "Library", icon: FolderOpen },
   { href: "/institutions", label: "Schools", icon: Building2 },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
-  const [mounted, setMounted] = React.useState(false);
-  const prevPathRef = React.useRef(pathname);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  React.useEffect(() => {
-    prevPathRef.current = pathname;
-  }, [pathname]);
 
   return (
     <nav
@@ -64,14 +53,14 @@ export function MobileNav() {
             >
               <div className={cn(
                 "flex items-center justify-center",
-                isActive && mounted && "animate-icon-bounce"
+                isActive && "motion-safe:animate-icon-bounce"
               )}>
                 <item.icon
                   className={cn(
                     "h-[24px] w-[24px] transition-all duration-200",
                   )}
                   strokeWidth={isActive ? 2 : 1.5}
-                  fill={isActive ? "currentColor" : "none"}
+                  fill="none"
                 />
               </div>
               <span
