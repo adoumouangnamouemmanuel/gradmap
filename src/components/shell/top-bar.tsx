@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Search, Bell, Menu } from "lucide-react";
+import { Search, CalendarDays, Menu, Compass, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 interface TopBarProps {
   onMenuToggle?: () => void;
@@ -15,6 +15,8 @@ interface TopBarProps {
 
 export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
   const [scrolled, setScrolled] = React.useState(false);
+  const pathname = usePathname();
+  const section = pathname.split("/")[1]?.replaceAll("-", " ") || "Workspace";
 
   React.useEffect(() => {
     const main = document.querySelector("main");
@@ -27,19 +29,19 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex h-[52px] items-center gap-3 px-3",
+        "app-topbar sticky top-0 z-30 flex h-[64px] shrink-0 items-center gap-3 px-4",
         "transition-all duration-300 ease-out",
         scrolled
-          ? "border-b border-border/40 bg-background/85 glass-blur shadow-elevation-1"
-          : "border-b border-transparent bg-background/60",
-        "lg:h-[56px] lg:gap-4 lg:border-b lg:border-border/40 lg:bg-background/85 lg:glass-blur lg:px-6"
+          ? "border-border/40 bg-background/85 glass-blur shadow-elevation-1 border-b"
+          : "bg-background/60 border-b border-transparent",
+        "lg:h-[72px] lg:gap-5 lg:px-8",
       )}
     >
       {/* Mobile menu toggle */}
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden h-10 w-10 rounded-full press-apple"
+        className="press-apple h-10 w-10 rounded-full lg:hidden"
         onClick={onMenuToggle}
         aria-label="Toggle menu"
       >
@@ -47,38 +49,42 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
       </Button>
 
       {/* Mobile logo */}
-      <Link href="/dashboard" className="lg:hidden press-apple">
+      <Link href="/dashboard" className="press-apple lg:hidden">
         <div className="flex items-center gap-2">
-          <div className="flex h-[26px] w-[26px] items-center justify-center rounded-[7px] overflow-hidden shadow-elevation-1">
-            <Image src="/logo.jpg" alt="GradMap" width={26} height={26} className="object-cover" />
+          <div className="shadow-elevation-1 flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-[7px]">
+            <Compass size={22} className="text-primary" />
           </div>
-          <span className="font-serif text-[16px] font-semibold tracking-tight">GradMap</span>
+          <span className="text-[16px] font-semibold tracking-tight">GradMap</span>
         </div>
       </Link>
 
+      <div className="hidden min-w-[130px] lg:block">
+        <p className="text-sm font-semibold capitalize">
+          {section === "dashboard" ? "Overview" : section}
+        </p>
+        <p className="text-muted-foreground mt-1 text-[11px]">Your personal workspace</p>
+      </div>
       {/* Desktop search bar */}
-      <div className="hidden lg:flex flex-1 max-w-[480px]">
+      <div className="hidden max-w-[340px] flex-1 lg:flex">
         <Button
           variant="outline"
           size="sm"
           onClick={onSearchOpen}
-          className="w-full justify-start gap-3 rounded-full text-muted-foreground hover:bg-accent/50 hover:text-foreground h-10 px-4 border-border/50 shadow-elevation-1 transition-all"
+          className="text-muted-foreground hover:bg-accent/50 hover:text-foreground bg-muted/65 h-10 w-full justify-start gap-3 rounded-2xl border-transparent px-4 shadow-none transition-all"
         >
-          <Search className="h-4 w-4 shrink-0 text-muted-foreground/60" />
-          <span className="flex-1 text-left font-normal text-[14px]">Search programs, scholarships...</span>
-          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-md bg-muted/50 px-1.5 font-mono text-[10px] font-medium text-muted-foreground/60">
-            <span className="text-[11px]">⌘</span>K
+          <Search className="text-muted-foreground/60 h-4 w-4 shrink-0" />
+          <span className="flex-1 text-left text-[14px] font-normal">Search your workspace</span>
+          <kbd className="bg-muted/50 text-muted-foreground/60 pointer-events-none inline-flex h-5 items-center gap-1 rounded-md px-1.5 font-mono text-[10px] font-medium select-none">
+            Ctrl K
           </kbd>
         </Button>
       </div>
-
-      <div className="flex-1 lg:hidden" />
 
       {/* Mobile search */}
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden h-10 w-10 rounded-full press-apple"
+        className="press-apple h-10 w-10 rounded-full lg:hidden"
         aria-label="Search"
         onClick={onSearchOpen}
       >
@@ -91,12 +97,21 @@ export function TopBar({ onMenuToggle, onSearchOpen }: TopBarProps) {
       <Button
         variant="ghost"
         size="icon"
-        aria-label="Notifications"
-        className="relative h-10 w-10 rounded-full press-apple"
+        asChild
+        className="press-apple relative h-10 w-10 rounded-full"
       >
-        <Bell className="h-[20px] w-[20px]" strokeWidth={1.8} />
-        <span className="absolute right-[9px] top-[9px] h-[7px] w-[7px] rounded-full bg-primary ring-2 ring-background" />
+        <Link href="/calendar" aria-label="Open deadlines">
+          <CalendarDays className="h-[20px] w-[20px]" strokeWidth={1.8} />
+        </Link>
       </Button>
+
+      <Link
+        href="/settings/profile"
+        aria-label="Open profile"
+        className="bg-primary/10 text-primary hover:bg-primary/20 hidden h-10 w-10 items-center justify-center rounded-2xl transition-colors lg:flex"
+      >
+        <User size={18} />
+      </Link>
 
       {/* Theme toggle */}
       <div className="rounded-full">
