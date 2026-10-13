@@ -5,11 +5,14 @@ import { z } from "zod";
 import { guardEntry } from "@/features/entries/relationships";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { APPLICATION_STATUSES } from "@/lib/constants";
 
 // Helper to get authenticated user
 async function getUser() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return { supabase, user };
 }
 
@@ -38,11 +41,7 @@ export async function getInstitution(id: string) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
 
-  const { data, error } = await supabase
-    .from("institutions")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data, error } = await supabase.from("institutions").select("*").eq("id", id).single();
 
   if (error) throw error;
   return data;
@@ -235,7 +234,9 @@ export async function getApplications() {
 
   const { data, error } = await supabase
     .from("applications")
-    .select("*, programs!applications_program_id_fkey(name, institutions!programs_institution_id_fkey(name, country_name))")
+    .select(
+      "*, programs!applications_program_id_fkey(name, institutions!programs_institution_id_fkey(name, country_name))",
+    )
     .is("archived_at", null)
     .order("priority", { ascending: false });
 
@@ -252,13 +253,15 @@ export async function getApplication(id: string) {
 
   const { data, error } = await supabase
     .from("applications")
-    .select(`
+    .select(
+      `
       *,
       programs!applications_program_id_fkey(
         name, degree_type, field, institution_id,
         institutions!programs_institution_id_fkey(name, country_name, city)
       )
-    `)
+    `,
+    )
     .eq("id", id)
     .single();
 
@@ -317,11 +320,7 @@ export async function createApplication(formData: {
   return data;
 }
 
-export async function updateApplicationStatus(
-  id: string,
-  newStatus: string,
-  note?: string,
-) {
+export async function updateApplicationStatus(id: string, newStatus: string, note?: string) {
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Not authenticated");
 
@@ -359,6 +358,14 @@ export async function updateApplicationStatus(
   revalidatePath("/applications");
   revalidatePath(`/applications/${id}`);
   return data;
+}
+
+export async function updateApplicationStatusFromForm(id: string, formData: FormData) {
+  const status = String(formData.get("status") || "");
+  if (!APPLICATION_STATUSES.includes(status as (typeof APPLICATION_STATUSES)[number])) {
+    throw new Error("Invalid application status");
+  }
+  return updateApplicationStatus(id, status);
 }
 
 export async function archiveApplication(id: string) {
@@ -436,10 +443,7 @@ export async function completeDeadline(id: string) {
 
 export async function deleteDeadline(id: string) {
   const { supabase } = await getUser();
-  const { error } = await supabase
-    .from("deadlines")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("deadlines").delete().eq("id", id);
 
   if (error) throw error;
   revalidatePath("/calendar");
@@ -448,10 +452,7 @@ export async function deleteDeadline(id: string) {
 
 export async function deleteTask(id: string) {
   const { supabase } = await getUser();
-  const { error } = await supabase
-    .from("tasks")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("tasks").delete().eq("id", id);
 
   if (error) throw error;
   revalidatePath("/calendar");
@@ -651,10 +652,7 @@ export async function getDashboardStats() {
   }
 
   const [programsRes, applicationsRes, deadlinesRes, tasksRes] = await Promise.all([
-    supabase
-      .from("programs")
-      .select("id, status", { count: "exact" })
-      .is("archived_at", null),
+    supabase.from("programs").select("id, status", { count: "exact" }).is("archived_at", null),
     supabase
       .from("applications")
       .select("id, status, priority", { count: "exact" })
@@ -708,11 +706,47 @@ export async function getProgramEvaluation(programId: string) {
   return data;
 }
 
-export async function getApplicationPage(options: { query?: string; status?: string; page?: number } = {}): Promise<ApplicationPage> {
-  const input = z.object({ query: z.string().trim().max(120).default(""), status: z.string().max(60).default("all"), page: z.number().int().min(1).max(10000).default(1) }).parse(options);
+export async function getApplicationPage(
+  options: { query?: string; status?: string; page?: number } = {},
+): Promise<ApplicationPage> {
+  const input = z
+    .object({
+      query: z.string().trim().max(120).default(""),
+      status: z.string().max(60).default("all"),
+      page: z.number().int().min(1).max(10000).default(1),
+    })
+    .parse(options);
   const { supabase, user } = await getUser();
   if (!user) throw new Error("Please sign in again.");
-  const { data, error } = await supabase.rpc("get_application_page", { p_query: input.query, p_status: input.status, p_page: input.page });
+  const { data, error } = await supabase.rpc("get_application_page", {
+    p_query: input.query,
+    p_status: input.status,
+    p_page: input.page,
+  });
   if (error) throw new Error("Applications couldn’t load. Please retry.");
-  return z.object({ items: z.array(z.object({ id: z.string().uuid(), status: z.string(), priority: z.number(), programs: z.object({ name: z.string(), institutions: z.object({ name: z.string(), country_name: z.string().nullable() }).nullable() }).nullable() })).max(24), page: z.number().int().positive(), total: z.number().int().nonnegative(), pageSize: z.literal(24), stages: z.array(z.string()) }).parse(data);
+  return z
+    .object({
+      items: z
+        .array(
+          z.object({
+            id: z.string().uuid(),
+            status: z.string(),
+            priority: z.number(),
+            programs: z
+              .object({
+                name: z.string(),
+                institutions: z
+                  .object({ name: z.string(), country_name: z.string().nullable() })
+                  .nullable(),
+              })
+              .nullable(),
+          }),
+        )
+        .max(24),
+      page: z.number().int().positive(),
+      total: z.number().int().nonnegative(),
+      pageSize: z.literal(24),
+      stages: z.array(z.string()),
+    })
+    .parse(data);
 }
