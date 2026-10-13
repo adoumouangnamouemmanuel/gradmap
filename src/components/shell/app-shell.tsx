@@ -7,16 +7,21 @@ import { TopBar } from "@/components/shell/top-bar";
 import { MobileNav } from "@/components/shell/mobile-nav";
 import { SearchDialog } from "@/components/domain/search-dialog";
 import { cn } from "@/lib/utils";
+import { MotionConfig, motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
-  const [drawerState, setDrawerState] = React.useState<"closed" | "opening" | "open" | "closing">("closed");
+  const [drawerState, setDrawerState] = React.useState<"closed" | "opening" | "open" | "closing">(
+    "closed",
+  );
 
   const openMenu = React.useCallback(() => {
     setMobileMenuOpen(true);
@@ -44,66 +49,80 @@ export function AppShell({ children }: AppShellProps) {
   }, [mobileMenuOpen, openMenu, closeMenu]);
 
   return (
-    <TooltipProvider>
-      <div className="flex h-screen overflow-hidden">
-        {/* Desktop sidebar */}
-        <AppSidebar
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="hidden lg:flex"
-        />
-
-        {/* Mobile drawer overlay */}
-        <div
-          className={cn(
-            "fixed inset-0 z-40 lg:hidden",
-            "bg-black/40 glass-blur",
-            drawerState === "closed" && "opacity-0 pointer-events-none",
-            drawerState === "opening" && "animate-overlay-in pointer-events-auto",
-            drawerState === "open" && "opacity-100 pointer-events-auto",
-            drawerState === "closing" && "animate-overlay-out pointer-events-none",
-          )}
-          onClick={closeMenu}
-        />
-
-        {/* Mobile drawer */}
-        {mobileMenuOpen && (
-          <div
-            className={cn(
-              "fixed inset-y-0 left-0 z-50 lg:hidden",
-              "shadow-elevation-3",
-              drawerState === "opening" && "animate-drawer-open",
-              drawerState === "open" && "translate-x-0",
-              drawerState === "closing" && "animate-drawer-close",
-            )}
+    <MotionConfig reducedMotion="user">
+      <TooltipProvider>
+        <div className="app-frame flex h-dvh overflow-hidden">
+          <a
+            href="#main-content"
+            className="focus:bg-card sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-xl focus:p-3"
           >
-            <AppSidebar
-              onToggle={closeMenu}
-              onNavSelect={closeMenu}
-              className="w-[280px] max-w-[85vw]"
-            />
-          </div>
-        )}
-
-        {/* Search dialog */}
-        <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
-
-        {/* Main content */}
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <TopBar
-            onMenuToggle={toggleMenu}
-            onSearchOpen={() => setSearchOpen(true)}
+            Skip to content
+          </a>
+          {/* Desktop sidebar */}
+          <AppSidebar
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden lg:flex"
           />
 
-          <main className="flex-1 overflow-y-auto pb-[84px] lg:pb-0 scroll-ios overscroll-contain">
-            <div className="animate-content-enter">
-              {children}
-            </div>
-          </main>
+          {/* Mobile drawer overlay */}
+          <div
+            className={cn(
+              "fixed inset-0 z-40 lg:hidden",
+              "glass-blur bg-black/40",
+              drawerState === "closed" && "pointer-events-none opacity-0",
+              drawerState === "opening" && "animate-overlay-in pointer-events-auto",
+              drawerState === "open" && "pointer-events-auto opacity-100",
+              drawerState === "closing" && "animate-overlay-out pointer-events-none",
+            )}
+            onClick={closeMenu}
+          />
 
-          <MobileNav />
+          {/* Mobile drawer */}
+          {mobileMenuOpen && (
+            <div
+              className={cn(
+                "fixed inset-y-0 left-0 z-50 lg:hidden",
+                "shadow-elevation-3",
+                drawerState === "opening" && "animate-drawer-open",
+                drawerState === "open" && "translate-x-0",
+                drawerState === "closing" && "animate-drawer-close",
+              )}
+            >
+              <AppSidebar
+                onToggle={closeMenu}
+                onNavSelect={closeMenu}
+                className="w-[280px] max-w-[85vw]"
+              />
+            </div>
+          )}
+
+          {/* Search dialog */}
+          <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+
+          {/* Main content */}
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+            <TopBar onMenuToggle={toggleMenu} onSearchOpen={() => setSearchOpen(true)} />
+
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className="scroll-ios flex-1 overflow-y-auto overscroll-contain pb-[84px] lg:pb-0"
+            >
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {children}
+              </motion.div>
+            </main>
+
+            <MobileNav />
+          </div>
         </div>
-      </div>
-    </TooltipProvider>
+      </TooltipProvider>
+    </MotionConfig>
   );
 }
