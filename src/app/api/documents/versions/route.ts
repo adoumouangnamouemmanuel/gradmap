@@ -1,71 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createActionClient } from "@/lib/supabase/server";
-
+import { createDocumentVersion } from "@/features/documents/actions";
+import { documentVersionSchema } from "@/features/documents/upload-validation";
+const headers = { "Cache-Control": "private, no-store" };
 export async function POST(request: NextRequest) {
+  if (request.headers.get("origin") && request.headers.get("origin") !== request.nextUrl.origin) return NextResponse.json({ error: "Request origin is not allowed." }, { status: 403, headers });
   try {
-    const supabase = await createActionClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { document_id, file_name, mime_type, file_size, storage_path, sha256_hash } = body;
-
-    if (!document_id || !file_name || !mime_type || !file_size || !storage_path) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    // Verify document belongs to user
-    const { data: doc } = await supabase
-      .from("documents")
-      .select("id")
-      .eq("id", document_id)
-      .eq("user_id", user.id)
-      .single();
-
-    if (!doc) {
-      return NextResponse.json({ error: "Document not found" }, { status: 404 });
-    }
-
-    // Get next version number
-    const { data: existing } = await supabase
-      .from("document_versions")
-      .select("version_number")
-      .eq("document_id", document_id)
-      .order("version_number", { ascending: false })
-      .limit(1);
-
-    const nextVersion = (existing?.[0]?.version_number || 0) + 1;
-
-    // Insert version
-    const { data: version, error } = await supabase
-      .from("document_versions")
-      .insert({
-        user_id: user.id,
-        document_id,
-        version_number: nextVersion,
-        file_name,
-        mime_type,
-        file_size,
-        storage_path,
-        sha256_hash: sha256_hash || null,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    // Update current_version_id on parent document
-    await supabase
-      .from("documents")
-      .update({ current_version_id: version.id })
-      .eq("id", document_id);
-
-    return NextResponse.json({ version });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
-  }
+    const client = await createActionClient();
+    const { data: { user } } = await client.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Please sign in again." }, { status: 401, headers });
+    let body: unknown;
+    try { body = await request.json(); } catch { return NextResponse.json({ error: "Send a valid JSON body." }, { status: 400, headers }); }
+    const input = documentVersionSchema.safeParse(body);
+    if (!input.success) return NextResponse.json({ error: "Review the file metadata and limits." }, { status: 400, headers });
+    if (!input.data.storage_path.startsWith(user.id + "/" + input.data.document_id + "/") || input.data.storage_path.includes("..")) return NextResponse.json({ error: "File not found." }, { status: 404, headers });
+    const { data: document, error } = await client.from("documents").select("id").eq("id", input.data.document_id).eq("user_id", user.id).is("archived_at", null).maybeSingle();
+    if (error) return NextResponse.json({ error: "Files are temporarily unavailable." }, { status: 503, headers });
+    if (!document) return NextResponse.json({ error: "Document not found." }, { status: 404, headers });
+    const version = await createDocumentVersion(input.data);
+    return NextResponse.json({ version }, { status: 201, headers });
+  } catch { return NextResponse.json({ error: "This file version couldn’t save. Refresh the document before retrying." }, { status: 503, headers }); }
 }
