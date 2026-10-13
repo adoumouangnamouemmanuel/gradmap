@@ -1,7 +1,4 @@
-import { getInstitutions } from "@/features/programs/actions";
-import NewProgramForm from "./form";
-
-export default async function NewProgramPage() {
-  const institutions = await getInstitutions();
-  return <NewProgramForm institutions={institutions} />;
+import { NewEntry, type EntrySearch } from "@/features/entries/new-entry";
+export default async function Page({ searchParams }: { searchParams: Promise<EntrySearch> }) {
+  return <NewEntry kind="program" search={await searchParams} />;
 }
